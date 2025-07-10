@@ -16,7 +16,7 @@ class RegistroController extends Controller
         $profesiones = Profesion::all();
         $hoy = now();
         $dia = (int)$hoy->format('d');
-        $dentroDelPlazo = $dia >= 1 && $dia <= 15;
+        $dentroDelPlazo = $dia >= 1 && $dia <= 5;
         return view('registro.create', compact('establecimientos', 'profesiones','dentroDelPlazo'));
     }
 

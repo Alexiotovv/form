@@ -135,7 +135,7 @@
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth(); // 0-indexed
-            const deadline = new Date(year, month, 15, 23, 59, 59); // 5 de este mes a las 23:59:59
+            const deadline = new Date(year, month, 5, 23, 59, 59); // 5 de este mes a las 23:59:59
 
             const interval = setInterval(() => {
                 const now = new Date().getTime();
