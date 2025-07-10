@@ -11,12 +11,12 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@sismed.com'],
-            [
-                'name' => 'Administrador',
-                'password' => Hash::make('admin123') // puedes cambiarlo luego
-            ]
-        );
+        // User::updateOrCreate(
+        //     ['email' => 'admin@sismed.com'],
+        //     [
+        //         'name' => 'Administrador',
+        //         'password' => Hash::make('admin123') // puedes cambiarlo luego
+        //     ]
+        // );
     }
 }

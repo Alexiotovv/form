@@ -13,20 +13,21 @@ class ProfesionesSeeder extends Seeder
      */
     public function run(): void
     {
-           $profesiones = [
-        'Químico Farmacéutico',
-        'Técnico Laboratorio',
-        'Digitador',
-        'Técnico Farmacéutico',
-        'Ingeniero de Sistemas',
-        'Médico',
-        'Técnico en Enfermería',
-        'Técnico Informático',
-        'Enfermera',
-    ];
+    //        $profesiones = [
+    //     'Químico Farmacéutico',
+    //     'Técnico Laboratorio',
+    //     'Digitador',
+    //     'Técnico Farmacéutico',
+    //     'Ingeniero de Sistemas',
+    //     'Médico',
+    //     'Técnico en Enfermería',
+    //     'Técnico Informático',
+    //     'Enfermera',
+    // ];
 
-    foreach ($profesiones as $nombre) {
-        Profesion::create(['nombre_profesion' => $nombre]);
-    }
+    // foreach ($profesiones as $nombre) {
+    //     Profesion::create(['nombre_profesion' => $nombre]);
+    // }
+
     }
 }
