@@ -10,8 +10,11 @@
                 <button class="btn btn-danger">Cerrar sesión</button>
             </form>
         </div>
-        <a href="{{ route('clave.edit') }}" class="btn btn-warning">
-            Configurar clave de acceso al formulario
+        <a href="{{ route('clave.edit') }}" class="btn btn-light btn-sm">
+            🔑 Configurar clave de acceso al formulario
+        </a>
+        <a href="{{ route('plazo.edit') }}" class="btn btn-light btn-sm">
+            🕒 Configurar plazo de envío
         </a>
 
         <table id="registros" class="table table-bordered table-hover">

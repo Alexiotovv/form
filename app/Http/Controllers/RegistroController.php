@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Establecimiento;
 use App\Models\Registro;
 use App\Models\Profesion;
+use App\Models\Plazo;
 use Illuminate\Support\Facades\Storage;
 
 class RegistroController extends Controller
@@ -14,10 +15,17 @@ class RegistroController extends Controller
     {
         $establecimientos = Establecimiento::all();
         $profesiones = Profesion::all();
-        $hoy = now();
-        $dia = (int)$hoy->format('d');
-        $dentroDelPlazo = $dia >= 1 && $dia <= 5;
-        return view('registro.create', compact('establecimientos', 'profesiones','dentroDelPlazo'));
+        $plazo   = Plazo::first();          // única fila
+        $inicio  = $plazo?->dia_inicio ?? 1;
+        $fin     = $plazo?->dia_fin    ?? 5;
+        $hoy     = now()->day;
+        $dentroDelPlazo = $hoy >= $inicio && $hoy <= $fin;
+        return view('registro.create', compact(
+            'establecimientos', 
+            'profesiones',
+            'dentroDelPlazo',
+            'inicio',
+            'fin'));
     }
 
     public function store(Request $request)

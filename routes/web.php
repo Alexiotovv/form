@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FormKeyController;
 use App\Http\Controllers\ClaveAccesoController;
+use App\Http\Controllers\PlazoController;
 
 Route::get('/acceso', [ClaveAccesoController::class, 'form'])->name('acceso.form');
 Route::post('/acceso', [ClaveAccesoController::class, 'verificar'])->name('acceso.verificar');
@@ -16,7 +17,12 @@ Route::middleware('check.formkey')->group(function () {
     Route::post('/registro', [RegistroController::class, 'store'])->name('registro.store');
 });
 
-#Route::get('/', [RegistroController::class, 'create'])->name('registro.create');
+Route::middleware('auth')->group(function () {
+    Route::get ('/admin/plazo',  [PlazoController::class, 'edit'])->name('plazo.edit');
+    Route::post('/admin/plazo',  [PlazoController::class, 'update'])->name('plazo.update');
+});
+
+
 Route::get('/', function () {
     return redirect()->route('acceso.form');
 });

@@ -129,33 +129,40 @@
         </form>
 
         <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const countdownEl = document.getElementById('countdown');
+            document.addEventListener('DOMContentLoaded', () => {
+                const countdownEl = document.getElementById('countdown');
 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth(); // 0-indexed
-            const deadline = new Date(year, month, 5, 23, 59, 59); // 5 de este mes a las 23:59:59
+                // valores dinámicos enviados por PHP/Blade
+                const inicioDia = {{ $inicio }};
+                const finDia    = {{ $fin }};
 
-            const interval = setInterval(() => {
-                const now = new Date().getTime();
-                const distance = deadline - now;
+                const now   = new Date();
+                const year  = now.getFullYear();
+                const month = now.getMonth(); // 0-indexed
 
-                if (distance <= 0) {
-                    clearInterval(interval);
-                    countdownEl.innerHTML = "¡Tiempo finalizado!";
-                    return;
-                }
+                // deadline = día "fin" a las 23:59:59
+                const deadline = new Date(year, month, finDia, 23, 59, 59);
 
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                const interval = setInterval(() => {
+                    const distance = deadline - Date.now();
 
-                countdownEl.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-            }, 1000);
-        });
+                    if (distance <= 0) {
+                        clearInterval(interval);
+                        countdownEl.textContent = "¡Tiempo finalizado!";
+                        return;
+                    }
+
+                    const days    = Math.floor(distance / (1000*60*60*24));
+                    const hours   = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
+                    const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
+                    const seconds = Math.floor((distance % (1000*60)) / 1000);
+
+                    countdownEl.textContent =
+                        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                }, 1000);
+            });
         </script>
+
     @endif
 
 </div>
