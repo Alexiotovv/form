@@ -1,8 +1,8 @@
 ---
   deployment:
     tasks:
-      - export DEPLOYPATH=/home/aywsolution/public_html/rh.aywsolution.com/
+      - export DEPLOYPATH=/home/soportediremidlo/public_html/ici.soportediremidloreto.com/
       - /bin/rsync -av public/ $DEPLOYPATH
-      - export DEPLOYPATH=/home/aywsolution/web_rh/
+      - export DEPLOYPATH=/home/soportediremidlo/web_ici/
       - /bin/rsync -av ./ $DEPLOYPATH
 
