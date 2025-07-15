@@ -26,6 +26,9 @@
 <body class="bg-light">
 <div class="container">
     <div class="form-box">
+        <div class="text-center">
+            <img src="../../images/logo_diremid.png" width="210px" alt="">
+        </div>
 
     <div class="text-center mb-4">
         <h1 class="fw-bold">Plataforma de Recepción</h1>
