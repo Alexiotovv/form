@@ -1,8 +1,8 @@
 ---
   deployment:
     tasks:
-      - export DEPLOYPATH=/home/soportediremidlo/public_html/ici.soportediremidloreto.com/
+      - export DEPLOYPATH=/home/diremidloreto/public_html/ici.diremidloreto.com/
       - /bin/rsync -av public/ $DEPLOYPATH
-      - export DEPLOYPATH=/home/soportediremidlo/web_ici/
+      - export DEPLOYPATH=/home/diremidloreto/web_ici/
       - /bin/rsync -av ./ $DEPLOYPATH
 
