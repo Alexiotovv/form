@@ -7,17 +7,30 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Registros enviados</h2>
 
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button class="btn btn-danger">Cerrar sesión</button>
-            </form>
+            <div class="text-end">
+                <p class="mb-1">👤 Bienvenido, {{ Auth::user()->name }}</p>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="btn btn-danger btn-sm">Cerrar sesión</button>
+                </form>
+            </div>
         </div>
-        <a href="{{ route('clave.edit') }}" class="btn btn-light btn-sm">
-            🔑 Configurar clave de acceso al formulario
-        </a>
-        <a href="{{ route('plazo.edit') }}" class="btn btn-light btn-sm">
-            🕒 Configurar plazo de envío
-        </a>
+
+        @auth
+                
+            @if(auth()->user()->is_admin)
+                <a href="{{ route('clave.edit') }}" class="btn btn-light btn-sm">
+                    🔑 Configurar clave de acceso al formulario
+                </a>
+                <a href="{{ route('plazo.edit') }}" class="btn btn-light btn-sm">
+                    🕒 Configurar plazo de envío
+                </a>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-light btn-sm">
+                    👥 Usuarios
+                </a> 
+            @endif
+        @endauth
+        
 
         <table id="registros" class="table table-bordered table-hover">
             <thead>
