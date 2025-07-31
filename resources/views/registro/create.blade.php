@@ -33,7 +33,7 @@
     <div class="text-center mb-4">
         <h1 class="fw-bold">Plataforma de Recepción</h1>
         <p class="lead">
-            Bienvenido a la plataforma web para la recepción diaria del backup del aplicativo <strong>SISMED</strong>
+            bienvenido a la plataforma de recepcion ICI, IDI, IME mensual del aplicativo <strong>SISMED</strong>
         </p>
     </div>
 
