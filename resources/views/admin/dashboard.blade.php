@@ -6,12 +6,37 @@
         </div>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Registros enviados</h2>
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-warning alert-dismissible fade show">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
 
             <div class="text-end">
                 <p class="mb-1">👤 Bienvenido, {{ Auth::user()->name }}</p>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button class="btn btn-danger btn-sm">Cerrar sesión</button>
+                    <button class="btn btn-light btn-sm">Cerrar sesión</button>
                 </form>
             </div>
         </div>
@@ -27,7 +52,10 @@
                 </a>
                 <a href="{{ route('admin.users.index') }}" class="btn btn-light btn-sm">
                     👥 Usuarios
-                </a> 
+                </a>
+                <a href="{{ route('establecimientos.index') }}" class="btn btn-light btn-sm">
+                    🏥 Establecimientos
+                </a>
             @endif
         @endauth
         
@@ -58,8 +86,25 @@
                         <td>{{ $reg->fecha_envio }}</td>
                         <td>{{ $reg->hora_envio }}</td>
                         <td>
-                            <a href="{{ asset('storage/' . $reg->archivo) }}" class="btn btn-sm btn-success" download>Descargar ZIP</a>
+                            <div class="d-flex gap-1">
+                                <a href="{{ asset('storage/' . $reg->archivo) }}" class="btn btn-sm btn-success" download>
+                                    Descargar ZIP
+                                </a>
+
+                                @if(auth()->user()->is_admin)
+                                    <form action="{{ route('registros.destroy', $reg->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-light"
+                                                onclick="return confirm('¿Eliminar registro de {{ $reg->nombres }} {{ $reg->apellidos }}?')">
+                                            🗑️ Eliminar
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </td>
+
                     </tr>
                 @endforeach
             </tbody>

@@ -25,6 +25,8 @@ class Registro extends Model
     public function profesion()
     {
         return $this->belongsTo(Profesion::class);
+        return $this->belongsTo(Establecimiento::class);
+
     }
 
 

@@ -17,6 +17,10 @@ Route::post('/acceso', [ClaveAccesoController::class, 'verificar'])->name('acces
 Route::middleware('check.formkey')->group(function () {
     Route::get('/formulario', [RegistroController::class, 'create'])->name('registro.create');
     Route::post('/registro', [RegistroController::class, 'store'])->name('registro.store');
+    Route::delete('/registros/{registro}', [RegistroController::class, 'destroy'])
+    ->name('registros.destroy')
+    ->middleware('auth');
+
 });
 
 Route::middleware('auth')->group(function () {
@@ -57,3 +61,9 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
         ]);
     });
 });
+
+Route::resource('establecimientos', App\Http\Controllers\EstablecimientoController::class)->except(['create', 'edit', 'show']);
+Route::get('/gracias', function () {
+    return view('registro.success');
+})->name('gracias');
+

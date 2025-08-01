@@ -59,9 +59,9 @@
             Puedes registrar hasta: <strong id="countdown"></strong>
         </div>
 
-        @if(session('success'))
+        {{-- @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+        @endif --}}
 
         @if($errors->any())
             <div class="alert alert-danger">
@@ -150,6 +150,15 @@
                     placeholder: "Seleccione un establecimiento",
                     allowClear: true
                 });
+
+                 $('.delete-form').on('submit', function(e) {
+                    e.preventDefault();
+                    if (confirm('¿Estás seguro de eliminar este registro?')) {
+                        this.submit();
+                    }
+                });
+
+
             });
         </script>
 

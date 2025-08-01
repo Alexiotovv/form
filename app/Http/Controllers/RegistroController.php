@@ -8,6 +8,9 @@ use App\Models\Registro;
 use App\Models\Profesion;
 use App\Models\Plazo;
 use Illuminate\Support\Facades\Storage;
+use Exception;
+use Illuminate\Support\Facades\Log;
+
 
 class RegistroController extends Controller
 {
@@ -41,7 +44,13 @@ class RegistroController extends Controller
             'terminos' => 'accepted',
         ]);
 
-        $rutaArchivo = $request->file('archivo')->store('archivos', 'public');
+        $establecimiento = Establecimiento::find($request->establecimiento_id);
+        $codigo = $establecimiento->codigo ?? ''; // puede ser null
+        $fechaHora = now()->format('Ymd_His');
+        $prefijo = $codigo ? $codigo . '_' : ''; // si hay código, añade "_"
+        $nombreArchivo = 'F'.'-'.$prefijo .'-'.'F01'. $fechaHora . '.' . $request->file('archivo')->getClientOriginalExtension();
+
+        $rutaArchivo = $request->file('archivo')->storeAs('archivos', $nombreArchivo, 'public');
 
         Registro::create([
             'nombres' => $request->nombres,
@@ -54,8 +63,53 @@ class RegistroController extends Controller
             'hora_envio' => now()->toTimeString(),
             'archivo' => $rutaArchivo,
         ]);
+        $establecimiento = Establecimiento::find($request->establecimiento_id);
+        return redirect()->route('gracias')->with([
+            'nombres' => $request->nombres,
+            'apellidos' => $request->apellidos,
+            'fecha' => now()->toDateString(),
+            'hora' => now()->toTimeString(),
+            'ruta_descarga'=>asset(Storage::url($rutaArchivo)),
+            'establecimiento' => $establecimiento->nombre
+        ]);
 
-        return redirect()->back()->with('success', '¡Registro enviado correctamente!');
-    
     }
+
+    public function destroy(Registro $registro)
+    {
+        try {
+            // 1. Guardar datos para el mensaje antes de eliminar
+            $nombreCompleto = $registro->nombres . ' ' . $registro->apellidos;
+            $rutaArchivo = $registro->archivo;
+            
+            // 2. Eliminar el archivo físico si existe
+            if ($rutaArchivo && Storage::disk('public')->exists($rutaArchivo)) {
+                Storage::disk('public')->delete($rutaArchivo);
+            }
+            
+            // 3. Eliminar el registro de la base de datos
+            $registro->delete();
+            
+            return redirect()->back()
+                ->with('success', "Registro de $nombreCompleto eliminado correctamente");
+                
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Error de integridad al eliminar registro: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'No se pudo eliminar el registro porque tiene relaciones dependientes');
+                
+        } catch (\Illuminate\Contracts\Filesystem\FileNotFoundException $e) {
+            Log::error('Archivo no encontrado al eliminar registro ID ' . $registro->id . ': ' . $e->getMessage());
+            $registro->delete(); // Eliminar el registro aunque no esté el archivo
+            
+            return redirect()->back()
+                ->with('warning', 'Registro eliminado pero no se encontró el archivo asociado');
+                
+        } catch (Exception $e) {
+            Log::error('Error al eliminar registro ID ' . $registro->id . ': ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Ocurrió un error inesperado al eliminar el registro');
+        }
+    }
+
 }
