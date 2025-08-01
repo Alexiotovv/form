@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <title>Formulario de Registro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CSS de Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- JS de jQuery (requerido por Select2) -->
+
+    <!-- Bootstrap 5 compatible Select2 theme -->
+    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- JS de Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    
     <style>
         body {
             background-image: url('{{ asset('storage/fondos/fondo_form3.webp') }}');
@@ -105,7 +117,7 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label>Establecimiento</label>
-                        <select name="establecimiento_id" class="form-select" required>
+                        <select name="establecimiento_id" class="form-select select2" required>
                             <option value="">Seleccione un establecimiento</option>
                             @foreach($establecimientos as $est)
                                 <option value="{{ $est->id }}">{{ $est->nombre }}</option>
@@ -126,10 +138,21 @@
                 <input type="checkbox" name="terminos" class="form-check-input" required>
                 <label class="form-check-label">Estoy de acuerdo con los términos y condiciones</label>
             </div>
-            <div class="h-captcha" data-sitekey="24321fda-1948-4430-bab6-2ea8cf4e9802"></div>
+            {{-- <div class="h-captcha" data-sitekey="24321fda-1948-4430-bab6-2ea8cf4e9802"></div> --}}
 
             <button type="submit" class="btn btn-primary">Enviar</button>
         </form>
+
+        <script>
+            $(document).ready(function() {
+                $('.select2').select2({
+                    theme: 'bootstrap4', // Usa el theme Bootstrap
+                    placeholder: "Seleccione un establecimiento",
+                    allowClear: true
+                });
+            });
+        </script>
+
 
         <script>
             document.addEventListener('DOMContentLoaded', () => {
