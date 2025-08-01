@@ -138,7 +138,7 @@
                 <input type="checkbox" name="terminos" class="form-check-input" required>
                 <label class="form-check-label">Estoy de acuerdo con los términos y condiciones</label>
             </div>
-            {{-- <div class="h-captcha" data-sitekey="24321fda-1948-4430-bab6-2ea8cf4e9802"></div> --}}
+            <div class="h-captcha" data-sitekey="24321fda-1948-4430-bab6-2ea8cf4e9802"></div>
 
             <button type="submit" class="btn btn-primary">Enviar</button>
         </form>
