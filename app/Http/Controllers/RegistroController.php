@@ -47,7 +47,7 @@ class RegistroController extends Controller
         $establecimiento = Establecimiento::find($request->establecimiento_id);
         $codigo = $establecimiento->codigo ?? ''; // puede ser null
         $fechaHora = now()->format('Ymd_His');
-        $prefijo = $codigo ? $codigo . '_' : ''; // si hay código, añade "_"
+        $prefijo = $codigo ? $codigo . '' : ''; // si hay código, añade "_"
         $nombreArchivo = 'F'.'-'.$prefijo .'-'.'F01'. $fechaHora . '.' . $request->file('archivo')->getClientOriginalExtension();
 
         $rutaArchivo = $request->file('archivo')->storeAs('archivos', $nombreArchivo, 'public');
