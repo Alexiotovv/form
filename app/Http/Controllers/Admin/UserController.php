@@ -23,7 +23,7 @@ class UserController extends Controller
     public function store(Request $request)
     {   
         $admin = $request->is_admin;
-        if ($admin == 'on'){
+        if ($admin = 'on'){
             $admin = 1;
         }else{
             $admin = 0;
@@ -78,7 +78,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
     public function destroy(User $user)

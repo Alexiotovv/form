@@ -6,32 +6,7 @@
         </div>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Registros enviados</h2>
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="alert alert-warning alert-dismissible fade show">
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-
+            
             <div class="text-end">
                 <p class="mb-1">👤 Bienvenido, {{ Auth::user()->name }}</p>
                 <form action="{{ route('logout') }}" method="POST">
@@ -41,6 +16,31 @@
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-warning alert-dismissible fade show">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        
         @auth
                 
             @if(auth()->user()->is_admin)
@@ -56,6 +56,10 @@
                 <a href="{{ route('establecimientos.index') }}" class="btn btn-light btn-sm">
                     🏥 Establecimientos
                 </a>
+                <a href="{{ route('tokens.index') }}" class="btn btn-light btn-sm">
+                    🗝️ Tokens de acceso
+                </a>
+
             @endif
         @endauth
         
@@ -72,6 +76,7 @@
                     <th>Fecha</th>
                     <th>Hora</th>
                     <th>Archivo</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,7 +92,7 @@
                         <td>{{ $reg->hora_envio }}</td>
                         <td>
                             <div class="d-flex gap-1">
-                                <a href="{{ asset('storage/' . $reg->archivo) }}" class="btn btn-sm btn-success" download>
+                                <a href="{{ asset('storage/' . $reg->archivo) }}" class="btn btn-sm btn-outline-success" download>
                                     Descargar ZIP
                                 </a>
 
@@ -102,6 +107,17 @@
                                         </button>
                                     </form>
                                 @endif
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+
+                                <form action="{{ route('registros.procesar', $reg->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-light {{ $reg->procesado ? 'disabled' : '' }}" {{ $reg->procesado ? 'disabled' : '' }}>
+                                        ⚙️ {{ $reg->procesado ? '✓ Procesado' : 'Procesar' }}
+                                    </button>
+                                </form>
                             </div>
                         </td>
 

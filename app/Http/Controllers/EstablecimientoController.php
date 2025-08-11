@@ -27,6 +27,7 @@ class EstablecimientoController extends Controller
             $validated = $request->validate([
                 'nombre' => 'required|string|max:255|unique:establecimientos,nombre',
                 'codigo' => 'string|max:255',
+                'envios' => 'required|integer|in:1,2,3'
             ]);
 
             Establecimiento::create($validated);
@@ -51,10 +52,12 @@ class EstablecimientoController extends Controller
     {
         try {
             $validated = $request->validate([
-                'nombre' => 'required|string|max:255|unique:establecimientos,nombre,'.$establecimiento->id,
+                'nombre' => 'required|string|max:255',
                 'codigo' => 'string|max:255',
+                'envios' => 'required|integer|in:1,2,3'
             ]);
 
+            // dd($request->envios);
             $establecimiento->update($validated);
 
             return redirect()->back()

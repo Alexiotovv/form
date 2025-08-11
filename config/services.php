@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'django' => [
+        'url' => env('DJANGO_API_URL'),
+        'token' => env('DJANGO_API_TOKEN'),
+    ],
+
 ];

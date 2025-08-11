@@ -9,5 +9,6 @@ class Establecimiento extends Model
     protected $fillable = [
         'codigo',
         'nombre',
+        'envios',
     ];
 }

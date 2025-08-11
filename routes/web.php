@@ -9,6 +9,16 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FormKeyController;
 use App\Http\Controllers\ClaveAccesoController;
 use App\Http\Controllers\PlazoController;
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\ProcesarDbfController;
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/tokens', [TokenController::class, 'index'])->name('tokens.index');
+    Route::post('/tokens/create', [TokenController::class, 'store'])->name('tokens.store');
+    Route::delete('/tokens/{tokenId}', [TokenController::class, 'destroy'])->name('tokens.destroy');
+    
+});
 
 Route::get('/acceso', [ClaveAccesoController::class, 'form'])->name('acceso.form');
 Route::post('/acceso', [ClaveAccesoController::class, 'verificar'])->name('acceso.verificar');
@@ -26,6 +36,8 @@ Route::middleware('check.formkey')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get ('/admin/plazo',  [PlazoController::class, 'edit'])->name('plazo.edit');
     Route::post('/admin/plazo',  [PlazoController::class, 'update'])->name('plazo.update');
+    Route::post('/registros/procesar/{id}', [ProcesarDbfController::class, 'procesar'])
+    ->name('registros.procesar');
 });
 
 

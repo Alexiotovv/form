@@ -49,6 +49,7 @@
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                             </form>
+                            
                         </td>
                     </tr>
                     @endforeach
@@ -57,4 +58,10 @@
         </div>
     </div>
 </div>
+
+
+@endsection
+
+@section('scripts')
+ 
 @endsection

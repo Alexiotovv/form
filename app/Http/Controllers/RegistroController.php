@@ -14,6 +14,35 @@ use Illuminate\Support\Facades\Log;
 
 class RegistroController extends Controller
 {
+
+    public function registrosici(Request $request)
+    {
+        
+        // Validar que las fechas sean correctas
+        $request->validate([
+            'fecha_inicio' => 'required|date',
+            'fecha_final' => 'required|date|after_or_equal:fecha_inicio',
+        ]);
+        $usuario = $request->user(); // autenticado por token Sanctum
+
+        // Si deseas filtrar por el usuario logueado, añade alguna relación en Registro, como user_id
+        // Suponiendo que no hay user_id, y solo quieres devolver todos los registros con ese filtro:
+        $registros = Registro::select('fecha_envio', 'hora_envio', 'archivo')
+        ->whereBetween('fecha_envio', [
+            $request->fecha_inicio,
+            $request->fecha_final
+        ])
+        ->orderBy('fecha_envio', 'desc')
+        ->get();
+        
+        $registros->transform(function ($registro) {
+            $registro->archivo_url = url('storage/' . $registro->archivo);
+            return $registro;
+        });
+
+        return response()->json([ 'data' => $registros]);
+    }
+
     public function create()
     {
         $establecimientos = Establecimiento::all();
@@ -45,6 +74,21 @@ class RegistroController extends Controller
         ]);
 
         $establecimiento = Establecimiento::find($request->establecimiento_id);
+
+        // 2. Contar cuántos envíos ha hecho este mes
+        $enviosActuales = Registro::where('establecimiento_id', $establecimiento->id)
+            ->whereMonth('fecha_envio', now()->month)
+            ->whereYear('fecha_envio', now()->year)
+            ->count();
+
+        // 3. Validar contra el límite mensual
+            if ($enviosActuales >= $establecimiento->envios) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', "El establecimiento '{$establecimiento->nombre}' no puede realizar más de {$establecimiento->envios} envíos este mes.");
+            }
+
+
         $codigo = $establecimiento->codigo ?? ''; // puede ser null
         $fechaHora = now()->format('Ymd_His');
         $prefijo = $codigo ? $codigo . '' : ''; // si hay código, añade "_"

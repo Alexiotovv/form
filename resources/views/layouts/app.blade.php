@@ -36,7 +36,6 @@
 
     <!-- Contenido Principal -->
     <main class="container">
-  
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show">
                 {{ session('success') }}
@@ -61,7 +60,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
+
         @yield('content')
+
+
+        
     </main>
 
     <!-- Scripts JS -->

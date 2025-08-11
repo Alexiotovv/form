@@ -15,6 +15,7 @@
                     <th>ID</th>
                     <th>código</th>
                     <th>Nombre</th>
+                    <th>Cant.Envíos</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -24,10 +25,13 @@
                     <td>{{ $est->id }}</td>
                     <td>{{ $est->codigo }}</td>
                     <td>{{ $est->nombre }}</td>
+                    <td>{{ $est->envios }}</td>
                     <td>
                         <button class="btn btn-sm btn-warning btnEditar" 
                             data-id="{{ $est->id }}"
+                            data-codigo="{{ $est->codigo }}"
                             data-nombre="{{ $est->nombre }}"
+                            data-envios="{{ $est->envios }}"
                             data-bs-toggle="modal" 
                             data-bs-target="#modalEditar">Editar</button>
 
@@ -62,6 +66,13 @@
                         <label for="nombre" class="form-label">Nombre del establecimiento</label>
                         <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Nombre del establecimiento" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Cant. de Envíos</label>
+                        <select name="envios" id="envios" name ="envios" class="form-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -84,12 +95,19 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="codigo" class="form-label">Código del establecimiento</label>
-                        <input type="text" name="codigo" id="editCodigo" class="form-control" placeholder="Código del establecimiento">
+                        <input type="text" name="codigo" id="editCodigo" class="form-control" placeholder="Código del establecimiento" required>
                     </div>
 
                     <div class="mb-3">
                         <label for="nombre" class="form-label">Nombre del establecimiento</label>
                         <input type="text" name="nombre" id="editNombre" class="form-control" placeholder="Nombre del establecimiento" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Cant. de Envíos</label>
+                        <select name="envios" name ="envios" id="editEnvios"  class="form-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -120,8 +138,12 @@
             let id = $(this).data('id');
             let nombre = $(this).data('nombre');
             let codigo = $(this).data('codigo');
+            let envios = $(this).data('envios');
+            console.log(codigo);
+            console.log(nombre);
             $('#editNombre').val(nombre);
             $('#editCodigo').val(codigo);
+            $('#editEnvios').val(envios).change();
             $('#formEditar').attr('action', '/establecimientos/' + id);
         });
     });

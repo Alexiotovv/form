@@ -36,18 +36,33 @@
     <script src='https://www.hCaptcha.com/1/api.js' async defer></script>
 </head>
 <body class="bg-light">
-<div class="container">
-    <div class="form-box">
-        <div class="text-center">
-            <img src="../../images/logo_diremid.png" width="210px" alt="">
-        </div>
-
-    <div class="text-center mb-4">
-        <h1 class="fw-bold">Plataforma de Recepción</h1>
-        <p class="lead">
-            bienvenido a la plataforma de recepcion ICI, IDI, IME mensual del aplicativo <strong>SISMED</strong>
-        </p>
-    </div>
+    
+    
+    <div class="container">
+        <div class="form-box">
+            <div class="text-center">
+                <img src="../../images/logo_diremid.png" width="210px" alt="">
+            </div>
+            
+            <div class="text-center mb-4">
+                <h1 class="fw-bold">Plataforma de Recepción</h1>
+                <p class="lead">
+                    bienvenido a la plataforma de recepcion ICI, IDI, IME mensual del aplicativo <strong>SISMED</strong>
+                </p>
+            </div>
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+        
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
     @if(!$dentroDelPlazo)
         <div class="alert alert-danger text-center">
@@ -59,9 +74,9 @@
             Puedes registrar hasta: <strong id="countdown"></strong>
         </div>
 
-        {{-- @if(session('success'))
+        @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
-        @endif --}}
+        @endif
 
         @if($errors->any())
             <div class="alert alert-danger">
@@ -140,7 +155,13 @@
             </div>
             <div class="h-captcha" data-sitekey="24321fda-1948-4430-bab6-2ea8cf4e9802"></div>
 
-            <button type="submit" class="btn btn-primary">Enviar</button>
+            <button type="submit" class="btn btn-primary">📩  Enviar</button>
+
+
+            <div style="text-align: center; font-size: 12px; color: #6c757d; margin-top: 10px;">
+                <br>
+                <small>Powered by Xioto-DiremidLoreto</small>
+            </div>
         </form>
 
         <script>

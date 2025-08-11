@@ -16,6 +16,7 @@ class Registro extends Model
         'fecha_envio',
         'hora_envio',
         'archivo',
+        'procesado',
     ];
 
     public function establecimiento()
@@ -29,6 +30,10 @@ class Registro extends Model
 
     }
 
+
+    protected $casts = [
+        'procesado' => 'boolean'
+    ];
 
 
 }
