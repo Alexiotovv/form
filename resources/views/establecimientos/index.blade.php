@@ -71,6 +71,7 @@
                         <select name="envios" id="envios" name ="envios" class="form-select">
                             <option value="1">1</option>
                             <option value="2">2</option>
+                            <option value="3">3</option>
                         </select>
                     </div>
                 </div>
@@ -107,6 +108,7 @@
                         <select name="envios" name ="envios" id="editEnvios"  class="form-select">
                             <option value="1">1</option>
                             <option value="2">2</option>
+                            <option value="3">3</option>
                         </select>
                     </div>
                 </div>
