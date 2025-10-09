@@ -13,7 +13,7 @@ class ProfesionesSeeder extends Seeder
      */
     public function run(): void
     {
-           $profesiones = [
+        $profesiones = [
         'Químico Farmacéutico',
         'Técnico Laboratorio',
         'Digitador',
@@ -23,6 +23,7 @@ class ProfesionesSeeder extends Seeder
         'Técnico en Enfermería',
         'Técnico Informático',
         'Enfermera',
+        'Otro'
     ];
 
     foreach ($profesiones as $nombre) {

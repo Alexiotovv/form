@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'almacen_id',
     ];
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -39,7 +40,10 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-
+    public function almacen()
+    {
+        return $this->belongsTo(Almacen::class, 'almacen_id');
+    }
 
 
     /**

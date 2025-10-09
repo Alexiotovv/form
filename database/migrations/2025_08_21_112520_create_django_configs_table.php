@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('establecimientos', function (Blueprint $table) {
+        Schema::create('django_configs', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
+            $table->string('url');
+            $table->string('token');
+            $table->string('password_zip');
             $table->timestamps();
         });
     }
@@ -23,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('establecimientos');
+        Schema::dropIfExists('django_configs');
     }
 };

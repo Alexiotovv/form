@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('form_det', function (Blueprint $table) {
             $table->id();
-            $table->string('CODIGO_EJE')->nullable();
-            $table->string('CODIGO_PRE')->nullable();
-            $table->string('TIPSUM')->nullable();
-            $table->string('ANNOMES')->nullable();
-            $table->string('CODIGO_MED')->nullable();
+            $table->string('CODIGO_EJE',4)->nullable();
+            $table->string('CODIGO_PRE',10)->nullable();
+            $table->string('TIPSUM',1)->nullable();
+            $table->string('ANNOMES',6)->nullable();
+            $table->string('CODIGO_MED',8)->nullable();
             $table->float('SALDO')->nullable();
             $table->float('PRECIO')->nullable();
             $table->float('INGRE')->nullable();
@@ -53,11 +53,11 @@ return new class extends Migration
             $table->float('DO_STK')->nullable();
             $table->date('DO_FECEXP')->nullable();
             $table->date('FECHA')->nullable();
-            $table->string('USUARIO')->nullable();
-            $table->string('INDIPROC')->nullable();
-            $table->string('SIT')->nullable();
-            $table->string('INDISIGA')->nullable();
-            $table->string('DSTKCERO')->nullable();
+            $table->string('USUARIO',20)->nullable();
+            $table->string('INDIPROC',10)->nullable();
+            $table->string('SIT',10)->nullable();
+            $table->string('INDISIGA',10)->nullable();
+            $table->string('DSTKCERO',10)->nullable();
             $table->float('MPTOREPO')->nullable();
             $table->float('ING_REGULA')->nullable();
             $table->float('SAL_REGULA')->nullable();

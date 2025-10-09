@@ -5,16 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\FormDet;
 use App\Models\Ime1;
 use App\Models\Imed2;
 use App\Models\Imed3;
 use App\Models\Registro;
+use App\Models\ProcesamientoHistorico;
+
 
 class ProcesarDbfController extends Controller
 {
     public function procesar(Request $request, $registroId)
     {
+        
+        $inicio = now();
+
         $registro = Registro::findOrFail($registroId);
         if ($registro->procesado) {
             return back()->with('warning', 'Este archivo ya fue procesado anteriormente');
@@ -23,40 +29,64 @@ class ProcesarDbfController extends Controller
         $zipPath = storage_path('app/public/' . $registro->archivo);
 
         try {
-            $djangoConfig = config('services.django');
+            $config = \App\Models\DjangoConfig::first();
+
+            if (!$config) {
+                return back()->with('error', 'No existe configuración de Django API en la BD');
+            }
+
             DB::beginTransaction();
             $response = Http::withHeaders([
-                'Authorization' => 'Token ' . $djangoConfig['token'],
+                'Authorization' => 'Token ' . $config->token,
             ])->attach(
                 'archivo', file_get_contents($zipPath), basename($zipPath)
-            )->post($djangoConfig['url'] . '/api/procesar-zip/',[
-                'password' => 'VEINTE4512' // Envía la contraseña desde el formulario
+            )->post($config->url . '/api/procesar-zip/',[
+                'password' => $config->password_zip // Envía la contraseña desde el formulario
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                // Procesar formDet
-                foreach ($data['tablas_procesadas']['formDet'] as $item) {
-                    FormDet::create($item);
+                $tablas = ['FormDet', 'Ime1', 'Imed2', 'Imed3'];
+                $cantidad_registros = [];
+
+                foreach ($tablas as $tabla) {
+                    $registros = $data['tablas_procesadas'][$tabla] ?? [];
+
+                    if (!empty($registros)) {
+                        // Insertamos en la BD
+                        foreach ($registros as $item) {
+                            $model = "\\App\\Models\\" . $tabla; // construimos el modelo dinámicamente
+                            $model::create($item);
+                        }
+
+                        // Guardamos el conteo en el arreglo
+                        $cantidad_registros[] = "📋 {$tabla}: " . count($registros) . " reg.";
+                    }
                 }
 
-                // Procesar Ime1
-                foreach ($data['tablas_procesadas']['Ime1'] as $item) {
-                    Ime1::create($item);
-                }
-
-                // Procesar Imed2
-                foreach ($data['tablas_procesadas']['Imed2'] as $item) {
-                    Imed2::create($item);
-                }
-                // Procesar Imed3
-                foreach ($data['tablas_procesadas']['Imed3'] as $item) {
-                    Imed3::create($item);
-                }
                 DB::commit();
                 $registro->update(['procesado' => true]);
-                return back()->with('success', 'Datos procesados correctamente');
+                
+                $fin = now();
+                $diffMs = $inicio->diffInMilliseconds($fin);
+                $diffSeg = $inicio->diffInSeconds($fin);
+                
+                $elapsed = "{$diffSeg} seg. {$diffMs} ms";//tiempo_ejecucion
+                
+
+                ProcesamientoHistorico::create([
+                    'fecha_ejecucion'   => now(), // fecha y hora actual
+                    'tiempo_ejecucion'  => $elapsed, // puedes calcular tiempo en segundos o ms
+                    'tablas_registros'  => implode("\n", $cantidad_registros), // variable
+                    'user_id'           => Auth::id(), // usuario autenticado
+                ]);
+
+
+                $mensaje = "✅ Datos procesados correctamente en ⏱️ {$elapsed}.<br>" . implode('<br>', $cantidad_registros);
+
+
+                return back()->with('success', $mensaje);
             } else {
                 DB::rollBack();
                 return back()->with('error', 'Error al procesar: ' . $response->body());

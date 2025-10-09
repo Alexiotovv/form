@@ -31,8 +31,14 @@
     <p class="text-muted">Su información ha sido recibido !</p>
 
     <!-- Botón para llenar de nuevo -->
-    <a href="{{ route('registro.create') }}" class="btn btn-outline-dark mt-3">
-        🔁 Llenar otra vez
-    </a>
+    <div class="d-flex justify-content-center gap-2 mt-3">
+        <a href="{{ route('registro.create') }}" class="btn btn-outline-dark">
+            🔁 Llenar otra vez
+        </a>
+        <a href="{{ route('registro.index') }}" class="btn btn-outline-dark">
+            ↩️ Ir a Lista de Archivos
+        </a>
+    </div>
+
 </div>
 @endsection

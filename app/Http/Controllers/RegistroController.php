@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Establecimiento;
+// use App\Models\Establecimiento;
+use App\Models\Almacen;
 use App\Models\Registro;
 use App\Models\Profesion;
 use App\Models\Plazo;
@@ -23,7 +24,7 @@ class RegistroController extends Controller
             'fecha_inicio' => 'required|date',
             'fecha_final' => 'required|date|after_or_equal:fecha_inicio',
         ]);
-        $usuario = $request->user(); // autenticado por token Sanctum
+        $usuario = $request->user();
 
         // Si deseas filtrar por el usuario logueado, añade alguna relación en Registro, como user_id
         // Suponiendo que no hay user_id, y solo quieres devolver todos los registros con ese filtro:
@@ -40,24 +41,30 @@ class RegistroController extends Controller
             return $registro;
         });
 
+        
+
         return response()->json([ 'data' => $registros]);
     }
 
     public function create()
     {
-        $establecimientos = Establecimiento::all();
+        $almacenes = Almacen::all();
         $profesiones = Profesion::all();
         $plazo   = Plazo::first();          // única fila
         $inicio  = $plazo?->dia_inicio ?? 1;
         $fin     = $plazo?->dia_fin    ?? 5;
         $hoy     = now()->day;
         $dentroDelPlazo = $hoy >= $inicio && $hoy <= $fin;
+        $almacenUsuarioId = auth()->user()->almacen_id;
+
         return view('registro.create', compact(
-            'establecimientos', 
+            'almacenes', 
             'profesiones',
             'dentroDelPlazo',
             'inicio',
-            'fin'));
+            'fin',
+            'almacenUsuarioId'
+        ));
     }
 
     public function store(Request $request)
@@ -68,53 +75,63 @@ class RegistroController extends Controller
             'correo' => 'required|email',
             'telefono' => 'required|string|max:20',
             'profesion_id' => 'required|exists:profesiones,id',
-            'establecimiento_id' => 'required|exists:establecimientos,id',
-            'archivo' => 'required|file|mimes:zip|max:10240', // máximo 10MB
+            // 'establecimiento_id' => 'required|exists:establecimientos,id',
+            'archivo' => 'required|file|mimes:zip|max:50000', // máximo 50MB
             'terminos' => 'accepted',
         ]);
+        // 🔒 Obtener el establecimiento del USUARIO AUTENTICADO (no del request)
+        $usuario = auth()->user();
+        $almacenId = $usuario->almacen_id;
+        // dd($establecimientoId);
+        // Verificar que el usuario tenga un establecimiento asignado
+        if (!$almacenId) {
+            return redirect()->back()->with('error', 'Tu cuenta no tiene un establecimiento asignado. Contacta al administrador.');
+        }
 
-        $establecimiento = Establecimiento::find($request->establecimiento_id);
+        $almacenId = Almacen::findOrFail($almacenId);
 
         // 2. Contar cuántos envíos ha hecho este mes
-        $enviosActuales = Registro::where('establecimiento_id', $establecimiento->id)
+        $enviosActuales = Registro::where('almacen_id', $almacenId->id)
             ->whereMonth('fecha_envio', now()->month)
             ->whereYear('fecha_envio', now()->year)
             ->count();
 
         // 3. Validar contra el límite mensual
-            if ($enviosActuales >= $establecimiento->envios) {
+            if ($enviosActuales >= $almacenId->envios) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', "El establecimiento '{$establecimiento->nombre}' no puede realizar más de {$establecimiento->envios} envíos este mes.");
+                    ->with('error', "El establecimiento '{$almacenId->nombre_ipress}' no puede realizar más de {$almacenId->envios} envíos este mes.");
             }
 
 
-        $codigo = $establecimiento->codigo ?? ''; // puede ser null
+        $codigo = $almacen->cod_ipress ?? ''; // puede ser null
         $fechaHora = now()->format('Ymd_His');
         $prefijo = $codigo ? $codigo . '' : ''; // si hay código, añade "_"
         $nombreArchivo = 'F'.'-'.$prefijo .'-'.'F01'. $fechaHora . '.' . $request->file('archivo')->getClientOriginalExtension();
 
         $rutaArchivo = $request->file('archivo')->storeAs('archivos', $nombreArchivo, 'public');
-
+        
+        // dd($establecimiento->id);
         Registro::create([
             'nombres' => $request->nombres,
             'apellidos' => $request->apellidos,
             'correo' => $request->correo,
             'telefono' => $request->telefono,
             'profesion_id' => $request->profesion_id,
-            'establecimiento_id' => $request->establecimiento_id,
+            'almacen_id' => $almacenId->id,
             'fecha_envio' => now()->toDateString(),
             'hora_envio' => now()->toTimeString(),
             'archivo' => $rutaArchivo,
+            'user_id' =>  auth()->user()->id,
         ]);
-        $establecimiento = Establecimiento::find($request->establecimiento_id);
+        // $establecimiento = Establecimiento::find($establecimientoId);
         return redirect()->route('gracias')->with([
             'nombres' => $request->nombres,
             'apellidos' => $request->apellidos,
             'fecha' => now()->toDateString(),
             'hora' => now()->toTimeString(),
             'ruta_descarga'=>asset(Storage::url($rutaArchivo)),
-            'establecimiento' => $establecimiento->nombre
+            'almacen' => $almacenId->nombre_ipress
         ]);
 
     }

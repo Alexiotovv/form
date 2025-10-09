@@ -1,4 +1,183 @@
-<!DOCTYPE html>
+@extends('admin.dashboard')
+
+@section('content')
+        <div class="container">
+        <div class="form-box">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Plataforma de Recepción</h2>
+                <p class="lead">
+                    bienvenido a la plataforma de recepcion ICI, IDI, IME mensual del aplicativo <strong>SISMED</strong>
+                </p>
+            </div>
+            
+
+    @if(!$dentroDelPlazo)
+        <div class="alert alert-danger text-center">
+            <strong>El plazo para registrar datos ha finalizado.</strong>
+            <br>Solo se puede registrar del 01 al 05 de cada mes.
+        </div>
+    @else
+        <div id="reloj-container" class="alert alert-info text-center">
+            Puedes registrar hasta: <strong id="countdown"></strong>
+        </div>
+
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <strong>Por favor corrige los siguientes errores:</strong>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('registro.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <!-- Aquí van todos los campos del formulario como ya los tienes -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Nombres</label>
+                        <input type="text" name="nombres" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Apellidos</label>
+                        <input type="text" name="apellidos" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Correo Electrónico</label>
+                        <input type="email" name="correo" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Teléfono</label>
+                        <input type="text" name="telefono" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Profesión o Cargo</label>
+                        <select name="profesion_id" class="form-select" required>
+                            <option value="">Seleccione una profesión</option>
+                            @foreach($profesiones as $profesion)
+                                <option value="{{ $profesion->id }}">{{ $profesion->nombre_profesion }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Establecimiento</label>
+                        <select name="almacen_id" id="almacen_id" class="form-select" disabled required>
+                            <option value="">Seleccione un establecimiento</option>
+                            @foreach($almacenes as $almacen)
+                                <option value="{{ $almacen->id }}"
+                                    {{ (string) $almacenUsuarioId === (string) $almacen->id ? 'selected' : '' }}>
+                                    {{ $almacen->nombre_ipress }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                
+            </div>
+
+
+            <div class="mb-3">
+                <label>Archivo ZIP</label>
+                <input type="file" name="archivo" class="form-control" accept=".zip" required>
+            </div>
+
+            <div class="form-check mb-3">
+                <input type="checkbox" name="terminos" class="form-check-input" required>
+                <label class="form-check-label">Estoy de acuerdo con los términos y condiciones</label>
+            </div>
+            <div class="h-captcha" data-sitekey="24321fda-1948-4430-bab6-2ea8cf4e9802"></div>
+
+            <button type="submit" class="btn btn-primary">📩  Registrar</button>
+
+
+            <div style="text-align: center; font-size: 12px; color: #6c757d; margin-top: 10px;">
+                <br>
+                <small>Powered by Xioto-DiremidLoreto</small>
+            </div>
+        </form>
+
+        <script>
+            $(document).ready(function() {
+                $('.select2').select2({
+                    theme: 'bootstrap4', // Usa el theme Bootstrap
+                    placeholder: "Seleccione un establecimiento",
+                    allowClear: true
+                });
+
+                 $('.delete-form').on('submit', function(e) {
+                    e.preventDefault();
+                    if (confirm('¿Estás seguro de eliminar este registro?')) {
+                        this.submit();
+                    }
+                });
+
+
+            });
+        </script>
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const countdownEl = document.getElementById('countdown');
+
+                // valores dinámicos enviados por PHP/Blade
+                const inicioDia = {{ $inicio }};
+                const finDia    = {{ $fin }};
+
+                const now   = new Date();
+                const year  = now.getFullYear();
+                const month = now.getMonth(); // 0-indexed
+
+                // deadline = día "fin" a las 23:59:59
+                const deadline = new Date(year, month, finDia, 23, 59, 59);
+
+                const interval = setInterval(() => {
+                    const distance = deadline - Date.now();
+
+                    if (distance <= 0) {
+                        clearInterval(interval);
+                        countdownEl.textContent = "¡Tiempo finalizado!";
+                        return;
+                    }
+
+                    const days    = Math.floor(distance / (1000*60*60*24));
+                    const hours   = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
+                    const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
+                    const seconds = Math.floor((distance % (1000*60)) / 1000);
+
+                    countdownEl.textContent =
+                        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                }, 1000);
+            });
+        </script>
+
+    @endif
+
+</div>
+</div>
+
+@endsection
+
+
+{{-- <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -35,9 +214,7 @@
     </style>
     <script src='https://www.hCaptcha.com/1/api.js' async defer></script>
 </head>
-<body class="bg-light">
-    
-    
+<body class="bg-light">  
     <div class="container">
         <div class="form-box">
             <div class="text-center">
@@ -226,4 +403,4 @@
 
 
 </body>
-</html>
+</html> --}}

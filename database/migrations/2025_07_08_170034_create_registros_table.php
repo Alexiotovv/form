@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('archivo');
             $table->unsignedBigInteger('profesion_id');
             $table->foreign('profesion_id')->references('id')->on('profesiones');
-            $table->unsignedBigInteger('establecimiento_id');
-            $table->foreign('establecimiento_id')->references('id')->on('establecimientos');
+            $table->unsignedBigInteger('almacen_id');
+            $table->foreign('almacen_id')->references('id')->on('almacenes');
             $table->timestamps();
         });
     }

@@ -1,15 +1,18 @@
 @extends('admin.base')
+@section('css')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{{-- Estilo Select2 para que se parezca a Bootstrap 5 --}}
+<link href="{{asset('css/select2-bootstrap.css')}}" rel="stylesheet"/>
+
+@endsection
 
 @section('content')
-<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <br>
-            <a href="{{ route('admin.dashboard') }}" class="">
-                ← Volver al Panel Admin
-            </a>
+ 
             <div class="card">
-                <div class="card-header">Edit User #{{ $user->id }}</div>
+                <div class="card-header">Editar Usuario #{{ $user->id }}</div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ route('admin.users.update', $user->id) }}">
@@ -17,7 +20,7 @@
                         @method('PUT')
 
                         <div class="form-group">
-                            <label for="name">Name</label>
+                            <label for="name">Nombre</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
                             @error('name')
                                 <span class="invalid-feedback" role="alert">
@@ -27,7 +30,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label for="email">Correo</label>
                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
                             @error('email')
                                 <span class="invalid-feedback" role="alert">
@@ -37,7 +40,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="password">Password (leave blank to keep current)</label>
+                            <label for="password">Contraseña (dejar en blanco si no va cambiar )</label>
                             <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password">
                             @error('password')
                                 <span class="invalid-feedback" role="alert">
@@ -47,10 +50,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="password-confirm">Confirm Password</label>
+                            <label for="password-confirm">Confirmar Contraseña</label>
                             <input type="password" class="form-control" id="password-confirm" name="password_confirmation">
                         </div>
-
+                        <br>
                         <div class="form-group">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin" {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
@@ -59,12 +62,60 @@
                                 </label>
                             </div>
                         </div>
-
-                        <button type="submit" class="btn btn-primary">Update User</button>
+                        <br>
+                        <div class="form-group">
+                            <label for="almacen_id" class="form-label">Establecimiento</label>
+                            <select name="almacen_id" id="almacen_id" class="form-select select2" required>
+                                @if($user->almacen)
+                                    <option value="{{ $user->almacen->id }}" selected>
+                                        {{ $user->almacen->cod_ipress }} - {{ $user->almacen->nombre_ipress }}
+                                    </option>
+                                @endif
+                            </select>
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-outline-primary btn-sm">💾 Actualizar Usuario</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
+@endsection
+@section('scripts')
+    <script src="{{asset('js/select2.min.js')}}"></script>
+    <script src="{{ asset('js/select2-focus.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                // theme: 'bootstrap4',
+                placeholder: "Escriba código o nombre de IPRESS...",
+                minimumInputLength: 2,
+                ajax: {
+                    url: "{{ route('matriz.searchAlmacen') }}", 
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+
+            // 🔥 FORZAR APLICAR EL SELECTED (si ya tiene almacen asignado)
+            const selectedValue = $('#almacen_id').val();
+            if (selectedValue) {
+                $('#almacen_id').trigger('change');
+            }
+
+            
+        });
+    </script>
 @endsection

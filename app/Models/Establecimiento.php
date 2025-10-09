@@ -11,4 +11,9 @@ class Establecimiento extends Model
         'nombre',
         'envios',
     ];
+
+    public function usuarios()
+    {
+        return $this->hasMany(User::class, 'almacen_id');
+    }
 }

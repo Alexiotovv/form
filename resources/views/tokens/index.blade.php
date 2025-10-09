@@ -1,8 +1,8 @@
-@extends('layouts.app') {{-- Usa tu plantilla Bootstrap base si tienes --}}
+@extends('admin.dashboard') {{-- Usa tu plantilla Bootstrap base si tienes --}}
 
 @section('content')
-<div class="container mt-4">
-    <h2>Gestión de Tokens Personales</h2>
+
+    <h4>Gestión de Tokens Personales</h4>
 
    @if(session('token_generado'))
         <div class="alert alert-success d-flex align-items-center justify-content-between">
@@ -59,7 +59,7 @@
         @endforeach
         </tbody>
     </table>
-</div>
+
 @endsection
 @section('scripts')
     <script>

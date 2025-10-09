@@ -12,25 +12,29 @@ class Registro extends Model
         'correo',
         'telefono',
         'profesion_id',
-        'establecimiento_id',
+        'almacen_id',
         'fecha_envio',
         'hora_envio',
         'archivo',
         'procesado',
+        'user_id',
     ];
 
-    public function establecimiento()
+    public function almacen()
     {
-        return $this->belongsTo(Establecimiento::class);
+        return $this->belongsTo(Almacen::class);
     }
     public function profesion()
     {
         return $this->belongsTo(Profesion::class);
-        return $this->belongsTo(Establecimiento::class);
+        // return $this->belongsTo(Establecimiento::class);
 
     }
 
-
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     protected $casts = [
         'procesado' => 'boolean'
     ];

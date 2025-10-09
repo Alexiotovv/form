@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('establecimientos', function (Blueprint $table) {
-            $table->string('codigo')->nullable();
+        Schema::table('requerimientos', function (Blueprint $table) {
+            $table->date('fecha_registro')->nullable()->after('almacen_id'); // o el campo que prefieras como referencia
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('establecimientos', function (Blueprint $table) {
-            $table->dropColumn('codigo');
+        Schema::table('requerimientos', function (Blueprint $table) {
+            $table->dropColumn('fecha_registro');
         });
     }
 };
