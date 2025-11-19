@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('admin.base')
 
 @section('content')
         <div class="container">
@@ -25,7 +25,7 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        @if($errors->any())
+        {{-- @if($errors->any())
             <div class="alert alert-danger">
                 <strong>Por favor corrige los siguientes errores:</strong>
                 <ul>
@@ -34,7 +34,7 @@
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif --}}
 
         <form action="{{ route('registro.store') }}" method="POST" enctype="multipart/form-data">
             @csrf

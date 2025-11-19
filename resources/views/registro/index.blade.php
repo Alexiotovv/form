@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('admin.base')
 @section('content')
     <h4>Lista de Archivos ICIs</h4>
     <form method="GET" action="{{ route('registro.index') }}" class="mb-3 d-flex">

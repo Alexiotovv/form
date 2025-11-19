@@ -63,19 +63,25 @@
 <body>
 
   <!-- Navbar superior -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-    <div class="container-fluid">
-      <button class="btn btn-outline-secondary d-md-none" id="toggleSidebar">☰</button>
-      <a class="navbar-brand ms-2" href="#">🌐 ICI</a>
-      <div class="d-flex ms-auto align-items-center">
-        <span class="me-3">👤 Bienvenido, {{ Auth::user()->name }}</span>
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button class="btn btn-light btn-sm">🚪Cerrar sesión</button>
-        </form>
-      </div>
+ <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+  <div class="container-fluid">
+    <button class="btn btn-outline-secondary d-md-none" id="toggleSidebar">☰</button>
+    
+    <a class="navbar-brand ms-2 d-flex align-items-center" href="#">
+      <img src="{{ asset('images/logo_diremid.png') }}" alt="Logo" class="me-2" style="height: 60px; width: auto;">
+      
+    </a>
+    
+    <div class="d-flex ms-auto align-items-center">
+      <span class="me-3">👤 Bienvenido, {{ Auth::user()->name }}</span>
+      <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button class="btn btn-light btn-sm">🚪Cerrar sesión</button>
+      </form>
     </div>
-  </nav>
+  </div>
+</nav>
+
 
   <div class="wrapper">
     <!-- Sidebar -->

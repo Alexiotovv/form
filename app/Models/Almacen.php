@@ -46,6 +46,7 @@ class Almacen extends Model
         'monitor',
         'digitador',
         'envios',
+        'para_descarga_siga',
     ];
     // protected $casts = [
     //     'envios' => 'integer',

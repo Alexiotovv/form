@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('admin.base')
 
 @section('content')
     <h2 class="mb-4">📜 Registros Históricos</h2>

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// use App\Models\Establecimiento;
+use Illuminate\Support\Facades\Http;
 use App\Models\Almacen;
 use App\Models\Registro;
 use App\Models\Profesion;
@@ -79,6 +79,43 @@ class RegistroController extends Controller
             'archivo' => 'required|file|mimes:zip|max:50000', // máximo 50MB
             'terminos' => 'accepted',
         ]);
+
+        //validar tablas formDet y Imed3
+        $config = \App\Models\DjangoConfig::first();
+        if (!$config) {
+            return back()->with('error', 'No existe configuración de Django API en la BD');
+        }
+
+        $archivo = $request->file('archivo');
+
+        // --- Validar ZIP en el endpoint de Django ---
+        $response = Http::withHeaders([
+            'Authorization' => 'Token ' . $config->token,
+        ])
+        ->attach(
+            'archivo', file_get_contents($archivo->getRealPath()), $archivo->getClientOriginalName()
+        )   
+        ->post($config->url . '/api/validar-zip/', [
+            'password' => $config->password_zip
+        ]);
+
+        if (!$response->successful()) {
+            $body = $response->json();
+
+            $errorMsg = 'Error al validar archivo ZIP.';
+            if (is_array($body)) {
+                $errorMsg = $body['error'] ?? ($body['detalle'] ?? $errorMsg);
+            } else {
+                $errorMsg = $response->body(); // texto plano si no es JSON
+            }
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $errorMsg);
+        }
+
+        //Termina de validar formDet y Imed3
+
         // 🔒 Obtener el establecimiento del USUARIO AUTENTICADO (no del request)
         $usuario = auth()->user();
         $almacenId = $usuario->almacen_id;
@@ -111,7 +148,7 @@ class RegistroController extends Controller
 
         $rutaArchivo = $request->file('archivo')->storeAs('archivos', $nombreArchivo, 'public');
         
-        // dd($establecimiento->id);
+
         Registro::create([
             'nombres' => $request->nombres,
             'apellidos' => $request->apellidos,

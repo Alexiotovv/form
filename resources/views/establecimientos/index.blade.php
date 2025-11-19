@@ -1,5 +1,4 @@
-@extends('admin.dashboard')
-@section('title', 'Establecimientos')
+@extends('admin.base')
 @section('content')
     <h4>Lista de Establecimientos</h4>
 

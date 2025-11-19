@@ -35,9 +35,45 @@ class AdminController extends Controller
 
     }
 
-    public function dashboard(){
-        return view('admin.dashboard');
+    public function dashboard()
+    {
+        // === Gráfico de avance SIGA ===
+        $totalAlmacenes = \App\Models\Almacen::where('para_descarga_siga', 'SI')->count();
+
+        $enviaronEsteMes = \App\Models\Registro::whereMonth('fecha_envio', now()->month)
+            ->whereYear('fecha_envio', now()->year)
+            ->distinct('almacen_id')
+            ->count('almacen_id');
+
+        $porcentaje = $totalAlmacenes > 0 ? round(($enviaronEsteMes / $totalAlmacenes) * 100, 2) : 0;
+
+        // === Gráfico de requerimientos por almacén ===
+        $requerimientos = \App\Models\Requerimiento::with('almacen')
+            ->whereMonth('fecha_registro', now()->month)
+            ->whereYear('fecha_registro', now()->year)
+            ->selectRaw('almacen_id, SUM(req_final) as total_requerimiento')
+            ->groupBy('almacen_id')
+            ->get();
+
+        // Armamos etiquetas (cod_ipress + nombre_ipress)
+        $labels = [];
+        $data = [];
+        foreach ($requerimientos as $r) {
+            if ($r->almacen) {
+                $labels[] = $r->almacen->cod_ipress . ' - ' . $r->almacen->nombre_ipress;
+                $data[] = $r->total_requerimiento;
+            }
+        }
+
+        return view('admin.dashboard', compact(
+            'totalAlmacenes',
+            'enviaronEsteMes',
+            'porcentaje',
+            'labels',
+            'data'
+        ));
     }
+
 
 
 }

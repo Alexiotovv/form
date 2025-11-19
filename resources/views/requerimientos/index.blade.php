@@ -1,7 +1,7 @@
 @extends('admin.base')
 @section('css')
     <link href="{{asset('css/select2.min.css')}}" rel="stylesheet" />
-    <link rel="stylesheet" href="{{asset('css/toastr.min.css')}}">
+    <link href="{{asset('css/toastr.min.css')}}" rel="stylesheet">
     <link href="{{asset('css/select2-bootstrap.css')}}" rel="stylesheet"/>
 @endsection
 @section('content')
@@ -119,8 +119,18 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
+                <!-- Dentro del card de la tabla, antes del card-body -->
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5>Productos Disponibles</h5>
+                    <div class="d-flex align-items-center">
+                        <button id="btn-no-encontre" class="btn btn-outline-secondary btn-sm me-4" style="display: none;">
+                            👩‍⚕️ No encontré el producto que busco...
+                        </button>
+                        <div class="input-group flex-grow-1">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" id="busqueda-productos" class="form-control" placeholder="Buscar producto...">
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -271,6 +281,30 @@ $(document).ready(function() {
                 let tbody = '';
 
                 response.data.forEach(item => {
+                    // Normalizar la situación de stock para comparación robusta
+                    const situacion = (item.situacion_stock || '').trim().toUpperCase();
+                    const esBloqueado = 
+                        situacion === 'SIN ROTACIÓN' || 
+                        situacion === 'SIN ROTACION' || 
+                        situacion === 'SOBRESTOCK';
+
+                    let celdaReqFinal;
+                    if (esBloqueado) {
+                        // Opción 1: Mostrar texto (recomendado)
+                        celdaReqFinal = '<span class="text-muted fst-italic small">🔒 No editable</span>';
+                        
+                        // Opción 2 (alternativa): input deshabilitado
+                        // celdaReqFinal = `<input type="number" class="form-control" value="${item.req_final || ''}" disabled title="No se permite requerimiento en ${item.situacion_stock}">`;
+                    } else {
+                        celdaReqFinal = `
+                            <input type="number" class="form-control req_final" 
+                                data-cod-sismed="${item.cod_sismed}" 
+                                data-cod-ipress="${codIpress}" 
+                                data-req-sugerido="${item.req_sugerido || 0}" 
+                                value="${item.req_final || ''}" min="0">
+                        `;
+                    }
+
                     tbody += `
                         <tr>
                             <td>${item.cod_sismed}</td>
@@ -282,10 +316,7 @@ $(document).ready(function() {
                             <td>${item.situacion_stock}</td>
                             <td>${item.situacion_fecha_venc || ''}</td>
                             <td>${item.req_sugerido || ''}</td>
-                            <td><input type="number" class="form-control req_final" 
-                                       data-cod-sismed="${item.cod_sismed}" 
-                                       data-cod-ipress="${codIpress}" 
-                                       value="${item.req_final || ''}" min="0"></td>
+                            <td>${celdaReqFinal}</td>
                         </tr>
                     `;
                 });
@@ -317,14 +348,29 @@ $(document).ready(function() {
     }
 
     $(document).on('blur', '.req_final', function() {
-        let valor = $(this).val();
-        let codSismed = $(this).data('cod-sismed');
-        let codIpress = $(this).data('cod-ipress');
-        
-        // console.log('Guardando:', { codSismed, codIpress, req_final: valor });
+        let $input = $(this);
+        let valor = $input.val();
+        let reqSugerido = parseFloat($input.data('req-sugerido')) || 0;
+        let codSismed = $input.data('cod-sismed');
+        let codIpress = $input.data('cod-ipress');
 
-        if (valor === '' || isNaN(valor)) return;
-        let cant = 0;
+        // Validar que sea un número válido
+        if (valor === '' || isNaN(valor)) {
+            $input.val(''); // opcional: limpiar
+            return;
+        }
+
+        let reqFinal = parseInt(valor);
+
+        // Validar límite: no más de 3 veces el sugerido
+        if (reqSugerido > 0 && reqFinal > reqSugerido * 3) {
+            alert(`⚠️ Monto excesivo: el requerimiento sugerido es ${reqSugerido}. 
+    El valor máximo permitido es ${Math.floor(reqSugerido * 3)}.`);
+            $input.val(''); // Opcional: limpiar el campo o dejar el valor anterior
+            return;
+        }
+
+        // Si pasa la validación, proceder a guardar
         $.ajax({
             url: "{{ route('requerimientos.guardar') }}",
             method: 'POST',
@@ -332,41 +378,38 @@ $(document).ready(function() {
                 _token: "{{ csrf_token() }}",
                 cod_sismed: codSismed,
                 cod_ipress: codIpress,
-                req_final: parseInt(valor)
+                req_final: reqFinal
             },
             success: function(response) {
                 if (response.success) {
                     toastr.success('Requerimiento guardado.');
-                    const fila = $(`.req_final[data-cod-sismed='${codSismed}'][data-cod-ipress='${codIpress}']`).closest('tr');
+                    const fila = $input.closest('tr');
                     fila.fadeOut(300, function() {
                         $(this).remove();
                     });
                 } else {
-                    // Manejar errores que vienen en success:false
                     toastr.error(response.error || 'Error al guardar.');
                 }
             },
             error: function(xhr, status, error) {
                 let mensaje = 'Error desconocido.';
-
-                // Intentar obtener el mensaje del JSON de error
                 if (xhr.responseJSON) {
                     if (xhr.responseJSON.error) {
                         mensaje = xhr.responseJSON.error;
                     } else if (xhr.responseJSON.message) {
                         mensaje = xhr.responseJSON.message;
                     } else if (xhr.responseJSON.errors) {
-                        // Errores de validación de Laravel
                         let errores = xhr.responseJSON.errors;
                         mensaje = Object.values(errores).flat().join(' ');
                     }
                 }
-
                 toastr.error(mensaje);
                 console.error('Error AJAX:', xhr.responseText || error);
             }
         });
     });
+
+    
 
     $('#btn_generar_fer').click(function() {
         if (!ipressSelected) {
@@ -487,10 +530,40 @@ $(document).ready(function() {
     });
 
 
+    // === Búsqueda en la tabla de productos ===
+    $('#busqueda-productos').on('keyup', function() {
+        let valor = $(this).val().toLowerCase().trim();
+        let filas = $('#requerimientos_table tbody tr');
+        let filasVisibles = 0;
 
+        filas.each(function() {
+            let fila = $(this);
+            let textoFila = fila.text().toLowerCase();
 
+            if (valor === '' || textoFila.includes(valor)) {
+                fila.show();
+                filasVisibles++;
+            } else {
+                fila.hide();
+            }
+        });
 
+        // Mostrar u ocultar el botón según si hay resultados
+        if (valor !== '' && filasVisibles === 0) {
+            $('#btn-no-encontre').show();
+        } else {
+            $('#btn-no-encontre').hide();
+        }
+    });
 });
+
+$('#btn-no-encontre').on('click', function() {
+    alert('Por favor, contacte al administrador o registre una solicitud.');
+    // O abra un modal, envíe un correo, etc.
+});
+
+
+
 </script>
 
 <script src="{{ asset('js/select2-focus.js') }}"></script>

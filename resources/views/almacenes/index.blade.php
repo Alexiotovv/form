@@ -133,6 +133,7 @@
                                     'monitor' => 100,
                                     'digitador' => 100,
                                     'envios'=>1,
+                                    'para_descarga_siga'=>2,
 
                                 ];
                                 $maxLength = $maxLengths[$campo] ?? null;
