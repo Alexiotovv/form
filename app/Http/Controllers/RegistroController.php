@@ -19,6 +19,7 @@ class RegistroController extends Controller
     public function registrosici(Request $request)
     {
         
+        
         // Validar que las fechas sean correctas
         $request->validate([
             'fecha_inicio' => 'required|date',
@@ -40,8 +41,6 @@ class RegistroController extends Controller
             $registro->archivo_url = url('storage/' . $registro->archivo);
             return $registro;
         });
-
-        
 
         return response()->json([ 'data' => $registros]);
     }

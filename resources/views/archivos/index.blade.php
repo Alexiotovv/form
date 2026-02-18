@@ -1,4 +1,4 @@
-@extends('admin.dashboard')
+@extends('admin.base')
 
 @section('content')
     <h4>Descargar Archivos ZIP</h4>

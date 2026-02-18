@@ -1,4 +1,4 @@
-@extends('admin.dashboard') {{-- Usa tu plantilla Bootstrap base si tienes --}}
+@extends('admin.base') {{-- Usa tu plantilla Bootstrap base si tienes --}}
 
 @section('content')
 

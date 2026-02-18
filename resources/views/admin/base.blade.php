@@ -62,8 +62,8 @@
 </head>
 <body>
 
-  <!-- Navbar superior -->
- <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+<!-- Navbar superior -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
   <div class="container-fluid">
     <button class="btn btn-outline-secondary d-md-none" id="toggleSidebar">☰</button>
     
@@ -96,10 +96,10 @@
                 </a>
                 <div class="collapse ps-3" id="menu1">
                     {{-- <a href="{{ route('clave.edit') }}" class="nav-link">🗸 Clave de Acceso</a> --}}
-                    <a href="{{ route('plazo.edit') }}" class="nav-link">🗸 Configurar plazo de envío</a>
-                    <a href="{{ route('admin.users.index') }}" class="nav-link">🗸 Usuarios</a>
-                    <a href="{{ route('almacenes.index') }}" class="nav-link">🗸 Almacenes</a>
-                    <a href="{{ route('productos.index') }}" class="nav-link">🗸 Productos</a>
+                    <a href="{{ route('plazo.edit') }}" class="nav-link">▪️ Configurar plazo de envío</a>
+                    <a href="{{ route('admin.users.index') }}" class="nav-link">▪️ Usuarios</a>
+                    <a href="{{ route('almacenes.index') }}" class="nav-link">▪️ Almacenes</a>
+                    <a href="{{ route('productos.index') }}" class="nav-link">▪️ Productos</a>
                     {{-- <a href="{{ route('unidadesejecutoras.index') }}" class="nav-link">🗸 UnidadesEjecutoras</a> --}}
                 </div>
 
@@ -109,8 +109,8 @@
                 ⚙️ Sistema <span>▾</span>
                 </a>
                 <div class="collapse ps-3" id="menu2">
-                {{-- <a href="{{ route('tokens.index') }}" class="nav-link">🗸 Tokens de acceso</a> --}}
-                <a href="{{ route('django-config.index') }}" class="nav-link">🗸 Django Config</a>
+                <a href="{{ route('tokens.index') }}" class="nav-link">▪️ Tokens de acceso</a>
+                <a href="{{ route('django-config.index') }}" class="nav-link">▪️ Django Config</a>
                 </div>
 
                 <!-- Menú 3 -->
@@ -119,13 +119,13 @@
                 📑 Archivos <span>▾</span>
                 </a>
                 <div class="collapse ps-3" id="menu3">
-                  <a href="{{ route('registro.index') }}" class="nav-link">🗸  Listar ICIs</a>  
-                  <a href="{{ route('archivos.index') }}" class="nav-link">🗸  Descargar Archivos</a>
-                  <a href="{{ route('registro.create') }}" class="nav-link">🗸 Registrar ICI</a>
-                  <a href="{{ route('historicos.index') }}" class="nav-link">🗸 Procesamiento Históricos</a>
-                  <a href="{{ route('matriz.index') }}" class="nav-link">🗸 Matriz Disponibilidad</a>
-                  <a href="{{ route('requerimientos.index') }}" class="nav-link">🗸 Requerimientos</a>
-                  <a href="{{ route('pedidos.index') }}" class="nav-link">🗸 Lista Requerimientos</a>
+                  <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
+                  <a href="{{ route('archivos.index') }}" class="nav-link">▪️Descargar Archivos</a>
+                  <a href="{{ route('registro.create') }}" class="nav-link">▪️Registrar ICI</a>
+                  <a href="{{ route('historicos.index') }}" class="nav-link">▪️Procesamiento Históricos</a>
+                  <a href="{{ route('matriz.index') }}" class="nav-link">▪️Matriz Disponibilidad</a>
+                  <a href="{{ route('requerimientos.index') }}" class="nav-link">▪️Requerimientos</a>
+                  <a href="{{ route('pedidos.index') }}" class="nav-link">▪️Lista Requerimientos</a>
                   
                 </div>
             @else
@@ -134,9 +134,9 @@
                   📑 Archivos <span>▾</span>
                 </a>
                 <div class="collapse ps-3" id="menu3">
-                    <a href="{{ route('registro.index') }}" class="nav-link">🗸  Listar ICIs</a>  
-                    <a href="{{ route('registro.create') }}" class="nav-link">🗸 Registro ICI</a>
-                    <a href="{{ route('requerimientos.index') }}" class="nav-link">🗸 Requerimientos</a>
+                    <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
+                    <a href="{{ route('registro.create') }}" class="nav-link">▪️Registro ICI</a>
+                    <a href="{{ route('requerimientos.index') }}" class="nav-link">▪️Requerimientos</a>
                 </div>
             @endif
         @endauth
