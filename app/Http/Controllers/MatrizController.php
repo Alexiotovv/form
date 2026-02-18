@@ -73,9 +73,9 @@ class MatrizController extends Controller
                 INGRE,
                 FEC_EXP
             FROM form_det
-            WHERE FECHA >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-            AND CODIGO_PRE = ?";
-
+            WHERE  CODIGO_PRE = ?";
+            // FECHA >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            //             AND
         $bindings = [$codigo_pre];
 
         // Si viene cod_sismed, lo agregamos al filtro
