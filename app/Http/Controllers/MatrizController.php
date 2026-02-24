@@ -49,12 +49,20 @@ class MatrizController extends Controller
     {
         $camposConsumo = 'form_det_filtrado.CREDHOSP + form_det_filtrado.DEFNAC + form_det_filtrado.EXO + form_det_filtrado.INTERSAN + form_det_filtrado.OTR_CONV + form_det_filtrado.SIS + form_det_filtrado.SOAT + form_det_filtrado.VENTA + form_det_filtrado.OTRAS_SAL';
 
-        // 🧱 Construimos la subconsulta dinámicamente
+        // 🧱 Obtener el ANNOMES de la fecha manual (formato YYYYMM)
+        $fechaObjeto = \Carbon\Carbon::parse($fechaManual);
+        $annomesActual = $fechaObjeto->format('Y-m'); // Esto da YYYY-MM para DATE_FORMAT
+        $annomesActualNum = $fechaObjeto->format('Ym'); // Esto da YYYYMM para comparaciones numéricas
+
+        // Calcular ANNOMES de hace 12 meses
+        $annomesHace12Meses = $fechaObjeto->copy()->subMonths(12)->format('Ym');
+
+        // 🧱 Construimos la subconsulta dinámicamente usando ANNOMES
         $subQuery = "
             SELECT
                 CODIGO_PRE,
                 CODIGO_MED,
-                FECHA,
+                ANNOMES,
                 CREDHOSP,
                 DEFNAC,
                 EXO,
@@ -73,10 +81,10 @@ class MatrizController extends Controller
                 INGRE,
                 FEC_EXP
             FROM form_det
-            WHERE  CODIGO_PRE = ?";
-            // FECHA >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-            //             AND
-        $bindings = [$codigo_pre];
+            WHERE ANNOMES >= ?  -- Filtro por ANNOMES (formato YYYYMM)
+            AND CODIGO_PRE = ?";
+
+        $bindings = [$annomesHace12Meses, $codigo_pre]; // Primero ANNOMES, luego CODIGO_PRE
 
         // Si viene cod_sismed, lo agregamos al filtro
         if (!empty($codigo_sismed)) {
@@ -106,7 +114,6 @@ class MatrizController extends Controller
                 DB::raw('MAX(almacenes.ipress_dengue) as ipress_dengue'),
                 DB::raw('MAX(almacenes.nivel) as nivel'),
                 DB::raw('MAX(almacenes.universo_ipress) as universo_ipress'),
-
                 'productos.cod_sismed',
                 DB::raw('MAX(productos.cod_unificado) as cod_unificado'),
                 DB::raw('MAX(productos.tipo_prod) as tipo_prod'),
@@ -122,31 +129,29 @@ class MatrizController extends Controller
                 DB::raw('MAX(productos.dengue_grupo_c) as dengue_grupo_c'),
                 DB::raw('MAX(productos.lista_1) as lista_1'),
                 DB::raw('MAX(productos.lista_2) as lista_2'),
-
                 DB::raw('MAX(productos.descripcion_cubo) as descripcion_cubo'),
                 DB::raw('MAX(productos.descripcion_producto) as descripcion_producto'),
                 DB::raw('MAX(productos.descripcion_producto_alt) as descripcion_producto_alt'),
 
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 11 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes1"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes2"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes3"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes4"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes5"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes6"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes7"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes8"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes9"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes10"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes11"),
-                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes12"),
+                // Meses usando ANNOMES (comparación numérica directa, más eficiente)
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(11)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes1"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(10)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes2"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(9)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes3"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(8)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes4"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(7)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes5"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(6)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes6"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(5)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes7"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(4)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes8"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(3)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes9"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(2)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes10"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(1)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes11"),
+                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes12"),
 
                 DB::raw('MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) as StockFinal'),
                 DB::raw('MAX(form_det_filtrado.INGRE) as ingre'),
                 DB::raw('MAX(form_det_filtrado.FEC_EXP) as fec_exp'),
 
                 DB::raw("SUM({$camposConsumo}) as consumo_total"),
-                //SOLAMENTE DIVIDIR ENTRE LAS CANTIDADES DE LOS MESES QUE HUBO CONSUNO
-                //SI HUBO 10 MESES CONSUMO /10
                 DB::raw("
                     CASE
                         WHEN SUM(
@@ -168,10 +173,10 @@ class MatrizController extends Controller
                     END as cpma
                 "),
 
-
+                // Últimos 4 meses usando ANNOMES (rango numérico)
                 DB::raw("SUM(
                     CASE
-                        WHEN DATE_FORMAT(form_det_filtrado.FECHA, '%Y%m') BETWEEN DATE_FORMAT(CURDATE() - INTERVAL 3 MONTH, '%Y%m') AND DATE_FORMAT(CURDATE(), '%Y%m')
+                        WHEN form_det_filtrado.ANNOMES BETWEEN " . ($fechaObjeto->copy()->subMonths(3)->format('Ym')) . " AND " . ($fechaObjeto->format('Ym')) . "
                         THEN ({$camposConsumo}) ELSE 0
                     END
                 ) as consumo_ultimos_4meses"),
@@ -231,7 +236,8 @@ class MatrizController extends Controller
                 'almacenes.id',
                 'almacenes.cod_ipress',
                 'productos.cod_sismed',
-                'productos.id');
+                'productos.id'
+            );
 
         // Asignamos los bindings a la subconsulta
         foreach ($bindings as $binding) {
