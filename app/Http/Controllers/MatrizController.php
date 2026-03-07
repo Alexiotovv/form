@@ -37,10 +37,9 @@ class MatrizController extends Controller
 
         // ✅ Llamamos a la función reutilizable
         $query = $this->obtenerRegistrosMatriz($codigo_pre, $codigo_sismed, $fechaManual);
-        
+
         // ✅ Paginamos
         $registros = $query->paginate(50);
-        
 
         return view('matriz.index', compact('registros'));
     }
@@ -48,21 +47,16 @@ class MatrizController extends Controller
     private function obtenerRegistrosMatriz($codigo_pre, $codigo_sismed, $fechaManual)
     {
         $camposConsumo = 'form_det_filtrado.CREDHOSP + form_det_filtrado.DEFNAC + form_det_filtrado.EXO + form_det_filtrado.INTERSAN + form_det_filtrado.OTR_CONV + form_det_filtrado.SIS + form_det_filtrado.SOAT + form_det_filtrado.VENTA + form_det_filtrado.OTRAS_SAL';
-
-        // 🧱 Obtener el ANNOMES de la fecha manual (formato YYYYMM)
-        $fechaObjeto = \Carbon\Carbon::parse($fechaManual);
-        $annomesActual = $fechaObjeto->format('Y-m'); // Esto da YYYY-MM para DATE_FORMAT
-        $annomesActualNum = $fechaObjeto->format('Ym'); // Esto da YYYYMM para comparaciones numéricas
-
-        // Calcular ANNOMES de hace 12 meses
-        $annomesHace12Meses = $fechaObjeto->copy()->subMonths(12)->format('Ym');
-
-        // 🧱 Construimos la subconsulta dinámicamente usando ANNOMES
+        
+        $fechaObj = \Carbon\Carbon::parse($fechaManual);
+        $fechaReferencia = $fechaObj->format('Y-m-d');
+        
+        // 🧱 Construimos la subconsulta dinámicamente
         $subQuery = "
             SELECT
                 CODIGO_PRE,
                 CODIGO_MED,
-                ANNOMES,
+                FECHA,
                 CREDHOSP,
                 DEFNAC,
                 EXO,
@@ -81,10 +75,10 @@ class MatrizController extends Controller
                 INGRE,
                 FEC_EXP
             FROM form_det
-            WHERE ANNOMES >= ?  -- Filtro por ANNOMES (formato YYYYMM)
+            WHERE FECHA >= DATE_SUB('{$fechaReferencia}', INTERVAL 12 MONTH)
             AND CODIGO_PRE = ?";
 
-        $bindings = [$annomesHace12Meses, $codigo_pre]; // Primero ANNOMES, luego CODIGO_PRE
+        $bindings = [$codigo_pre];
 
         // Si viene cod_sismed, lo agregamos al filtro
         if (!empty($codigo_sismed)) {
@@ -93,7 +87,7 @@ class MatrizController extends Controller
         }
 
         $formDetFiltrado = DB::raw("({$subQuery}) AS form_det_filtrado");
-
+    
         // 🧱 Paso 1: Construimos la consulta base
         $baseQuery = Almacen::query()
             ->join($formDetFiltrado, 'almacenes.cod_ipress', '=', 'form_det_filtrado.CODIGO_PRE')
@@ -102,56 +96,60 @@ class MatrizController extends Controller
             ->select(
                 'almacenes.id',
                 'productos.id as producto_id',
-                DB::raw('MAX(almacenes.disa_diresa) as disa_diresa'),
-                DB::raw('MAX(almacenes.ue_mef) as ue_mef'),
-                DB::raw('MAX(almacenes.almacen_pertenece) as almacen_pertenece'),
-                DB::raw('MAX(almacenes.red) as red'),
-                DB::raw('MAX(almacenes.microred) as microred'),
-                DB::raw('MAX(almacenes.distrito) as distrito'),
+                DB::raw('ANY_VALUE(almacenes.disa_diresa) as disa_diresa'),
+                DB::raw('ANY_VALUE(almacenes.ue_mef) as ue_mef'),
+                DB::raw('ANY_VALUE(almacenes.almacen_pertenece) as almacen_pertenece'),
+                DB::raw('ANY_VALUE(almacenes.red) as red'),
+                DB::raw('ANY_VALUE(almacenes.microred) as microred'),
+                DB::raw('ANY_VALUE(almacenes.distrito) as distrito'),
                 'almacenes.cod_ipress',
-                DB::raw('MAX(almacenes.nombre_ipress) as nombre_ipress'),
-                DB::raw('MAX(almacenes.tipo_establecimiento) as tipo_establecimiento'),
-                DB::raw('MAX(almacenes.ipress_dengue) as ipress_dengue'),
-                DB::raw('MAX(almacenes.nivel) as nivel'),
-                DB::raw('MAX(almacenes.universo_ipress) as universo_ipress'),
-                'productos.cod_sismed',
-                DB::raw('MAX(productos.cod_unificado) as cod_unificado'),
-                DB::raw('MAX(productos.tipo_prod) as tipo_prod'),
-                DB::raw('MAX(productos.tipo_abastecimiento) as tipo_abastecimiento'),
-                DB::raw('MAX(productos.peti2023) as peti2023'),
-                DB::raw('MAX(productos.estado) as estado'),
-                DB::raw('MAX(productos.producto_fed_actual) as producto_fed_actual'),
-                DB::raw('MAX(productos.producto_cap_eca) as producto_cap_eca'),
-                DB::raw('MAX(productos.iras) as iras'),
-                DB::raw('MAX(productos.dengue) as dengue'),
-                DB::raw('MAX(productos.dengue_grupo_a) as dengue_grupo_a'),
-                DB::raw('MAX(productos.dengue_grupo_b) as dengue_grupo_b'),
-                DB::raw('MAX(productos.dengue_grupo_c) as dengue_grupo_c'),
-                DB::raw('MAX(productos.lista_1) as lista_1'),
-                DB::raw('MAX(productos.lista_2) as lista_2'),
-                DB::raw('MAX(productos.descripcion_cubo) as descripcion_cubo'),
-                DB::raw('MAX(productos.descripcion_producto) as descripcion_producto'),
-                DB::raw('MAX(productos.descripcion_producto_alt) as descripcion_producto_alt'),
+                DB::raw('ANY_VALUE(almacenes.nombre_ipress) as nombre_ipress'),
+                DB::raw('ANY_VALUE(almacenes.tipo_establecimiento) as tipo_establecimiento'),
+                DB::raw('ANY_VALUE(almacenes.ipress_dengue) as ipress_dengue'),
+                DB::raw('ANY_VALUE(almacenes.nivel) as nivel'),
+                DB::raw('ANY_VALUE(almacenes.universo_ipress) as universo_ipress'),
 
-                // Meses usando ANNOMES (comparación numérica directa, más eficiente)
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(11)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes1"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(10)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes2"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(9)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes3"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(8)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes4"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(7)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes5"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(6)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes6"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(5)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes7"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(4)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes8"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(3)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes9"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(2)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes10"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->copy()->subMonths(1)->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes11"),
-                DB::raw("SUM(CASE WHEN form_det_filtrado.ANNOMES = " . ($fechaObjeto->format('Ym')) . " THEN ({$camposConsumo}) ELSE 0 END) as Mes12"),
+                'productos.cod_sismed',
+                DB::raw('ANY_VALUE(productos.cod_unificado) as cod_unificado'),
+                DB::raw('ANY_VALUE(productos.tipo_prod) as tipo_prod'),
+                DB::raw('ANY_VALUE(productos.tipo_abastecimiento) as tipo_abastecimiento'),
+                DB::raw('ANY_VALUE(productos.peti2023) as peti2023'),
+                DB::raw('ANY_VALUE(productos.estado) as estado'),
+                DB::raw('ANY_VALUE(productos.producto_fed_actual) as producto_fed_actual'),
+                DB::raw('ANY_VALUE(productos.producto_cap_eca) as producto_cap_eca'),
+                DB::raw('ANY_VALUE(productos.iras) as iras'),
+                DB::raw('ANY_VALUE(productos.dengue) as dengue'),
+                DB::raw('ANY_VALUE(productos.dengue_grupo_a) as dengue_grupo_a'),
+                DB::raw('ANY_VALUE(productos.dengue_grupo_b) as dengue_grupo_b'),
+                DB::raw('ANY_VALUE(productos.dengue_grupo_c) as dengue_grupo_c'),
+                DB::raw('ANY_VALUE(productos.lista_1) as lista_1'),
+                DB::raw('ANY_VALUE(productos.lista_2) as lista_2'),
+
+                DB::raw('ANY_VALUE(productos.descripcion_cubo) as descripcion_cubo'),
+                DB::raw('ANY_VALUE(productos.descripcion_producto) as descripcion_producto'),
+                DB::raw('ANY_VALUE(productos.descripcion_producto_alt) as descripcion_producto_alt'),
+
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes1"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes2"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes3"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes4"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes5"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes6"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes7"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes8"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes9"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes10"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes11"),
+                DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes12"),
+                // DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes12"),
 
                 DB::raw('MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) as StockFinal'),
-                DB::raw('MAX(form_det_filtrado.INGRE) as ingre'),
-                DB::raw('MAX(form_det_filtrado.FEC_EXP) as fec_exp'),
+                DB::raw('ANY_VALUE(form_det_filtrado.INGRE) as ingre'),
+                DB::raw('ANY_VALUE(form_det_filtrado.FEC_EXP) as fec_exp'),
 
                 DB::raw("SUM({$camposConsumo}) as consumo_total"),
+                //SOLAMENTE DIVIDIR ENTRE LAS CANTIDADES DE LOS MESES QUE HUBO CONSUNO
+                //SI HUBO 10 MESES CONSUMO /10
                 DB::raw("
                     CASE
                         WHEN SUM(
@@ -173,10 +171,10 @@ class MatrizController extends Controller
                     END as cpma
                 "),
 
-                // Últimos 4 meses usando ANNOMES (rango numérico)
+
                 DB::raw("SUM(
                     CASE
-                        WHEN form_det_filtrado.ANNOMES BETWEEN " . ($fechaObjeto->copy()->subMonths(3)->format('Ym')) . " AND " . ($fechaObjeto->format('Ym')) . "
+                        WHEN DATE_FORMAT(form_det_filtrado.FECHA, '%Y%m') BETWEEN DATE_FORMAT(CURDATE() - INTERVAL 3 MONTH, '%Y%m') AND DATE_FORMAT(CURDATE(), '%Y%m')
                         THEN ({$camposConsumo}) ELSE 0
                     END
                 ) as consumo_ultimos_4meses"),
@@ -236,8 +234,7 @@ class MatrizController extends Controller
                 'almacenes.id',
                 'almacenes.cod_ipress',
                 'productos.cod_sismed',
-                'productos.id'
-            );
+                'productos.id');
 
         // Asignamos los bindings a la subconsulta
         foreach ($bindings as $binding) {
@@ -580,6 +577,260 @@ class MatrizController extends Controller
         return response()->json(['success' => true]);
     }
 
+    // public function guardarRequerimiento(Request $request)
+    // {
+    //     $request->validate([
+    //         'cod_sismed' => 'required|string',
+    //         'cod_ipress' => 'required|string',
+    //         'req_final' => 'nullable|integer|min:0'
+    //     ]);
+
+    //     $cod_sismed = $request->input('cod_sismed');
+    //     $cod_ipress = $request->input('cod_ipress');
+    //     $req_final = $request->input('req_final');
+
+    //     // 1. Obtener el almacén (para almacen_id)
+    //     $almacen = Almacen::where('cod_ipress', $cod_ipress)->first();
+    //     if (!$almacen) {
+    //         return response()->json(['success' => false, 'error' => 'IPRESS no encontrada']);
+    //     }
+
+    //     // 2. Obtener el producto
+    //     $producto = Producto::where('cod_sismed', $cod_sismed)->first();
+    //     if (!$producto) {
+    //         return response()->json(['success' => false, 'error' => 'Producto no encontrado']);
+    //     }
+
+    //     // 3. Obtener los datos dinámicos de la matriz (solo para este producto + ipress)
+    //     $datosMatriz = $this->obtenerRegistrosMatriz($cod_ipress, $cod_sismed, date('Y-m-t'))->first();
+
+    //     // Si no hay datos en la matriz, usamos valores por defecto
+    //     $stock_final = $datosMatriz ? $datosMatriz->StockFinal : 0;
+    //     $fecha_venc = $datosMatriz && $datosMatriz->fec_exp ? \Carbon\Carbon::parse($datosMatriz->fec_exp)->format('Y-m-d') : null;
+    //     $cpm = $datosMatriz ? $datosMatriz->cpma : 0;
+    //     $msd = $datosMatriz ? $datosMatriz->meses_prov : 0;
+    //     $situacion_stock = $datosMatriz ? $datosMatriz->situacion_stock : 'SIN DATOS';
+    //     $situacion_fecha_venc = $datosMatriz ? $datosMatriz->sit_fecha_vcmto : null;
+    //     $req_sugerido = $datosMatriz ? round($datosMatriz->consumo_total / 12 * 3) : 0; // 3 meses
+
+    //     // 4. Guardar o actualizar en la tabla requerimientos
+    //     \App\Models\Requerimiento::updateOrCreate(
+    //         [
+    //             'cod_sismed' => $cod_sismed,
+    //             'almacen_id' => $almacen->id,
+    //         ],
+    //         [
+    //             'descripcion_producto' => $producto->descripcion_producto,
+    //             'stock_final' => $stock_final,
+    //             'fecha_venc' => $fecha_venc,
+    //             'cpm' => $cpm,
+    //             'msd' => $msd,
+    //             'situacion_stock' => $situacion_stock,
+    //             'situacion_fecha_venc' => $situacion_fecha_venc,
+    //             'req_sugerido' => $req_sugerido,
+    //             'req_final' => $req_final,
+    //         ]
+    //     );
+
+    //     return response()->json(['success' => true]);
+    // }
 
 
 }
+
+
+
+
+
+// public function index(Request $request)
+        // {
+        //     $camposConsumo = 'form_det_filtrado.CREDHOSP + form_det_filtrado.DEFNAC + form_det_filtrado.EXO + form_det_filtrado.INTERSAN + form_det_filtrado.OTR_CONV + form_det_filtrado.SIS + form_det_filtrado.SOAT + form_det_filtrado.VENTA + form_det_filtrado.OTRAS_SAL';
+        //     $fechaManual = $request->input('fin_mes');
+        //     $codigo_pre = $request->input('cod_ipress');
+        //     $codigo_sismed = $request->input('cod_sismed');
+
+        //     if (empty($codigo_pre)) {
+        //         // Creamos un paginador vacío con la misma estructura
+        //         $registros = new \Illuminate\Pagination\LengthAwarePaginator(
+        //             collect(), // items vacíos
+        //             0,         // total
+        //             50,        // por página
+        //             1          // página actual
+        //         );
+        //         return view('matriz.index', compact('registros'));
+        //     }
+
+        //     // 🧱 Construimos la subconsulta dinámicamente
+        //     $subQuery = "
+        //         SELECT
+        //             CODIGO_PRE,
+        //             CODIGO_MED,
+        //             FECHA,
+        //             CREDHOSP,
+        //             DEFNAC,
+        //             EXO,
+        //             INTERSAN,
+        //             OTR_CONV,
+        //             SIS,
+        //             SOAT,
+        //             VENTA,
+        //             OTRAS_SAL,
+        //             STOCK_FIN,
+        //             PRECIO,
+        //             ROW_NUMBER() OVER (
+        //                 PARTITION BY CODIGO_PRE, CODIGO_MED
+        //                 ORDER BY STOCK_FIN ASC
+        //             ) as rn_stock,
+        //             INGRE,
+        //             FEC_EXP
+        //         FROM form_det
+        //         WHERE FECHA >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        //         AND CODIGO_PRE = ?";
+
+        //     $bindings = [$codigo_pre];
+
+        //     // Si viene cod_sismed, lo agregamos al filtro
+        //     if (!empty($codigo_sismed)) {
+        //         $subQuery .= " AND CODIGO_MED = ?";
+        //         $bindings[] = $codigo_sismed;
+        //     }
+
+        //     $formDetFiltrado = DB::raw("({$subQuery}) AS form_det_filtrado");
+
+        //     // 🧱 Paso 1: Construimos la consulta base
+        //     $baseQuery = Almacen::query()
+        //         ->join($formDetFiltrado, 'almacenes.cod_ipress', '=', 'form_det_filtrado.CODIGO_PRE')
+        //         ->join('productos', 'productos.cod_sismed', '=', 'form_det_filtrado.CODIGO_MED')
+        //         ->where('productos.estado', 'C')
+        //         ->select(
+        //             'almacenes.id',
+        //             DB::raw('ANY_VALUE(almacenes.disa_diresa) as disa_diresa'),
+        //             DB::raw('ANY_VALUE(almacenes.ue_mef) as ue_mef'),
+        //             DB::raw('ANY_VALUE(almacenes.almacen_pertenece) as almacen_pertenece'),
+        //             DB::raw('ANY_VALUE(almacenes.red) as red'),
+        //             DB::raw('ANY_VALUE(almacenes.microred) as microred'),
+        //             DB::raw('ANY_VALUE(almacenes.distrito) as distrito'),
+        //             'almacenes.cod_ipress',
+        //             DB::raw('ANY_VALUE(almacenes.nombre_ipress) as nombre_ipress'),
+        //             DB::raw('ANY_VALUE(almacenes.tipo_establecimiento) as tipo_establecimiento'),
+        //             DB::raw('ANY_VALUE(almacenes.ipress_dengue) as ipress_dengue'),
+        //             DB::raw('ANY_VALUE(almacenes.nivel) as nivel'),
+        //             DB::raw('ANY_VALUE(almacenes.universo_ipress) as universo_ipress'),
+
+        //             'productos.cod_sismed',
+        //             DB::raw('ANY_VALUE(productos.cod_unificado) as cod_unificado'),
+        //             DB::raw('ANY_VALUE(productos.tipo_prod) as tipo_prod'),
+        //             DB::raw('ANY_VALUE(productos.tipo_abastecimiento) as tipo_abastecimiento'),
+        //             DB::raw('ANY_VALUE(productos.peti2023) as peti2023'),
+        //             DB::raw('ANY_VALUE(productos.estado) as estado'),
+        //             DB::raw('ANY_VALUE(productos.producto_fed_actual) as producto_fed_actual'),
+        //             DB::raw('ANY_VALUE(productos.producto_cap_eca) as producto_cap_eca'),
+        //             DB::raw('ANY_VALUE(productos.iras) as iras'),
+        //             DB::raw('ANY_VALUE(productos.dengue) as dengue'),
+        //             DB::raw('ANY_VALUE(productos.dengue_grupo_a) as dengue_grupo_a'),
+        //             DB::raw('ANY_VALUE(productos.dengue_grupo_b) as dengue_grupo_b'),
+        //             DB::raw('ANY_VALUE(productos.dengue_grupo_c) as dengue_grupo_c'),
+        //             DB::raw('ANY_VALUE(productos.lista_1) as lista_1'),
+        //             DB::raw('ANY_VALUE(productos.lista_2) as lista_2'),
+
+        //             DB::raw('ANY_VALUE(productos.descripcion_cubo) as descripcion_cubo'),
+        //             DB::raw('ANY_VALUE(productos.descripcion_producto) as descripcion_producto'),
+        //             DB::raw('ANY_VALUE(productos.descripcion_producto_alt) as descripcion_producto_alt'),
+
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 11 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes1"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes2"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes3"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes4"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes5"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes6"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes7"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes8"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes9"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes10"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes11"),
+        //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes12"),
+
+        //             DB::raw('MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) as StockFinal'),
+        //             DB::raw('ANY_VALUE(form_det_filtrado.INGRE) as ingre'),
+        //             DB::raw('ANY_VALUE(form_det_filtrado.FEC_EXP) as fec_exp'),
+
+        //             DB::raw("SUM({$camposConsumo}) as consumo_total"),
+        //             DB::raw("FLOOR(SUM({$camposConsumo}) / 12) as cpma"),
+
+        //             DB::raw("SUM(
+        //                 CASE
+        //                     WHEN DATE_FORMAT(form_det_filtrado.FECHA, '%Y%m') BETWEEN DATE_FORMAT(CURDATE() - INTERVAL 3 MONTH, '%Y%m') AND DATE_FORMAT(CURDATE(), '%Y%m')
+        //                     THEN ({$camposConsumo}) ELSE 0
+        //                 END
+        //             ) as consumo_ultimos_4meses"),
+
+        //             DB::raw("CASE
+        //                 WHEN SUM({$camposConsumo}) > 0
+        //                 THEN ROUND(
+        //                     MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) / (SUM({$camposConsumo}) / 12.0),
+        //                     2
+        //                 )
+        //                 ELSE 0
+        //             END as meses_prov"),
+
+        //             DB::raw('CASE
+        //                 WHEN MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) IS NOT NULL
+        //                 THEN ROUND(
+        //                     MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) *
+        //                     MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.PRECIO END),
+        //                     2
+        //                 )
+        //                 ELSE 0
+        //             END as monto'),
+        //             DB::raw("
+        //                 @meses := (
+        //                     CASE
+        //                         WHEN MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) > 0
+        //                         THEN TIMESTAMPDIFF(
+        //                             MONTH,
+        //                             DATE('{$fechaManual}'),
+        //                             MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.FEC_EXP END)
+        //                         )
+        //                         ELSE NULL
+        //                     END
+        //                 ) as meses_para_vencimiento,
+
+        //                 CASE
+        //                     WHEN @meses IS NULL THEN ''
+        //                     WHEN @meses <= 0 THEN 'VENCIDO'
+        //                     WHEN @meses > 6 THEN ''
+        //                     ELSE 'POR VENCER'
+        //                 END as sit_fecha_vcmto
+        //             ")
+        //         )
+        //         ->groupBy('almacenes.id', 'almacenes.cod_ipress', 'productos.cod_sismed');
+
+        //     // Asignamos los bindings a la subconsulta
+        //     foreach ($bindings as $binding) {
+        //         $baseQuery->addBinding($binding, 'join');
+        //     }
+
+        //     // Paso 2: Envuelve la base y agrega situacion_stock
+        //     $wrappedQuery = DB::table(DB::raw("({$baseQuery->toSql()}) as base"))
+        //         ->mergeBindings($baseQuery->getQuery())
+        //         ->select('*', DB::raw("
+        //             CASE
+        //                 WHEN StockFinal < 0 THEN 'SALDO NEGATIVO'
+        //                 WHEN lista_1 = 'Gran Volumen' AND meses_prov BETWEEN 1 AND 6 THEN 'NORMOSTOCK'
+        //                 WHEN StockFinal > 0 AND cpma > 0 AND meses_prov > 6 THEN 'SOBRESTOCK'
+        //                 WHEN StockFinal > 0 AND cpma = 0 AND meses_prov = 0 THEN 'SIN ROTACION'
+        //                 WHEN StockFinal > 0 AND cpma > 0 AND meses_prov BETWEEN 2 AND 6 THEN 'NORMOSTOCK'
+        //                 WHEN StockFinal > 0 AND cpma > 0 AND meses_prov > 0 AND meses_prov < 2 THEN 'SUBSTOCK'
+        //                 WHEN StockFinal = 0 AND cpma > 0 AND meses_prov = 0 AND consumo_ultimos_4meses > 0 THEN 'DESABASTECIDO'
+        //                 WHEN StockFinal = 0 AND cpma > 0 AND meses_prov = 0 AND consumo_ultimos_4meses = 0 THEN 'SIN CONSUMO'
+        //                 WHEN StockFinal = 0 AND cpma = 0 AND meses_prov = 0 AND consumo_ultimos_4meses = 0 THEN 'SIN DATOS'
+        //                 ELSE 'SIN CLASIFICAR'
+        //             END as situacion_stock
+        //         "))
+        //         ->orderBy('id', 'desc');
+
+        //     // ✅ Paginamos solo si hay registros
+        //     $registros = $wrappedQuery->paginate(50);
+
+        //     return view('matriz.index', compact('registros'));
+        // }
