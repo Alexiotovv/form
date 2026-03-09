@@ -80,38 +80,38 @@ class RegistroController extends Controller
         ]);
 
         //validar tablas formDet y Imed3
-        $config = \App\Models\DjangoConfig::first();
-        if (!$config) {
-            return back()->with('error', 'No existe configuración de Django API en la BD');
-        }
+        // $config = \App\Models\DjangoConfig::first();
+        // if (!$config) {
+        //     return back()->with('error', 'No existe configuración de Django API en la BD');
+        // }
 
-        $archivo = $request->file('archivo');
+        // $archivo = $request->file('archivo');
 
-        // --- Validar ZIP en el endpoint de Django ---
-        $response = Http::withHeaders([
-            'Authorization' => 'Token ' . $config->token,
-        ])
-        ->attach(
-            'archivo', file_get_contents($archivo->getRealPath()), $archivo->getClientOriginalName()
-        )   
-        ->post($config->url . '/api/validar-zip/', [
-            'password' => $config->password_zip
-        ]);
+        // // --- Validar ZIP en el endpoint de Django ---
+        // $response = Http::withHeaders([
+        //     'Authorization' => 'Token ' . $config->token,
+        // ])
+        // ->attach(
+        //     'archivo', file_get_contents($archivo->getRealPath()), $archivo->getClientOriginalName()
+        // )   
+        // ->post($config->url . '/api/validar-zip/', [
+        //     'password' => $config->password_zip
+        // ]);
 
-        if (!$response->successful()) {
-            $body = $response->json();
+        // if (!$response->successful()) {
+        //     $body = $response->json();
 
-            $errorMsg = 'Error al validar archivo ZIP.';
-            if (is_array($body)) {
-                $errorMsg = $body['error'] ?? ($body['detalle'] ?? $errorMsg);
-            } else {
-                $errorMsg = $response->body(); // texto plano si no es JSON
-            }
+        //     $errorMsg = 'Error al validar archivo ZIP.';
+        //     if (is_array($body)) {
+        //         $errorMsg = $body['error'] ?? ($body['detalle'] ?? $errorMsg);
+        //     } else {
+        //         $errorMsg = $response->body(); // texto plano si no es JSON
+        //     }
 
-            return redirect()->back()
-                ->withInput()
-                ->with('error', $errorMsg);
-        }
+        //     return redirect()->back()
+        //         ->withInput()
+        //         ->with('error', $errorMsg);
+        // }
 
         //Termina de validar formDet y Imed3
 

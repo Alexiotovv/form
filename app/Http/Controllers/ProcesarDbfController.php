@@ -46,7 +46,7 @@ class ProcesarDbfController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
-
+                dd($data);
                 $tablas = ['FormDet', 'Ime1', 'Imed2', 'Imed3'];
                 $cantidad_registros = [];
 
@@ -64,6 +64,46 @@ class ProcesarDbfController extends Controller
                         $cantidad_registros[] = "📋 {$tabla}: " . count($registros) . " reg.";
                     }
                 }
+
+            // if ($response->successful()) {
+            //     $data = $response->json();
+            //     $tablas = ['FormDet', 'Ime1', 'Imed2', 'Imed3'];
+            //     $cantidad_registros = [];
+
+            //     foreach ($tablas as $tabla) {
+            //         $registros = $data['tablas_procesadas'][$tabla] ?? [];
+
+            //         if (!empty($registros)) {
+            //             \Log::info("Procesando tabla: {$tabla} - Total registros: " . count($registros));
+                        
+            //             foreach ($registros as $index => $item) {
+            //                 try {
+            //                     $model = "\\App\\Models\\" . $tabla;
+                                
+            //                     // Log para verificar el campo FECHA antes de insertar
+            //                     if (isset($item['FECHA'])) {
+            //                         \Log::info("Registro {$index} - FECHA: " . $item['FECHA'] . " - Tipo: " . gettype($item['FECHA']));
+            //                     } else {
+            //                         \Log::warning("Registro {$index} - NO TIENE campo FECHA");
+            //                     }
+                                
+            //                     // Log de todos los campos del registro (opcional, puede ser muy verboso)
+            //                     // \Log::debug("Registro completo: " . json_encode($item));
+                                
+            //                     $model::create($item);
+                                
+            //                 } catch (\Exception $e) {
+            //                     \Log::error("Error al insertar registro {$index} en {$tabla}: " . $e->getMessage());
+            //                     \Log::error("Datos del registro: " . json_encode($item));
+            //                 }
+            //             }
+
+            //             $cantidad_registros[] = "📋 {$tabla}: " . count($registros) . " reg.";
+            //         } else {
+            //             \Log::info("Tabla {$tabla} no tiene registros");
+            //         }
+            //     }
+                
 
                 DB::commit();
                 $registro->update(['procesado' => true]);
