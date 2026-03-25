@@ -10,54 +10,91 @@
   @yield('css')
   <style>
     body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
     .wrapper {
-      display: flex;
-      flex: 1;
-      overflow-y: hidden;   /* solo oculta el scroll vertical */
-      
+        display: flex;
+        flex: 1;
+        overflow-y: hidden;
     }
+    
+    /* Sidebar - estado expandido (por defecto) */
     .sidebar {
-      min-width: 250px;
-      max-width: 250px;
-      background-color: #f8f9fa;
-      border-right: 1px solid #dee2e6;
-      transition: all 0.3s;
-      overflow-y: auto;
+        min-width: 250px;
+        max-width: 250px;
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+        overflow-y: auto;
     }
+    
+    /* Sidebar - estado contraído */
+    .sidebar.collapsed {
+        min-width: 0;
+        max-width: 0;
+        padding: 0;
+        overflow: hidden;
+        border-right: none;
+    }
+    
     .sidebar .nav-link {
-      font-weight: 500;
-      color: #333;
+        font-weight: 500;
+        color: #333;
+        white-space: nowrap;
     }
+    
     .sidebar .nav-link:hover {
-      background-color: #e9ecef;
-      border-radius: 8px;
+        background-color: #e9ecef;
+        border-radius: 8px;
     }
+    
+    /* Contenido principal - ocupa todo el espacio disponible */
     .content {
-      flex-grow: 1;
-      padding: 20px;
-       overflow-x: auto;  
+        flex-grow: 1;
+        padding: 20px;
+        overflow-x: auto;
+        transition: all 0.3s ease;
+        width: calc(100% - 250px); /* Ancho total menos el sidebar */
     }
+    
+    /* Cuando el sidebar está contraído, el contenido ocupa el 100% */
+    .content.expanded {
+        width: 100%;
+    }
+    
     .table-container {
-      flex-grow: 1;
-      padding: 20px;
-       overflow-x: auto;  
+        flex-grow: 1;
+        padding: 20px;
+        overflow-x: auto;
     }
+    
     @media (max-width: 768px) {
-      .sidebar {
-        position: absolute;
-        left: -250px;
-        top: 56px;
-        height: calc(100% - 56px);
-        z-index: 1000;
-      }
-      .sidebar.show {
-        left: 0;
-      }
+        .sidebar {
+            position: absolute;
+            left: -250px;
+            top: 76px; /* Ajusta según altura de tu navbar */
+            height: calc(100% - 76px);
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar.show {
+            left: 0;
+        }
+        
+        /* En móvil, cuando está contraído no se muestra */
+        .sidebar.collapsed {
+            left: -250px;
+        }
+        
+        .content {
+            width: 100% !important;
+        }
     }
+
+    
   </style>
 </head>
 <body>
@@ -65,7 +102,8 @@
 <!-- Navbar superior -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
   <div class="container-fluid">
-    <button class="btn btn-outline-secondary d-md-none" id="toggleSidebar">☰</button>
+
+    <button class="btn btn-outline-secondary" id="toggleSidebar">☰</button>
     
     <a class="navbar-brand ms-2 d-flex align-items-center" href="#">
       <img src="{{ asset('images/logo_diremid.png') }}" alt="Logo" class="me-2" style="height: 60px; width: auto;">
@@ -185,12 +223,50 @@
   <script>
     const toggleSidebar = document.getElementById('toggleSidebar');
     const sidebar = document.getElementById('sidebarMenu');
+    const content = document.querySelector('.content');
     
     toggleSidebar.addEventListener('click', () => {
-      sidebar.classList.toggle('show');
+        if (window.innerWidth > 768) {
+            // Desktop: toggle collapsed class
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+            
+            // Cambiar el icono (opcional)
+            if (sidebar.classList.contains('collapsed')) {
+                toggleSidebar.textContent = '☰'; // O puedes usar '→' o '☰'
+            } else {
+                toggleSidebar.textContent = '☰';
+            }
+        } else {
+            // Mobile: toggle show class
+            sidebar.classList.toggle('show');
+        }
+    });
+
+    // Opcional: cerrar sidebar al hacer clic fuera en móvil
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(event.target) && !toggleSidebar.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        }
+    });
+
+    // Opcional: guardar estado en localStorage para recordar preferencia
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState === 'true' && window.innerWidth > 768) {
+        sidebar.classList.add('collapsed');
+        content.classList.add('expanded');
+    }
+
+    // Guardar estado al hacer click
+    toggleSidebar.addEventListener('click', function() {
+        if (window.innerWidth > 768) {
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
     });
   </script>
-
+  
 
 </body>
 </html>

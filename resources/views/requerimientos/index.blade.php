@@ -3,6 +3,154 @@
     <link href="{{asset('css/select2.min.css')}}" rel="stylesheet" />
     <link href="{{asset('css/toastr.min.css')}}" rel="stylesheet">
     <link href="{{asset('css/select2-bootstrap.css')}}" rel="stylesheet"/>
+
+    @section('css')
+    <link href="{{asset('css/select2.min.css')}}" rel="stylesheet" />
+    <link href="{{asset('css/toastr.min.css')}}" rel="stylesheet">
+    <link href="{{asset('css/select2-bootstrap.css')}}" rel="stylesheet"/>
+    
+    <!-- CSS personalizado solo para esta vista -->
+    <style>
+        /* Reducir tamaño de fuente general en la vista */
+        .container-fluid {
+            font-size: 0.85rem;
+        }
+        
+        /* Achicar títulos */
+        h4 {
+            font-size: 1.3rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        h5 {
+            font-size: 1.1rem !important;
+            margin-bottom: 0 !important;
+        }
+        
+        /* Achicar labels */
+        label {
+            font-size: 0.8rem !important;
+        }
+        
+        /* Achicar inputs y selects */
+        .form-control, .form-control-sm {
+            font-size: 0.8rem !important;
+            padding: 0.2rem 0.4rem !important;
+            height: auto !important;
+        }
+        
+        /* Achicar los select2 */
+        .select2-container .select2-selection--single {
+            height: 28px !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 26px !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 26px !important;
+        }
+        
+        /* Achicar las cards de resumen */
+        .card {
+            font-size: 0.8rem !important;
+        }
+        
+        .card-body {
+            padding: 0.3rem !important;
+        }
+        
+        .card-title {
+            font-size: 0.65rem !important;
+        }
+        
+        .card-text {
+            font-size: 0.9rem !important;
+        }
+        
+        /* Achicar botones */
+        .btn, .btn-sm {
+            font-size: 0.75rem !important;
+            padding: 0.2rem 0.5rem !important;
+        }
+        
+        /* Achicar la tabla */
+        .table {
+            font-size: 0.75rem !important;
+        }
+        
+        .table th {
+            font-size: 0.7rem !important;
+            padding: 0.4rem 0.3rem !important;
+            white-space: nowrap;
+        }
+        
+        .table td {
+            padding: 0.3rem 0.3rem !important;
+        }
+        
+        /* Inputs dentro de la tabla más pequeños */
+        .table input.form-control {
+            font-size: 0.7rem !important;
+            padding: 0.1rem 0.2rem !important;
+            height: 22px !important;
+        }
+        
+        /* Achicar el input de búsqueda */
+        .input-group-text {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.5rem !important;
+        }
+        
+        #busqueda-productos {
+            font-size: 0.75rem !important;
+            height: auto !important;
+            padding: 0.2rem 0.5rem !important;
+        }
+        
+        /* Reducir márgenes */
+        .row {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .mb-2, .mb-3 {
+            margin-bottom: 0.4rem !important;
+        }
+        
+        /* Achicar el input de fecha */
+        #fecha_referencia {
+            width: 140px !important;
+            font-size: 0.8rem !important;
+        }
+        
+        /* Achicar modales */
+        .modal-title {
+            font-size: 1rem !important;
+        }
+        
+        .modal-body {
+            font-size: 0.8rem !important;
+            padding: 0.8rem !important;
+        }
+        
+        .modal-footer {
+            padding: 0.5rem !important;
+        }
+        
+        /* Hacer más compactas las filas de filtros */
+        .d-flex.align-items-center {
+            margin-bottom: 0.2rem !important;
+        }
+        
+        /* Achicar el badge de "No editable" */
+        .text-muted.fst-italic.small {
+            font-size: 0.7rem !important;
+        }
+    </style>
+
 @endsection
 @section('content')
 <div class="container-fluid">
@@ -15,6 +163,14 @@
     <!-- Filtros + Resúmenes en una sola fila -->
     <div class="row mb-3">
         <!-- Columna izquierda: filtros -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <label for="fecha_referencia" class="me-2 mb-0 fw-bold">Fecha:</label>
+                    <input type="date" id="fecha_referencia" class="form-control form-control-sm" style="width: auto;">
+                </div>
+            </div>
+        </div>
         <div class="col-md-7">
             <div class="row mb-2">
                 <div class="col-md-12 d-flex align-items-center">
@@ -227,7 +383,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
 $(document).ready(function() {
-    
+    $('#fecha_referencia').val(getUltimoDiaMes());
+
+    $('#fecha_referencia').on('change', function() {
+        if (ipressSelected) {
+            cargarDatos(ipressSelected);
+        }
+    });
 
     // Inicializar Select2 con AJAX
     $('#ipress_select').select2({
@@ -270,10 +432,11 @@ $(document).ready(function() {
     });
 
     function cargarDatos(codIpress) {
+        const fecha = $('#fecha_referencia').val(); 
         $.ajax({
             url: "{{ route('requerimientos.data') }}",
             method: 'GET',
-            data: { cod_ipress: codIpress },
+            data: { cod_ipress: codIpress, fecha: fecha },
             beforeSend: function() {
                 $('#requerimientos_table tbody').html('<tr><td colspan="10" class="text-center">Cargando...</td></tr>');
             },
@@ -567,5 +730,34 @@ $('#btn-no-encontre').on('click', function() {
 </script>
 
 <script src="{{ asset('js/select2-focus.js') }}"></script>
+
+<script>
+    function getUltimoDiaMes() {
+        const fecha = new Date();
+        const año = fecha.getFullYear();
+        const mes = fecha.getMonth(); // Mes actual (0-11)
+        
+        // Si estamos en Enero (mes 0), restar 1 mes nos lleva a Diciembre del año anterior
+        let añoResultado = año;
+        let mesResultado = mes; // mes actual menos 1? No, porque getMonth() ya da el mes actual
+        
+        // Restar 1 mes: si mes actual es 0 (Enero), vamos a mes 11 (Diciembre) del año anterior
+        if (mes === 0) {
+            añoResultado = año - 1;
+            mesResultado = 11; // Diciembre
+        } else {
+            mesResultado = mes - 1; // Mes anterior
+        }
+        
+        // Obtener el último día del mes calculado
+        const ultimoDia = new Date(añoResultado, mesResultado + 1, 0).getDate();
+        
+        // Formatear con leading zeros (mesResultado ya está en 0-11, sumamos 1 para mostrarlo)
+        const mesFormateado = (mesResultado + 1).toString().padStart(2, '0');
+        const diaFormateado = ultimoDia.toString().padStart(2, '0');
+        
+        return `${añoResultado}-${mesFormateado}-${diaFormateado}`;
+    }
+</script>
 @endsection
 

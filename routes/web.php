@@ -21,6 +21,7 @@ use App\Http\Controllers\MatrizController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\PedidoController;
 
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/tokens', [TokenController::class, 'index'])->name('tokens.index');
     Route::post('/tokens/create', [TokenController::class, 'store'])->name('tokens.store');
@@ -38,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
     //descargar en un solo archivo
     Route::get('/archivos/descargar-zip', [ArchivoController::class, 'descargarZip'])
     ->name('archivos.descargarZip');
+
+    Route::delete('/historicos/{id}', [ProcesamientoHistoricoController::class, 'destroy'])
+    ->name('historicos.destroy');
 
 });
 

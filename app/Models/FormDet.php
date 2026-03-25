@@ -9,6 +9,7 @@ class FormDet extends Model
     protected $table = 'form_det';
     
     protected $fillable = [
+        'procesamiento_id',
         'CODIGO_EJE',
         'CODIGO_PRE',
         'TIPSUM',
@@ -61,4 +62,10 @@ class FormDet extends Model
         'STOCKFIN',
         'STOCKFIN1'
     ];
+
+    public function procesamiento()
+    {
+        return $this->belongsTo(ProcesamientoHistorico::class, 'procesamiento_id');
+    }
+    
 }

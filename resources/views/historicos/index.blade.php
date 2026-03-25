@@ -20,6 +20,7 @@
                     <th>Tiempo Ejecución</th>
                     <th>Tablas Registros</th>
                     <th>Usuario</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,6 +37,19 @@
                         @endif
                     </td>
                     <td>{{ $h->user->name ?? 'Desconocido' }}</td>
+                    <td>
+                        {{-- Botón de eliminar con confirmación --}}
+                        <form action="{{ route('historicos.destroy', $h->id) }}" 
+                              method="POST" 
+                              class="d-inline"
+                              onsubmit="return confirm('¿Estás seguro de eliminar este procesamiento? Se eliminarán todos los registros de form_det asociados.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -43,7 +57,6 @@
     </div>
 
     <!-- Paginación -->
- 
     Mostrando {{ $historicos->firstItem() }} a {{ $historicos->lastItem() }} 
     de {{ $historicos->total() }} historicos
     Página {{ $historicos->currentPage() }} de {{ $historicos->lastPage() }}   
@@ -61,8 +74,8 @@
 <script>
 $(document).ready(function () {
     $('#historicosTable').DataTable({
-        paging: false, // usamos la paginación de Laravel
-        searching: false, // usamos nuestro buscador personalizado
+        paging: false,
+        searching: false,
         info: true,
         language: {
             url: "//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json"
