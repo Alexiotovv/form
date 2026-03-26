@@ -13,49 +13,178 @@
         }
         
         /* Achicar títulos */
-        h4 {
-            font-size: 1.2rem !important;
-            margin-bottom: 0.5rem !important;
+        h4, h5, h6 {
+            font-size: 0.85rem !important;
+            margin-bottom: 0.3rem !important;
         }
         
         /* Achicar labels */
         label {
-            font-size: 0.75rem !important;
+            font-size: 0.7rem !important;
             margin-bottom: 0.1rem !important;
             font-weight: 500;
         }
         
         /* Achicar inputs y selects */
         .form-control, .form-select {
-            font-size: 0.75rem !important;
-            padding: 0.25rem 0.4rem !important;
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.3rem !important;
             height: auto !important;
         }
         
         /* Achicar los select2 */
         .select2-container .select2-selection--single {
-            height: 28px !important;
-            font-size: 0.75rem !important;
+            height: 26px !important;
+            font-size: 0.7rem !important;
         }
         
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 26px !important;
-            font-size: 0.75rem !important;
+            line-height: 24px !important;
+            font-size: 0.7rem !important;
         }
         
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 26px !important;
+            height: 24px !important;
+        }
+        
+        .select2-container--default .select2-selection--multiple {
+            font-size: 0.7rem !important;
+            min-height: 26px !important;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            font-size: 0.65rem !important;
+            padding: 1px 4px !important;
+            margin: 1px !important;
         }
         
         /* Achicar botones */
         .btn, .btn-sm {
-            font-size: 0.7rem !important;
-            padding: 0.2rem 0.6rem !important;
+            font-size: 0.65rem !important;
+            padding: 0.15rem 0.5rem !important;
         }
         
-        /* Achicar la tabla - ESTO ES LO MÁS IMPORTANTE */
+        /* Layout de dos columnas principal */
+        .dashboard-layout {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        /* Panel izquierdo - Filtros (35%) */
+        .filtros-panel {
+            width: 25%;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            height: fit-content;
+        }
+        
+        /* Panel derecho - Resúmenes (65%) */
+        .resumenes-panel {
+            width: 75%;
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* Tarjetas de resumen */
+        .card-resumen {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            overflow: hidden;
+        }
+        
+        .card-resumen .card-header {
+            background-color: #f8f9fa;
+            padding: 6px 10px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .card-resumen .card-body {
+            padding: 8px 10px;
+        }
+        
+        /* Tabla de resumen de stock */
+        .resumen-stock-table {
+            width: 100%;
+            font-size: 0.65rem;
+        }
+        
+        .resumen-stock-table td {
+            padding: 3px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .resumen-stock-table td:last-child {
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        .resumen-stock-table tr:last-child td {
+            border-bottom: none;
+            font-weight: bold;
+            padding-top: 5px;
+        }
+        
+        .resumen-stock-table .badge {
+            font-size: 0.6rem;
+            padding: 2px 5px;
+        }
+        
+        /* Barra de progreso */
+        .progress {
+            height: 5px;
+            margin-top: 5px;
+        }
+        
+        /* Filtros avanzados en grid */
+        .filtros-avanzados-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .filtros-basicos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        /* Achicar el input de fecha */
+        #fechaFinMes {
+            width: 100% !important;
+        }
+        
+        /* Contenedor de la tabla con scroll */
+        .table-responsive {
+            max-height: 450px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            position: relative;
+            margin-top: 15px;
+        }
+        
+        
+        .table-responsive thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 10;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+        
         .table {
-            font-size: 0.65rem !important; /* Fuente muy pequeña para la tabla */
+            font-size: 0.65rem !important;
+            margin-bottom: 0;
         }
         
         .table th {
@@ -68,165 +197,47 @@
         
         .table td {
             padding: 0.2rem 0.2rem !important;
-            white-space: nowrap; /* Evitar que el texto se rompa */
-        }
-        
-        /* Reducir márgenes entre filas */
-        .row {
-            margin-bottom: 0.3rem !important;
-        }
-        
-        .mb-3, .mb-4 {
-            margin-bottom: 0.5rem !important;
-        }
-        
-        /* Achicar el input de fecha */
-        #fechaFinMes {
-            width: 180px !important;
-            font-size: 0.75rem !important;
-        }
-        
-        /* Contenedor de la tabla con scroll */
-        /* .table-container {
-            overflow-x: auto;
-            margin-top: 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 0;
-        } */
-
-            /* === NUEVO: Contenedor con altura fija y scroll vertical === */
-        .table-responsive {
-            max-height: 400px; /* Ajusta esta altura según necesites */
-            overflow-y: auto;
-            overflow-x: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            position: relative;
-        }
-        
-        /* Mantener el encabezado fijo */
-        .table-responsive thead th {
-            position: sticky;
-            top: 0;
-            background-color: #f8f9fa;
-            z-index: 10;
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Ajustes para la tabla dentro del contenedor con scroll */
-        .table-responsive table {
-            margin-bottom: 0;
-            font-size: 0.65rem !important;
-        }
-        
-        .table-responsive table th {
-            font-size: 0.6rem !important;
-            padding: 0.3rem 0.2rem !important;
-            white-space: nowrap;
-            font-weight: 600;
-        }
-        
-        .table-responsive table td {
-            padding: 0.2rem 0.2rem !important;
             white-space: nowrap;
         }
         
-        /* Eliminar bordes duplicados */
-        .table-responsive {
-            border-collapse: collapse;
-        }
-        
-        /* Paginación más pequeña */
-        .pagination {
-            font-size: 0.7rem !important;
-            margin-top: 0.5rem !important;
-        }
-        
-        .pagination .page-link {
-            padding: 0.2rem 0.5rem !important;
-            font-size: 0.7rem !important;
-        }
-        
-        /* Opcional: colores alternados en la tabla para mejor legibilidad */
-        .table-striped > tbody > tr:nth-of-type(odd) {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-        
-        /* Hover más sutil */
-        .table-hover > tbody > tr:hover {
-            background-color: rgba(0, 123, 255, 0.05);
-        }
-        
-        /* Columnas numéricas alineadas a la derecha (opcional) */
-        .table td:nth-child(17), /* Mes1 */
-        .table td:nth-child(18), /* Mes2 */
-        .table td:nth-child(19), /* Mes3 */
-        .table td:nth-child(20), /* Mes4 */
-        .table td:nth-child(21), /* Mes5 */
-        .table td:nth-child(22), /* Mes6 */
-        .table td:nth-child(23), /* Mes7 */
-        .table td:nth-child(24), /* Mes8 */
-        .table td:nth-child(25), /* Mes9 */
-        .table td:nth-child(26), /* Mes10 */
-        .table td:nth-child(27), /* Mes11 */
-        .table td:nth-child(28), /* Mes12 */
-        .table td:nth-child(29), /* StockFinal */
-        .table td:nth-child(30), /* Ingreso ICI */
-        .table td:nth-child(32), /* Consumo Total */
-        .table td:nth-child(33), /* CPMA */
-        .table td:nth-child(34), /* Consumo Últimos 4meses */
-        .table td:nth-child(35), /* MesesProv */
-        .table td:nth-child(36), /* Precio_Unitario */
-        .table td:nth-child(37) { /* Monto */
-            text-align: right;
-            padding-right: 0.5rem !important;
-        }
-
         /* Minigráfico */
         .minigrafico-cell {
             padding: 2px !important;
             min-width: 100px;
         }
-
+        
         .minigrafico {
             display: flex;
             align-items: flex-end;
-            height: 30px;
+            height: 28px;
             gap: 2px;
-            padding: 2px 0;
         }
-
+        
         .barra-mini {
             flex: 1;
             background-color: #4299e1;
             min-width: 3px;
             border-radius: 2px 2px 0 0;
             transition: height 0.2s ease;
+            position: relative;
         }
-
-        /* Diferentes colores según el valor (opcional) */
+        
         .barra-mini[data-valor="0"] {
             background-color: #cbd5e0;
         }
-
+        
         .barra-mini.valor-bajo {
-            background-color: #fbbf24; /* Amarillo para valores bajos */
+            background-color: #fbbf24;
         }
-
+        
         .barra-mini.valor-medio {
-            background-color: #4299e1; /* Azul para valores medios */
+            background-color: #4299e1;
         }
-
+        
         .barra-mini.valor-alto {
-            background-color: #48bb78; /* Verde para valores altos */
+            background-color: #48bb78;
         }
-
-        /* Tooltip con el valor exacto */
-        .barra-mini {
-            position: relative;
-        }
-
+        
         .barra-mini:hover::after {
             content: attr(data-valor);
             position: absolute;
@@ -243,389 +254,922 @@
             pointer-events: none;
             margin-bottom: 2px;
         }
-
-        .barra-mini:hover::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 4px;
-            border-style: solid;
-            border-color: #2d3748 transparent transparent transparent;
-            margin-bottom: -4px;
-            z-index: 20;
-        }
-
-        /* Estilos para filtros múltiples */
-        .select2-multiple {
-            /* width: 100% !important; */
-        }
-
-        .select2-container--default .select2-selection--multiple {
-            font-size: 0.75rem !important;
-            min-height: 28px !important;
-        }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            font-size: 0.7rem !important;
-            padding: 1px 4px !important;
-            margin: 2px !important;
-        }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
-            font-size: 0.75rem !important;
-        }
-
-        /* Botón para limpiar filtros */
-        .btn-limpiar-filtros {
-            font-size: 0.7rem !important;
-            padding: 0.2rem 0.5rem !important;
-            margin-left: 5px;
-        }
-
-        /* Tooltip para filtros activos */
-        .filtros-activos {
-            font-size: 0.7rem;
-            padding: 5px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .filtro-badge {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-right: 5px;
-            margin-bottom: 3px;
-        }
-
+        
         /* Estilos para fila seleccionada */
         .table tbody tr.seleccionada {
-            background-color: #cfe2ff !important; /* Azul claro */
+            background-color: #cfe2ff !important;
             outline: 2px solid #0d6efd;
             outline-offset: -2px;
         }
-
-        /* Estilo para celda seleccionada (opcional) */
+        
         .table tbody tr.seleccionada td.seleccionada {
             background-color: #9ec5fe !important;
             outline: 2px solid #0a58ca;
             outline-offset: -2px;
         }
-
-        /* Cambiar cursor para indicar que es seleccionable */
+        
         .table tbody tr {
             cursor: pointer;
         }
-
-        /* Estilo para cuando se pasa el mouse */
+        
         .table tbody tr:hover {
             background-color: rgba(13, 110, 253, 0.1);
         }
+        
+        /* Acciones de filtros */
+        .acciones-filtros {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+            .filtros-panel, .resumenes-panel {
+                width: 100%;
+            }
+            .resumenes-panel {
+                flex-direction: column;
+            }
+            .filtros-basicos {
+                grid-template-columns: 1fr;
+            }
+            .filtros-avanzados-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Columnas numéricas alineadas a la derecha */
+        .table td:nth-child(5), .table td:nth-child(6), .table td:nth-child(7),
+        .table td:nth-child(8), .table td:nth-child(9), .table td:nth-child(10),
+        .table td:nth-child(11), .table td:nth-child(12), .table td:nth-child(13),
+        .table td:nth-child(14), .table td:nth-child(15), .table td:nth-child(16),
+        .table td:nth-child(17), .table td:nth-child(18), .table td:nth-child(20),
+        .table td:nth-child(21), .table td:nth-child(22), .table td:nth-child(23),
+        .table td:nth-child(24), .table td:nth-child(25), .table td:nth-child(26) {
+            text-align: right;
+        }
 
+        /* Colores para encabezados de tabla */
+        .table th.envio-sugerido {
+            background-color: #ffcccc !important;
+            color: #990000 !important;
+        }
+
+        .table th.proyectado {
+            background-color: #cce5ff !important;
+            color: #004085 !important;
+        }
+
+        .table th.distribucion {
+            background-color: #cce5ff !important;
+            color: #004085 !important;
+        }
+
+        .table th.vencimiento {
+            background-color: #ffe5cc !important;
+            color: #cc7000 !important;
+        }
     </style>
-
 @endsection
 
+@section('titulo_pagina')
+    <!-- Título -->
+    📊 Matriz de Disponibilidad
+@endsection
+
+<!-- @section('fecha_pagina')
+    Fecha: {{ request('fin_mes', date('d/m/Y')) }}
+@endsection -->
+
 @section('content')
-    <!-- Filtros en la parte superior de tu index -->
-    <div class="row">
-        <div class="col-md-3">
-            <label for="fechaFinMes">Fin de Mes</label>
-            <input 
-                type="date"
-                id="fechaFinMes"
-                name="fin_mes"
-                class="form-control"
-                value="{{ request('fin_mes') ?? date('Y-m-t') }}">
-        </div>
-    
-        <div class="col-md-3">
-            <label for="cod_ipress" class="form-label">Código IPRESS <span class="text-danger">*</span></label>
-            <select id="cod_ipress" name="cod_ipress" class="form-control select2" required>
-                <option value="">Seleccione un IPRESS</option>
-                @if(request('cod_ipress'))
-                    <option value="{{ request('cod_ipress') }}" selected>{{ request('cod_ipress') }} - {{ optional($registros->first())->nombre_ipress ?? 'Cargando...' }}</option>
-                @endif
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label for="cod_sismed" class="form-label">Código SISMED</label>
-            <select id="cod_sismed" name="cod_sismed" class="form-control select2">
-                <option value="">Todos los productos</option>
-                @if(request('cod_sismed'))
-                    <option value="{{ request('cod_sismed') }}" selected>{{ request('cod_sismed') }} - {{ optional($registros->first())->descripcion_producto ?? 'Cargando...' }}</option>
-                @endif
-            </select>
-        </div>
+<div class="container-fluid">
 
-        <!-- NUEVOS FILTROS MÚLTIPLES -->
-        <div class="row mt-3">
-            <div class="col-md-2">
-                <label for="tip_sum" class="form-label">TIPSUM</label>
-                <select id="tip_sum" name="tip_sum[]" class="form-control select2-multiple" multiple="multiple">
-                    @php
-                        $valoresTipSum = $registros->isNotEmpty() ? $registros->pluck('TIPSUM')->unique()->filter()->values() : collect([]);
-                    @endphp
-                    {{-- Agregar opción para valores vacíos/nulos --}}
-                    @if($registros->whereNull('TIPSUM')->count() > 0 || $registros->where('TIPSUM', '')->count() > 0)
-                        <option value="__NULL__" {{ in_array('__NULL__', request('tip_sum', [])) ? 'selected' : '' }}>
-                            [En blanco]
-                        </option>
-                    @endif
-                    @foreach($valoresTipSum as $valor)
-                        <option value="{{ $valor }}" {{ in_array($valor, request('tip_sum', [])) ? 'selected' : '' }}>
-                            {{ $valor }}
-                        </option>
-                    @endforeach
-                </select>
+
+    <!-- Layout principal -->
+    <div class="dashboard-layout">
+        <!-- Panel izquierdo - Filtros -->
+        <div class="filtros-panel">
+            <!-- Cuadro de Niveles de Disponibilidad -->
+            <div class="mb-1" style="background-color: #f8f9fa; border-radius: 2px; padding: 1px;">
+                <div class="small fw-bold mb-1 text-center">📊 Niveles de Disponibilidad</div>
+                <div style="font-size: 0.65rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e9ecef;">
+                        <span>Disponibilidad ≥ 90%</span>
+                        <span class="fw-bold" style="color: #28a745;">ÓPTIMO</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e9ecef;">
+                        <span>Disponibilidad ≥ 80% y &lt; 90%</span>
+                        <span class="fw-bold" style="color: #17a2b8;">ALTO</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e9ecef;">
+                        <span>Disponibilidad ≥ 70% y &lt; 80%</span>
+                        <span class="fw-bold" style="color: #fd7e14;">REGULAR</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                        <span>Disponibilidad &lt; 70%</span>
+                        <span class="fw-bold" style="color: #dc3545;">BAJO</span>
+                    </div>
+                </div>
+            </div>
+            <h6 class="mb-1">🔍 Filtros</h6>
+            
+            <!-- Filtros básicos en grid -->
+            <div class="filtros-basicos">
+                <div>
+                    <label for="fechaFinMes" class="form-label">📅 Fin de Mes</label>
+                    <input type="date" id="fechaFinMes" name="fin_mes" class="form-control" value="{{ request('fin_mes') ?? date('Y-m-t') }}">
+                </div>
+                <div>
+                    <label for="cod_ipress" class="form-label">🏥 IPRESS <span class="text-danger">*</span></label>
+                    <select id="cod_ipress" name="cod_ipress" class="form-control select2" required>
+                        <option value="">Seleccione...</option>
+                        @if(request('cod_ipress'))
+                            <option value="{{ request('cod_ipress') }}" selected>{{ request('cod_ipress') }} - {{ optional($registros->first())->nombre_ipress ?? 'Cargando...' }}</option>
+                        @endif
+                    </select>
+                </div>
+                <div>
+                    <label for="cod_sismed" class="form-label">💊 Código SISMED</label>
+                    <select id="cod_sismed" name="cod_sismed" class="form-control select2">
+                        <option value="">Todos</option>
+                        @if(request('cod_sismed'))
+                            <option value="{{ request('cod_sismed') }}" selected>{{ request('cod_sismed') }} - {{ optional($registros->first())->descripcion_producto ?? 'Cargando...' }}</option>
+                        @endif
+                    </select>
+                </div>
+            </div>
+   
+            
+            <h6 class="mb-1">🎯 Filtros Avanzados</h6>
+            
+            <!-- Filtros avanzados en grid de 3 columnas (2 filas) -->
+            <div class="filtros-avanzados-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px;">
+                <div>
+                    <label for="tip_sum" class="form-label">TIPSUM</label>
+                    <select id="tip_sum" name="tip_sum[]" class="form-control select2-multiple" multiple="multiple">
+                        @php
+                            $valoresTipSum = $registros->isNotEmpty() ? $registros->pluck('TIPSUM')->unique()->filter()->values() : collect([]);
+                        @endphp
+                        @if($registros->whereNull('TIPSUM')->count() > 0 || $registros->where('TIPSUM', '')->count() > 0)
+                            <option value="__NULL__" {{ in_array('__NULL__', request('tip_sum', [])) ? 'selected' : '' }}>[En blanco]</option>
+                        @endif
+                        @foreach($valoresTipSum as $valor)
+                            <option value="{{ $valor }}" {{ in_array($valor, request('tip_sum', [])) ? 'selected' : '' }}>{{ $valor }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="tipo_prod" class="form-label">Tipo Producto</label>
+                    <select id="tipo_prod" name="tipo_prod[]" class="form-control select2-multiple" multiple="multiple">
+                        @php
+                            $valoresTipoProd = $registros->isNotEmpty() ? $registros->pluck('tipo_prod')->unique()->filter()->values() : collect([]);
+                        @endphp
+                        @if($registros->whereNull('tipo_prod')->count() > 0 || $registros->where('tipo_prod', '')->count() > 0)
+                            <option value="__NULL__" {{ in_array('__NULL__', request('tipo_prod', [])) ? 'selected' : '' }}>[En blanco]</option>
+                        @endif
+                        @foreach($valoresTipoProd as $valor)
+                            <option value="{{ $valor }}" {{ in_array($valor, request('tipo_prod', [])) ? 'selected' : '' }}>{{ $valor }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="tipo_abastecimiento" class="form-label">Tipo Abastecimiento</label>
+                    <select id="tipo_abastecimiento" name="tipo_abastecimiento[]" class="form-control select2-multiple" multiple="multiple">
+                        @php
+                            $valoresTipoAbast = $registros->isNotEmpty() ? $registros->pluck('tipo_abastecimiento')->unique()->filter()->values() : collect([]);
+                        @endphp
+                        @if($registros->whereNull('tipo_abastecimiento')->count() > 0 || $registros->where('tipo_abastecimiento', '')->count() > 0)
+                            <option value="__NULL__" {{ in_array('__NULL__', request('tipo_abastecimiento', [])) ? 'selected' : '' }}>[En blanco]</option>
+                        @endif
+                        @foreach($valoresTipoAbast as $valor)
+                            <option value="{{ $valor }}" {{ in_array($valor, request('tipo_abastecimiento', [])) ? 'selected' : '' }}>{{ $valor }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="tipo_establecimiento" class="form-label">Tipo Establecimiento</label>
+                    <select id="tipo_establecimiento" name="tipo_establecimiento[]" class="form-control select2-multiple" multiple="multiple">
+                        @php
+                            $valoresTipoEstab = $registros->isNotEmpty() ? $registros->pluck('tipo_establecimiento')->unique()->filter()->values() : collect([]);
+                        @endphp
+                        @if($registros->whereNull('tipo_establecimiento')->count() > 0 || $registros->where('tipo_establecimiento', '')->count() > 0)
+                            <option value="__NULL__" {{ in_array('__NULL__', request('tipo_establecimiento', [])) ? 'selected' : '' }}>[En blanco]</option>
+                        @endif
+                        @foreach($valoresTipoEstab as $valor)
+                            <option value="{{ $valor }}" {{ in_array($valor, request('tipo_establecimiento', [])) ? 'selected' : '' }}>{{ $valor }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="peti2023" class="form-label">PETI 2023</label>
+                    <select id="peti2023" name="peti2023[]" class="form-control select2-multiple" multiple="multiple">
+                        @php
+                            $valoresPeti = $registros->isNotEmpty() ? $registros->pluck('peti2023')->unique()->filter()->values() : collect([]);
+                        @endphp
+                        @if($registros->whereNull('peti2023')->count() > 0 || $registros->where('peti2023', '')->count() > 0)
+                            <option value="__NULL__" {{ in_array('__NULL__', request('peti2023', [])) ? 'selected' : '' }}>[En blanco]</option>
+                        @endif
+                        @foreach($valoresPeti as $valor)
+                            <option value="{{ $valor }}" {{ in_array($valor, request('peti2023', [])) ? 'selected' : '' }}>{{ $valor }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="lista_1" class="form-label">Lista 1</label>
+                    <select id="lista_1" name="lista_1[]" class="form-control select2-multiple" multiple="multiple">
+                        @php
+                            $valoresLista1 = $registros->isNotEmpty() ? $registros->pluck('lista_1')->unique()->filter()->values() : collect([]);
+                        @endphp
+                        @if($registros->whereNull('lista_1')->count() > 0 || $registros->where('lista_1', '')->count() > 0)
+                            <option value="__NULL__" {{ in_array('__NULL__', request('lista_1', [])) ? 'selected' : '' }}>[En blanco]</option>
+                        @endif
+                        @foreach($valoresLista1 as $valor)
+                            <option value="{{ $valor }}" {{ in_array($valor, request('lista_1', [])) ? 'selected' : '' }}>{{ $valor }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             
-            <div class="col-md-2">
-                <label for="tipo_prod" class="form-label">Tipo Producto</label>
-                <select id="tipo_prod" name="tipo_prod[]" class="form-control select2-multiple" multiple="multiple">
-                    @php
-                        $valoresTipoProd = $registros->isNotEmpty() ? $registros->pluck('tipo_prod')->unique()->filter()->values() : collect([]);
-                    @endphp
-                    @if($registros->whereNull('tipo_prod')->count() > 0 || $registros->where('tipo_prod', '')->count() > 0)
-                        <option value="__NULL__" {{ in_array('__NULL__', request('tipo_prod', [])) ? 'selected' : '' }}>
-                            [En blanco]
-                        </option>
-                    @endif
-                    @foreach($valoresTipoProd as $valor)
-                        <option value="{{ $valor }}" {{ in_array($valor, request('tipo_prod', [])) ? 'selected' : '' }}>
-                            {{ $valor }}
-                        </option>
-                    @endforeach
-                </select>
+            <!-- Botones de acción -->
+            <div class="acciones-filtros">
+                <button type="button" id="btn-filtrar" class="btn btn-primary btn-sm w-100">🔍 Filtrar</button>
+                <a href="{{ route('matriz.index') }}" class="btn btn-secondary btn-sm w-100">🗑️ Limpiar</a>
             </div>
-            
-            <div class="col-md-2">
-                <label for="tipo_abastecimiento" class="form-label">Tipo Abastecimiento</label>
-                <select id="tipo_abastecimiento" name="tipo_abastecimiento[]" class="form-control select2-multiple" multiple="multiple">
-                    @php
-                        $valoresTipoAbast = $registros->isNotEmpty() ? $registros->pluck('tipo_abastecimiento')->unique()->filter()->values() : collect([]);
-                    @endphp
-                    @if($registros->whereNull('tipo_abastecimiento')->count() > 0 || $registros->where('tipo_abastecimiento', '')->count() > 0)
-                        <option value="__NULL__" {{ in_array('__NULL__', request('tipo_abastecimiento', [])) ? 'selected' : '' }}>
-                            [En blanco]
-                        </option>
-                    @endif
-                    @foreach($valoresTipoAbast as $valor)
-                        <option value="{{ $valor }}" {{ in_array($valor, request('tipo_abastecimiento', [])) ? 'selected' : '' }}>
-                            {{ $valor }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <label for="tipo_establecimiento" class="form-label">Tipo Establecimiento</label>
-                <select id="tipo_establecimiento" name="tipo_establecimiento[]" class="form-control select2-multiple" multiple="multiple">
-                    @php
-                        $valoresTipoEstab = $registros->isNotEmpty() ? $registros->pluck('tipo_establecimiento')->unique()->filter()->values() : collect([]);
-                    @endphp
-                    @if($registros->whereNull('tipo_establecimiento')->count() > 0 || $registros->where('tipo_establecimiento', '')->count() > 0)
-                        <option value="__NULL__" {{ in_array('__NULL__', request('tipo_establecimiento', [])) ? 'selected' : '' }}>
-                            [En blanco]
-                        </option>
-                    @endif
-                    @foreach($valoresTipoEstab as $valor)
-                        <option value="{{ $valor }}" {{ in_array($valor, request('tipo_establecimiento', [])) ? 'selected' : '' }}>
-                            {{ $valor }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <label for="peti2023" class="form-label">PETI 2023</label>
-                <select id="peti2023" name="peti2023[]" class="form-control select2-multiple" multiple="multiple">
-                    @php
-                        $valoresPeti = $registros->isNotEmpty() ? $registros->pluck('peti2023')->unique()->filter()->values() : collect([]);
-                    @endphp
-                    @if($registros->whereNull('peti2023')->count() > 0 || $registros->where('peti2023', '')->count() > 0)
-                        <option value="__NULL__" {{ in_array('__NULL__', request('peti2023', [])) ? 'selected' : '' }}>
-                            [En blanco]
-                        </option>
-                    @endif
-                    @foreach($valoresPeti as $valor)
-                        <option value="{{ $valor }}" {{ in_array($valor, request('peti2023', [])) ? 'selected' : '' }}>
-                            {{ $valor }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <label for="lista_1" class="form-label">Lista 1</label>
-                <select id="lista_1" name="lista_1[]" class="form-control select2-multiple" multiple="multiple">
-                    @php
-                        $valoresLista1 = $registros->isNotEmpty() ? $registros->pluck('lista_1')->unique()->filter()->values() : collect([]);
-                    @endphp
-                    @if($registros->whereNull('lista_1')->count() > 0 || $registros->where('lista_1', '')->count() > 0)
-                        <option value="__NULL__" {{ in_array('__NULL__', request('lista_1', [])) ? 'selected' : '' }}>
-                            [En blanco]
-                        </option>
-                    @endif
-                    @foreach($valoresLista1 as $valor)
-                        <option value="{{ $valor }}" {{ in_array($valor, request('lista_1', [])) ? 'selected' : '' }}>
-                            {{ $valor }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+            <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-secondary btn-sm w-100 mt-2">🧹 Limpiar Filtros Avanzados</button>
         </div>
+        
+        <!-- Panel derecho - Resúmenes (horizontal) -->
+        <div class="resumenes-panel">
+            @php
+                // Inicializar resumen de stock
+                $resumenStock = [
+                    'DESABASTECIDO' => ['count' => 0, 'monto' => 0, 'color' => '#dc3545'],
+                    'SUBSTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#fd7e14'],
+                    'NORMOSTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#28a745'],
+                    'SOBRESTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#6c757d'],
+                    'SIN ROTACION' => ['count' => 0, 'monto' => 0, 'color' => '#6f42c1'],
+                    'SIN CONSUMO' => ['count' => 0, 'monto' => 0, 'color' => '#17a2b8'],
+                    'SIN DATOS' => ['count' => 0, 'monto' => 0, 'color' => '#6c757d'],
+                    'POR VENCER' => ['count' => 0, 'monto' => 0, 'color' => '#fd7e14'],
+                    'VENCIDO' => ['count' => 0, 'monto' => 0, 'color' => '#dc3545']
+                ];
+                
+                foreach ($registros as $item) {
+                    $stock = $item->situacion_stock;
+                    if (isset($resumenStock[$stock])) {
+                        $resumenStock[$stock]['count']++;
+                        $resumenStock[$stock]['monto'] += $item->monto;
+                    }
+                    
+                    $venc = $item->sit_fecha_vcmto;
+                    if ($venc == 'POR VENCER' || $venc == 'VENCIDO') {
+                        if (isset($resumenStock[$venc])) {
+                            $resumenStock[$venc]['count']++;
+                            $resumenStock[$venc]['monto'] += $item->monto;
+                        }
+                    }
+                }
+                
+                // TOTAL = solo DESABASTECIDO + SUBSTOCK + NORMOSTOCK + SOBRESTOCK
+                $baseTotal = $resumenStock['DESABASTECIDO']['count'] + 
+                            $resumenStock['SUBSTOCK']['count'] + 
+                            $resumenStock['NORMOSTOCK']['count'] + 
+                            $resumenStock['SOBRESTOCK']['count'];
+                
+                // MONTO TOTAL = SUBSTOCK + NORMOSTOCK + SOBRESTOCK + SIN ROTACION
+                $baseTotalMonto = $resumenStock['SUBSTOCK']['monto'] + 
+                                $resumenStock['NORMOSTOCK']['monto'] + 
+                                $resumenStock['SOBRESTOCK']['monto'] + 
+                                $resumenStock['SIN ROTACION']['monto'];
+                
+                // Calcular porcentajes
+                $resumenStock['DESABASTECIDO']['porcentaje'] = $baseTotal > 0 ? round(($resumenStock['DESABASTECIDO']['count'] / $baseTotal) * 100, 1) : 0;
+                $resumenStock['SUBSTOCK']['porcentaje'] = $baseTotal > 0 ? round(($resumenStock['SUBSTOCK']['count'] / $baseTotal) * 100, 1) : 0;
+                $resumenStock['NORMOSTOCK']['porcentaje'] = $baseTotal > 0 ? round(($resumenStock['NORMOSTOCK']['count'] / $baseTotal) * 100, 1) : 0;
+                $resumenStock['SOBRESTOCK']['porcentaje'] = $baseTotal > 0 ? round(($resumenStock['SOBRESTOCK']['count'] / $baseTotal) * 100, 1) : 0;
+                
+                $baseSinRotacion = $baseTotal + $resumenStock['SIN ROTACION']['count'];
+                $resumenStock['SIN ROTACION']['porcentaje'] = $baseSinRotacion > 0 ? round(($resumenStock['SIN ROTACION']['count'] / $baseSinRotacion) * 100, 1) : 0;
+                
+                $baseSinConsumo = $resumenStock['SUBSTOCK']['count'] + 
+                                $resumenStock['NORMOSTOCK']['count'] + 
+                                $resumenStock['SOBRESTOCK']['count'] + 
+                                $resumenStock['SIN ROTACION']['count'] + 
+                                $resumenStock['SIN CONSUMO']['count'];
+                $resumenStock['SIN CONSUMO']['porcentaje'] = $baseSinConsumo > 0 ? round(($resumenStock['SIN CONSUMO']['count'] / $baseSinConsumo) * 100, 1) : 0;
+                
+                $basePorVencer = $baseTotal + $resumenStock['SIN ROTACION']['count'];
+                $resumenStock['POR VENCER']['porcentaje'] = $basePorVencer > 0 ? round(($resumenStock['POR VENCER']['count'] / $basePorVencer) * 100, 1) : 0;
+                $resumenStock['VENCIDO']['porcentaje'] = $baseTotal > 0 ? round(($resumenStock['VENCIDO']['count'] / $baseTotal) * 100, 1) : 0;
+                
+                // Sumatoria porcentaje (DESABASTECIDO + SUBSTOCK + NORMOSTOCK + SOBRESTOCK)
+                $sumatoriaPorcentaje = $resumenStock['DESABASTECIDO']['porcentaje'] + 
+                                    $resumenStock['SUBSTOCK']['porcentaje'] + 
+                                    $resumenStock['NORMOSTOCK']['porcentaje'] + 
+                                    $resumenStock['SOBRESTOCK']['porcentaje'];
+                
+                // NORMOSTOCK + SOBRESTOCK para el nivel
+                $regularTotal = $resumenStock['NORMOSTOCK']['count'] + $resumenStock['SOBRESTOCK']['count'];
+                $regularPorcentaje = $baseTotal > 0 ? round(($regularTotal / $baseTotal) * 100, 1) : 0;
+                
+                $disponibilidad = $regularPorcentaje;
+                $nivel = '';
+                $nivelColor = '';
+                
+                if ($disponibilidad >= 90) {
+                    $nivel = 'ÓPTIMO';
+                    $nivelColor = '#28a745';
+                } elseif ($disponibilidad >= 80 && $disponibilidad < 90) {
+                    $nivel = 'ALTO';
+                    $nivelColor = '#17a2b8';
+                } elseif ($disponibilidad >= 70 && $disponibilidad < 80) {
+                    $nivel = 'REGULAR';
+                    $nivelColor = '#fd7e14';
+                } else {
+                    $nivel = 'BAJO';
+                    $nivelColor = '#dc3545';
+                }
+                
+                // Variables para mostrar en la tabla
+                $totalRegistrosMostrar = $baseTotal;
+                $totalMontoMostrar = $baseTotalMonto;
 
-    </div>
+                // Inicializar resumen proyectado
+                $resumenProyectado = [
+                    'DESABASTECIDO' => ['count' => 0, 'monto' => 0, 'color' => '#dc3545'],
+                    'SUBSTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#fd7e14'],
+                    'NORMOSTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#28a745'],
+                    'SOBRESTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#6c757d'],
+                    'SIN ROTACION' => ['count' => 0, 'monto' => 0, 'color' => '#6f42c1'],
+                    'SIN CONSUMO' => ['count' => 0, 'monto' => 0, 'color' => '#17a2b8'],
+                    'POR VENCER' => ['count' => 0, 'monto' => 0, 'color' => '#fd7e14'],
+                    'VENCIDO' => ['count' => 0, 'monto' => 0, 'color' => '#dc3545']
+                ];
+                
+                $totalMontoProyectado = 0; // 👈 Agrega esta línea
+                
+                foreach ($registros as $item) {
+                    $stockProyectado = $item->situacion_stock_proyectado;
+                    if (isset($resumenProyectado[$stockProyectado])) {
+                        $resumenProyectado[$stockProyectado]['count']++;
+                        $resumenProyectado[$stockProyectado]['monto'] += $item->stockfinal_proyectado * $item->precio;
+                    }
+                    
+                    // Calcular POR VENCER proyectado
+                    if ($item->sit_fecha_vcmto == 'POR VENCER' && $item->meses_para_vencimiento >= 1) {
+                        $resumenProyectado['POR VENCER']['count']++;
+                        $resumenProyectado['POR VENCER']['monto'] += $item->stockfinal_proyectado * $item->precio;
+                    }
+                    
+                    // Calcular VENCIDO proyectado
+                    if ($item->meses_prov > 1 && $item->meses_para_vencimiento >= 0 && $item->meses_para_vencimiento < 1) {
+                        $resumenProyectado['VENCIDO']['count']++;
+                        $resumenProyectado['VENCIDO']['monto'] += $item->stockfinal_proyectado * $item->precio;
+                    }
+                }
+                
+                // Calcular totales proyectados
+                $baseTotalProyectado = $resumenProyectado['DESABASTECIDO']['count'] + 
+                                    $resumenProyectado['SUBSTOCK']['count'] + 
+                                    $resumenProyectado['NORMOSTOCK']['count'] + 
+                                    $resumenProyectado['SOBRESTOCK']['count'];
+                
+                $totalMontoProyectado = $resumenProyectado['SUBSTOCK']['monto'] + 
+                                        $resumenProyectado['NORMOSTOCK']['monto'] + 
+                                        $resumenProyectado['SOBRESTOCK']['monto'] + 
+                                        $resumenProyectado['SIN ROTACION']['monto'];
 
-    <!-- Botón de búsqueda -->
-    <div class="row mb-4">
-        <div class="col-md-12 d-flex align-items-center">
-            <button type="button" id="btn-filtrar" class="btn btn-primary btn-sm me-2">Filtrar</button>
-            <a href="{{ route('matriz.index') }}" class="btn btn-secondary btn-sm me-2">Limpiar</a>
-            <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-secondary btn-sm">Limpiar Filtros</button>
-        </div>
-    </div>
 
-    <div class="container-fluid">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h6 class="mb-0">🧪 Matriz de Disponibilidad</h6>
-            </div>
-            <div class="col-md-6 text-end">
-                <strong>Total de registros: {{ $registros->count() }}</strong>
-            </div>
-        </div>
-        {{-- <div class="mb-3">
-            <button type="button" class="btn btn-success btn-sm">
-                📥 Descargar Excel
-            </button>
-            <button type="button" class="btn btn-primary btn-sm">
-                👁️ Visualizar
-            </button>
-        </div> --}}
 
-        <!-- Contenedor con scroll horizontal y vertical explícito -->
-        <div class="table-responsive">
-            <table id="registros" class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <!-- <th>DISA/DIRESA</th>
-                        <th>UE_MEF</th>
-                        <th>ALMACEN</th>
-                        <th>RED</th>
-                        <th>MICRORED</th>
-                        <th>COD_IPRESS</th>
-                        <th>NOMBRE IPRESS</th>
-                        <th>TIPO ESTAB</th> -->
-                        <!-- <th>IPRESS DENGUE</th>
-                        <th>COD UNIF</th>
-                        <th>DESC CUBO</th>
-                        <th>COD SISMED</th> -->
-                        <th>DESC PROD</th>
-                        <th>DESC PROD ALT</th>
-                        <th>TIPO PROD</th>
-                        <th>TIPO ABAST</th>
-                        <th>MES1</th>
-                        <th>MES2</th>
-                        <th>MES3</th>
-                        <th>MES4</th>
-                        <th>MES5</th>
-                        <th>MES6</th>
-                        <th>MES7</th>
-                        <th>MES8</th>
-                        <th>MES9</th>
-                        <th>MES10</th>
-                        <th>MES11</th>
-                        <th>MES12</th>
-                        <th>STOCK_FINAL</th>
-                        <th>INGRESO_ICI</th>
-                        <th>FECHA_VCMTO.</th>
-                        <th>CONSUMO_TOTAL</th>
-                        <th>CPMA</th>
-                        <th>CONSUMO_ÚLT.4MESES</th>
-                        <th>MSD(MES_PROV.)</th>
-                        <th>PRECIO_UNIT</th>
-                        <th>MONTO</th>
-                        <th>SIT.SOCK</th>
-                        <th>MESES_PARA_VCMTO.</th>
-                        <th>SIT_FECH_VCMTO.</th>
-                        <th>MINIGRÁF.</th>
-                        <th>DIST.1</th>
-                        <th>DIST.2</th>
-                        <th>PEND.ING.ICI</th>
-                        <th>CONSUMO_TOT.PROYEC.</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($registros as $reg)
-                        <tr>
-                            <!-- <td>{{ $reg->disa_diresa }}</td>
-                            <td>{{ $reg->ue_mef }}</td>
-                            <td>{{ $reg->almacen_pertenece }}</td>
-                            <td>{{ $reg->red }}</td>
-                            <td>{{ $reg->microred }}</td>
-                            <td>{{ $reg->cod_ipress }}</td>
-                            <td>{{ $reg->nombre_ipress }}</td>
-                            <td>{{ $reg->tipo_establecimiento }}</td> 
-                            <td>{{ $reg->ipress_dengue }}</td>
-                            <td>{{ $reg->cod_unificado }}</td>
-                            <td>{{ $reg->descripcion_cubo }}</td>
-                            <td>{{ $reg->cod_sismed }}</td>-->
-                            <td>{{ $reg->descripcion_producto }}</td>
-                            <td>{{ $reg->descripcion_producto_alt }}</td>
-                            <td>{{ $reg->tipo_prod }}</td>
-                            <td>{{ $reg->tipo_abastecimiento }}</td>
-                            <td>{{ $reg->Mes1 }}</td>
-                            <td>{{ $reg->Mes2 }}</td>
-                            <td>{{ $reg->Mes3 }}</td>
-                            <td>{{ $reg->Mes4 }}</td>
-                            <td>{{ $reg->Mes5 }}</td>
-                            <td>{{ $reg->Mes6 }}</td>
-                            <td>{{ $reg->Mes7 }}</td>
-                            <td>{{ $reg->Mes8 }}</td>
-                            <td>{{ $reg->Mes9 }}</td>
-                            <td>{{ $reg->Mes10 }}</td>
-                            <td>{{ $reg->Mes11 }}</td>
-                            <td>{{ $reg->Mes12 }}</td>
-                            <td>{{ $reg->StockFinal }}</td>
-                            <td>{{ $reg->ingre }}</td>
-                            <td>{{ $reg->fec_exp }}</td>
-                            <td>{{ $reg->consumo_total }}</td>
-                            <td>{{ $reg->cpma }}</td>
-                            <td>{{ $reg->consumo_ultimos_4meses }}</td>
-                            <td>{{ $reg->meses_prov }}</td>
-                            <td>{{$reg->precio}}</td>
-                            <td>{{ $reg->monto }}</td>
-                            <td>{{ $reg->situacion_stock }}</td>
-                            <td>{{ $reg->meses_para_vencimiento }}</td>
-                            <td>{{$reg->sit_fecha_vcmto}}</td>
-                            <td class="minigrafico-cell">
-                                <div class="minigrafico" data-meses="{{ $reg->Mes1 }},{{ $reg->Mes2 }},{{ $reg->Mes3 }},{{ $reg->Mes4 }},{{ $reg->Mes5 }},{{ $reg->Mes6 }},{{ $reg->Mes7 }},{{ $reg->Mes8 }},{{ $reg->Mes9 }},{{ $reg->Mes10 }},{{ $reg->Mes11 }},{{ $reg->Mes12 }}">
-                                    <!-- Los gráficos se generarán con JavaScript -->
-                                </div>
-                            </td>
-                           <td>{{$reg->dist1}}</td>
-                           <td>{{$reg->dist2}}</td>
-                           <td>{{$reg->pendingre_ici}}</td>
-                           <td>{{$reg->consumo_total_proyectado}}</td>
+            @endphp
+            
+            <!-- Tarjeta única: Situación de Stock y Vencimiento -->
+            <div class="card-resumen">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>📦 Disponibilidad</span>
+                    <span class="text-muted">Total: S/ {{ number_format($totalMontoMostrar, 2) }}</span>
+                </div>
+                <div class="card-body">
+                    <!-- Tabla de stock -->
+                    <table class="resumen-stock-table">
+                        @foreach(['DESABASTECIDO', 'SUBSTOCK', 'NORMOSTOCK', 'SOBRESTOCK', 'SIN ROTACION', 'SIN CONSUMO', 'POR VENCER', 'VENCIDO'] as $nombre)
+                            @if($resumenStock[$nombre]['count'] > 0)
+                            <tr>
+                                <td><span class="badge" style="background-color: {{ $resumenStock[$nombre]['color'] }};">{{ $nombre }}</span></td>
+                                <td class="text-end">{{ $resumenStock[$nombre]['count'] }}</td>
+                                <td class="text-end">S/ {{ number_format($resumenStock[$nombre]['monto'], 2) }}</td>
+                                <td class="text-end">{{ $resumenStock[$nombre]['porcentaje'] }}%</td>
+                            </tr>
+                            @endif
+                        @endforeach
+                        <tr style="border-top: 1px solid #dee2e6;">
+                            <td><strong>TOTAL</strong></td>
+                            <td class="text-end"><strong>{{ $totalRegistrosMostrar }}</strong></td>
+                            <td class="text-end"><strong>S/ {{ number_format($totalMontoMostrar, 2) }}</strong></td>
+                            <td class="text-end"><strong>{{ $sumatoriaPorcentaje }}%</strong></td>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </table>
+
+                    <!-- Barra y nivel -->
+                    <div class="text-center mt-1 pt-1 border-top">
+                        <div class="display-6 fw-bold" style="font-size: 1.3rem; color: {{ $nivelColor }};">{{ $regularPorcentaje }}%</div>
+                        <div class="badge" style="background-color: {{ $nivelColor }}; font-size: 0.75rem; padding: 4px 12px;">{{ $nivel }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cuadro: Sobrestock por Meses -->
+            <div class="card-resumen">
+                <div class="card-header">
+                    📊 Sobrestock por Meses de Vencimiento
+                    <span class="float-end" style="z-index: 1000;">
+                        <i class="fas fa-info-circle text-muted" style="cursor: help;" title="Atención con los items que están en esta situación. La probabilidad de que expiren es muy alta. Realizar monitoreo mediante la validación de la información y realizar acciones para evitar vencimiento."></i>
+                    </span>
+                </div>
+                <div class="card-body" style="padding: 8px; overflow: visible;">
+                    @php
+                        $rangosVencimiento = [
+                            ['label' => '> 0 y ≤ 6', 'min' => 0, 'max' => 6, 'condicion' => 'exclude_min', 'color' => '#ffffff'],
+                            ['label' => '> 6 y < 12', 'min' => 6, 'max' => 12, 'condicion' => 'exclude_min', 'color' => '#ffe6e6'],
+                            ['label' => '≥ 12 y < 24', 'min' => 12, 'max' => 24, 'color' => '#ffcccc'],
+                            ['label' => '≥ 24 y < 36', 'min' => 24, 'max' => 36, 'color' => '#ff9999'],
+                            ['label' => '≥ 36 y < 48', 'min' => 36, 'max' => 48, 'color' => '#ff6666'],
+                            ['label' => '≥ 48 (4 años)', 'min' => 48, 'max' => null, 'color' => '#ff0000'],
+                        ];
+                        
+                        $totalItems = 0;
+                        $totalMonto = 0;
+                        $datosRangos = [];
+                        
+                        foreach ($rangosVencimiento as $rango) {
+                            $items = $registros->filter(function($item) use ($rango) {
+                                $meses = $item->meses_para_vencimiento;
+                                if ($item->situacion_stock != 'SOBRESTOCK') return false;
+                                if ($meses === null) return false;
+                                
+                                if ($rango['max'] === null) {
+                                    return $meses >= $rango['min'];
+                                }
+                                
+                                if (isset($rango['condicion']) && $rango['condicion'] == 'exclude_min') {
+                                    return $meses > $rango['min'] && $meses <= $rango['max'];
+                                }
+                                
+                                return $meses >= $rango['min'] && $meses < $rango['max'];
+                            });
+                            
+                            $count = $items->count();
+                            $monto = $items->sum('monto');
+                            
+                            $datosRangos[] = [
+                                'label' => $rango['label'],
+                                'count' => $count,
+                                'monto' => $monto,
+                                'color' => $rango['color']
+                            ];
+                            
+                            $totalItems += $count;
+                            $totalMonto += $monto;
+                        }
+                    @endphp
+                    
+                    <style>
+                        .tooltip-mensaje {
+                            position: relative;
+                            cursor: pointer;
+                            border-bottom: 1px dashed #ff0000;
+                        }
+                        .tooltip-mensaje .tooltip-texto {
+                            visibility: hidden;
+                            width: 280px;
+                            background-color: #333;
+                            color: #fff;
+                            text-align: left;
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            position: fixed;
+                            z-index: 99999;
+                            /* bottom: 125%; */
+                            /* left: 50%; */
+                            /* margin-left: -140px; */
+                            font-size: 0.7rem;
+                            font-weight: normal;
+                            opacity: 0;
+                            transition: opacity 0.3s;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                            pointer-events: none;
+                            white-space: normal;
+                            /* word-wrap: break-word; */
+                        }
+                        .tooltip-mensaje .tooltip-texto{
+                            content: "";
+                            position: absolute;
+                            top: 100%;
+                            left: 50%;
+                            margin-left: -5px;
+                            border-width: 5px;
+                            border-style: solid;
+                            border-color: #333 transparent transparent transparent;
+                        }
+                        .tooltip-mensaje:hover .tooltip-texto {
+                            visibility: visible;
+                            opacity: 1;
+                        }
+                        .tooltip-mensaje .tooltip-texto::after {
+                            content: "";
+                            position: absolute;
+                            top: 100%;
+                            left: 50%;
+                            margin-left: -5px;
+                            border-width: 5px;
+                            border-style: solid;
+                            border-color: #333 transparent transparent transparent;
+                        }
+                        .tooltip-mensaje:hover .tooltip-texto {
+                            visibility: visible;
+                            opacity: 1;
+                        }
+                    </style>
+                    
+                    <table class="resumen-stock-table" style="width: 100%;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th>Meses para vencimiento</th>
+                                <th class="text-end">Nº ITEM</th>
+                                <th class="text-end">MONTO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($datosRangos as $index => $rango)
+                                <tr style="background: linear-gradient(90deg, {{ $rango['color'] }} 0%, #ffffff 100%);">
+                                    <td class="tooltip-mensaje">
+                                        @if($index == 0)
+                                            {{ $rango['label'] }}
+                                            <span class="tooltip-texto">⚠️ Atención con los items que están en esta situación. La probabilidad de que expiren es muy alta. Realizar monitoreo mediante la validación de la información y realizar acciones para evitar vencimiento.</span>
+                                        @else
+                                            {{ $rango['label'] }}
+                                        @endif
+                                    </td>
+                                    <td class="text-end" style="color: {{ $index == 0 ? '#ff0000' : 'inherit' }};">{{ $rango['count'] }}</td>
+                                    <td class="text-end" style="color: {{ $index == 0 ? '#ff0000' : 'inherit' }};">S/ {{ number_format($rango['monto'], 2) }}</td>
+                                </tr>
+                            @endforeach
+                            <tr style="border-top: 2px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">
+                                <td>TOTAL</td>
+                                <td class="text-end">{{ $totalItems }}</td>
+                                <td class="text-end">S/ {{ number_format($totalMonto, 2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cuadro: Disponibilidad Proyectada -->
+            <div class="card-resumen">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>📊 Disponibilidad Proyectada</span>
+                    <span class="text-muted">Total: S/ {{ number_format($totalMontoProyectado, 2) }}</span>
+                </div>
+                <div class="card-body">
+                    @php
+                        // Inicializar resumen proyectado
+                        $resumenProyectado = [
+                            'DESABASTECIDO' => ['count' => 0, 'monto' => 0, 'color' => '#dc3545'],
+                            'SUBSTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#fd7e14'],
+                            'NORMOSTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#28a745'],
+                            'SOBRESTOCK' => ['count' => 0, 'monto' => 0, 'color' => '#6c757d'],
+                            'SIN ROTACION' => ['count' => 0, 'monto' => 0, 'color' => '#6f42c1'],
+                            'SIN CONSUMO' => ['count' => 0, 'monto' => 0, 'color' => '#17a2b8'],
+                            'POR VENCER' => ['count' => 0, 'monto' => 0, 'color' => '#fd7e14'],
+                            'VENCIDO' => ['count' => 0, 'monto' => 0, 'color' => '#dc3545']
+                        ];
+                        
+                        foreach ($registros as $item) {
+                            $stockProyectado = $item->situacion_stock_proyectado;
+                            if (isset($resumenProyectado[$stockProyectado])) {
+                                $resumenProyectado[$stockProyectado]['count']++;
+                                $resumenProyectado[$stockProyectado]['monto'] += $item->stockfinal_proyectado * $item->precio;
+                            }
+                            
+                            // Calcular POR VENCER proyectado
+                            if ($item->sit_fecha_vcmto == 'POR VENCER' && $item->meses_para_vencimiento >= 1) {
+                                $resumenProyectado['POR VENCER']['count']++;
+                                $resumenProyectado['POR VENCER']['monto'] += $item->stockfinal_proyectado * $item->precio;
+                            }
+                            
+                            // Calcular VENCIDO proyectado
+                            if ($item->meses_prov > 1 && $item->meses_para_vencimiento >= 0 && $item->meses_para_vencimiento < 1) {
+                                $resumenProyectado['VENCIDO']['count']++;
+                                $resumenProyectado['VENCIDO']['monto'] += $item->stockfinal_proyectado * $item->precio;
+                            }
+                        }
+                        
+                        // Calcular totales proyectados
+                        $baseTotalProyectado = $resumenProyectado['DESABASTECIDO']['count'] + 
+                                            $resumenProyectado['SUBSTOCK']['count'] + 
+                                            $resumenProyectado['NORMOSTOCK']['count'] + 
+                                            $resumenProyectado['SOBRESTOCK']['count'];
+                        
+                        $totalMontoProyectado = $resumenProyectado['SUBSTOCK']['monto'] + 
+                                                $resumenProyectado['NORMOSTOCK']['monto'] + 
+                                                $resumenProyectado['SOBRESTOCK']['monto'] + 
+                                                $resumenProyectado['SIN ROTACION']['monto'];
+                        
+                        // Calcular porcentajes proyectados
+                        foreach (['DESABASTECIDO', 'SUBSTOCK', 'NORMOSTOCK', 'SOBRESTOCK'] as $nombre) {
+                            $resumenProyectado[$nombre]['porcentaje'] = $baseTotalProyectado > 0 ? 
+                                round(($resumenProyectado[$nombre]['count'] / $baseTotalProyectado) * 100, 1) : 0;
+                        }
+                        
+                        $baseSinRotacionProyectado = $baseTotalProyectado + $resumenProyectado['SIN ROTACION']['count'];
+                        $resumenProyectado['SIN ROTACION']['porcentaje'] = $baseSinRotacionProyectado > 0 ? 
+                            round(($resumenProyectado['SIN ROTACION']['count'] / $baseSinRotacionProyectado) * 100, 1) : 0;
+                        
+                        $baseSinConsumoProyectado = $resumenProyectado['SUBSTOCK']['count'] + 
+                                                    $resumenProyectado['NORMOSTOCK']['count'] + 
+                                                    $resumenProyectado['SOBRESTOCK']['count'] + 
+                                                    $resumenProyectado['SIN ROTACION']['count'] + 
+                                                    $resumenProyectado['SIN CONSUMO']['count'];
+                        $resumenProyectado['SIN CONSUMO']['porcentaje'] = $baseSinConsumoProyectado > 0 ? 
+                            round(($resumenProyectado['SIN CONSUMO']['count'] / $baseSinConsumoProyectado) * 100, 1) : 0;
+                        
+                        $basePorVencerProyectado = $baseTotalProyectado + $resumenProyectado['SIN ROTACION']['count'];
+                        $resumenProyectado['POR VENCER']['porcentaje'] = $basePorVencerProyectado > 0 ? 
+                            round(($resumenProyectado['POR VENCER']['count'] / $basePorVencerProyectado) * 100, 1) : 0;
+                        $resumenProyectado['VENCIDO']['porcentaje'] = $baseTotalProyectado > 0 ? 
+                            round(($resumenProyectado['VENCIDO']['count'] / $baseTotalProyectado) * 100, 1) : 0;
+                        
+                        $sumatoriaPorcentajeProyectado = $resumenProyectado['DESABASTECIDO']['porcentaje'] + 
+                                                        $resumenProyectado['SUBSTOCK']['porcentaje'] + 
+                                                        $resumenProyectado['NORMOSTOCK']['porcentaje'] + 
+                                                        $resumenProyectado['SOBRESTOCK']['porcentaje'];
+                        
+                        // Calcular regular porcentaje para nivel
+                        $regularTotalProyectado = $resumenProyectado['NORMOSTOCK']['count'] + $resumenProyectado['SOBRESTOCK']['count'];
+                        $regularPorcentajeProyectado = $baseTotalProyectado > 0 ? 
+                            round(($regularTotalProyectado / $baseTotalProyectado) * 100, 1) : 0;
+                        
+                        // Calcular nivel
+                        $consumoTotalProyectado = $regularPorcentajeProyectado / 100;
+                        if ($consumoTotalProyectado >= 0.9) {
+                            $nivelProyectado = 'ÓPTIMO';
+                            $nivelColorProyectado = '#28a745';
+                        } elseif ($consumoTotalProyectado < 0.7) {
+                            $nivelProyectado = 'BAJO';
+                            $nivelColorProyectado = '#dc3545';
+                        } elseif ($consumoTotalProyectado >= 0.8 && $consumoTotalProyectado < 0.9) {
+                            $nivelProyectado = 'ALTO';
+                            $nivelColorProyectado = '#17a2b8';
+                        } elseif ($consumoTotalProyectado >= 0.7 && $consumoTotalProyectado < 0.8) {
+                            $nivelProyectado = 'REGULAR';
+                            $nivelColorProyectado = '#fd7e14';
+                        } else {
+                            $nivelProyectado = 'SIN CLASIFICAR';
+                            $nivelColorProyectado = '#6c757d';
+                        }
+                    @endphp
+                    
+                    <table class="resumen-stock-table">
+                        @foreach(['DESABASTECIDO', 'SUBSTOCK', 'NORMOSTOCK', 'SOBRESTOCK', 'SIN ROTACION', 'SIN CONSUMO', 'POR VENCER', 'VENCIDO'] as $nombre)
+                            @if($resumenProyectado[$nombre]['count'] > 0)
+                            <tr>
+                                <td><span class="badge" style="background-color: {{ $resumenProyectado[$nombre]['color'] }};">{{ $nombre }}</span></td>
+                                <td class="text-end">{{ $resumenProyectado[$nombre]['count'] }}</td>
+                                <td class="text-end">S/ {{ number_format($resumenProyectado[$nombre]['monto'], 2) }}</td>
+                                <td class="text-end">{{ $resumenProyectado[$nombre]['porcentaje'] }}%</td>
+                            </tr>
+                            @endif
+                        @endforeach
+                        <tr style="border-top: 1px solid #dee2e6;">
+                            <td><strong>TOTAL</strong></td>
+                            <td class="text-end"><strong>{{ $baseTotalProyectado }}</strong></td>
+                            <td class="text-end"><strong>S/ {{ number_format($totalMontoProyectado, 2) }}</strong></td>
+                            <td class="text-end"><strong>{{ $sumatoriaPorcentajeProyectado }}%</strong></td>
+                        </tr>
+                    </table>
+                    
+                    <div class="text-center mt-1 pt-1 border-top">
+                        <div class="display-6 fw-bold" style="font-size: 1.3rem; color: {{ $nivelColorProyectado }};">{{ $regularPorcentajeProyectado }}%</div>
+                        <div class="badge" style="background-color: {{ $nivelColorProyectado }}; font-size: 0.75rem; padding: 4px 12px;">{{ $nivelProyectado }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cuadro: Sobrestock por Meses (Proyectado) -->
+            <div class="card-resumen">
+                <div class="card-header">
+                    📊 Sobrestock Proyectado por Meses de Vencimiento
+                    <span class="float-end" style="z-index: 1000;">
+                        <i class="fas fa-info-circle text-muted" style="cursor: help;" title="Atención con los items que están en esta situación. La probabilidad de que expiren es muy alta. Realizar monitoreo mediante la validación de la información y realizar acciones para evitar vencimiento."></i>
+                    </span>
+                </div>
+                <div class="card-body" style="padding: 8px; overflow: visible;">
+                    @php
+                        $rangosVencimientoProyectado = [
+                            ['label' => '> 6 y < 12', 'min' => 6, 'max' => 12, 'condicion' => 'exclude_min', 'color' => '#ffe6e6'],
+                            ['label' => '≥ 12 y < 24', 'min' => 12, 'max' => 24, 'color' => '#ffcccc'],
+                            ['label' => '≥ 24 y < 36', 'min' => 24, 'max' => 36, 'color' => '#ff9999'],
+                            ['label' => '≥ 36 y < 48', 'min' => 36, 'max' => 48, 'color' => '#ff6666'],
+                            ['label' => '≥ 48 (4 años)', 'min' => 48, 'max' => null, 'color' => '#ff0000'],
+                        ];
+                        
+                        $totalItemsProyectado = 0;
+                        $totalMontoProyectadoSobrestock = 0;
+                        $datosRangosProyectado = [];
+                        
+                        foreach ($rangosVencimientoProyectado as $rango) {
+                            $items = $registros->filter(function($item) use ($rango) {
+                                $msdProyectado = $item->msd_proyectado;
+                                if ($item->situacion_stock_proyectado != 'SOBRESTOCK') return false;
+                                if ($msdProyectado === null) return false;
+                                
+                                if ($rango['max'] === null) {
+                                    return $msdProyectado >= $rango['min'];
+                                }
+                                
+                                if (isset($rango['condicion']) && $rango['condicion'] == 'exclude_min') {
+                                    return $msdProyectado > $rango['min'] && $msdProyectado < $rango['max'];
+                                }
+                                
+                                return $msdProyectado >= $rango['min'] && $msdProyectado < $rango['max'];
+                            });
+                            
+                            $count = $items->count();
+                            $monto = $items->sum(function($item) {
+                                return $item->stockfinal_proyectado * $item->precio;
+                            });
+                            
+                            $datosRangosProyectado[] = [
+                                'label' => $rango['label'],
+                                'count' => $count,
+                                'monto' => $monto,
+                                'color' => $rango['color']
+                            ];
+                            
+                            $totalItemsProyectado += $count;
+                            $totalMontoProyectadoSobrestock += $monto;
+                        }
+                    @endphp
+                    
+                    <table class="resumen-stock-table" style="width: 100%;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th>Meses para vencimiento</th>
+                                <th class="text-end">Nº ITEM</th>
+                                <th class="text-end">MONTO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($datosRangosProyectado as $index => $rango)
+                                <tr style="background: linear-gradient(90deg, {{ $rango['color'] }} 0%, #ffffff 100%);">
+                                    <td>{{ $rango['label'] }}</td>
+                                    <td class="text-end">{{ $rango['count'] }}</td>
+                                    <td class="text-end">S/ {{ number_format($rango['monto'], 2) }}</td>
+                                </tr>
+                            @endforeach
+                            <tr style="border-top: 2px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">
+                                <td>TOTAL</td>
+                                <td class="text-end">{{ $totalItemsProyectado }}</td>
+                                <td class="text-end">S/ {{ number_format($totalMontoProyectadoSobrestock, 2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
-      
-        <br>
     </div>
+    
+    <!-- Tabla principal -->
+    <div class="mt-2 text-end">
+        <small class="text-muted">Total de registros: {{ $registros->count() }}</small>
+        <button id="btn-exportar-excel" class="btn btn-success btn-sm">📥 Exportar a Excel</button>
+
+    </div>
+    <div class="table-responsive">
+        <table id="registros" class="table table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>DESC PROD</th>
+                    <th>COD_SISMED</th>
+                    <th>TIPO PROD</th>
+                    <th>TIPO ABAST</th>
+                    <th>MES1</th>
+                    <th>MES2</th>
+                    <th>MES3</th>
+                    <th>MES4</th>
+                    <th>MES5</th>
+                    <th>MES6</th>
+                    <th>MES7</th>
+                    <th>MES8</th>
+                    <th>MES9</th>
+                    <th>MES10</th>
+                    <th>MES11</th>
+                    <th>MES12</th>
+                    <th>STOCK_FINAL</th>
+                    <th>FECHA_VCMTO.</th>
+                    <th>CONSUMO_TOTAL</th>
+                    <th>CPMA</th>
+                    <th>CONSUMO_ÚLT.4MESES</th>
+                    <th>MSD(MES_PROV.)</th>
+                    <th>PRECIO_UNIT</th>
+                    <th>MONTO</th>
+                    <th class="vencimiento">SIT.STOCK</th>
+                    <th class="vencimiento">MESES_PARA_VCMTO.</th>
+                    <th class="vencimiento">SIT.FECH_VCMTO.</th>
+                    <th>MINIGRÁF.</th>
+                    <th class="distribucion">DIST.1</th>
+                    <th class="distribucion">INGRESO_ICI</th>
+                    <th class="distribucion">PEND.ING.ICI</th>
+                    <th class="distribucion">DIST.2</th>
+                    <th class="proyectado">CONSUMO_PROYEC.</th>
+                    <th class="proyectado">STOCK_PROYEC.</th>
+                    <th class="proyectado">CPMA PROYEC.</th>
+                    <th class="proyectado">CONSUMO_4M_PROYEC.</th>
+                    <th class="proyectado">MSD PROYEC.</th>
+                    <th class="proyectado">SIT.STOCK_PROYEC</th>
+                    <th class="envio-sugerido">ENVÍO SUGERIDO</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($registros as $reg)
+                <tr>
+                    <td>{{ $reg->descripcion_producto }}</td>
+                    <td>{{ $reg->cod_sismed }}</td>
+                    <td>{{ $reg->tipo_prod }}</td>
+                    <td>{{ $reg->tipo_abastecimiento }}</td>
+                    <td class="text-end">{{ $reg->Mes1 }}</td>
+                    <td class="text-end">{{ $reg->Mes2 }}</td>
+                    <td class="text-end">{{ $reg->Mes3 }}</td>
+                    <td class="text-end">{{ $reg->Mes4 }}</td>
+                    <td class="text-end">{{ $reg->Mes5 }}</td>
+                    <td class="text-end">{{ $reg->Mes6 }}</td>
+                    <td class="text-end">{{ $reg->Mes7 }}</td>
+                    <td class="text-end">{{ $reg->Mes8 }}</td>
+                    <td class="text-end">{{ $reg->Mes9 }}</td>
+                    <td class="text-end">{{ $reg->Mes10 }}</td>
+                    <td class="text-end">{{ $reg->Mes11 }}</td>
+                    <td class="text-end">{{ $reg->Mes12 }}</td>
+                    <td class="text-end">{{ number_format($reg->StockFinal, 2) }}</td>
+                    <td>{{ $reg->fec_exp }}</td>
+                    <td class="text-end">{{ number_format($reg->consumo_total, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->cpma, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->consumo_ultimos_4meses, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->meses_prov, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->precio, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->monto, 2) }}</td>
+                    <td>
+                        <span class="badge" style="background-color: 
+                            @switch($reg->situacion_stock)
+                            @case('DESABASTECIDO') #dc3545 @break
+                            @case('SUBSTOCK') #fd7e14 @break
+                            @case('NORMOSTOCK') #28a745 @break
+                            @case('SOBRESTOCK') #6c757d @break
+                            @case('SIN ROTACION') #6f42c1 @break
+                            @case('SIN CONSUMO') #17a2b8 @break
+                            @default #6c757d
+                            @endswitch
+                            ">{{ $reg->situacion_stock }}</span>
+                    </td>
+                    <td class="text-end">{{ $reg->meses_para_vencimiento }}</td>
+                    <td>{{ $reg->sit_fecha_vcmto }}</td>
+                    <td class="minigrafico-cell">
+                        <div class="minigrafico" data-meses="{{ $reg->Mes1 }},{{ $reg->Mes2 }},{{ $reg->Mes3 }},{{ $reg->Mes4 }},{{ $reg->Mes5 }},{{ $reg->Mes6 }},{{ $reg->Mes7 }},{{ $reg->Mes8 }},{{ $reg->Mes9 }},{{ $reg->Mes10 }},{{ $reg->Mes11 }},{{ $reg->Mes12 }}">
+                        </div>
+                    </td>
+                    <td class="text-end">{{ number_format($reg->dist1, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->ingre, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->pendingre_ici, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->dist2, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->consumo_total_proyectado, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->stockfinal_proyectado, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->cpma_proyectado, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->consumo_cuatro_ult_meses_proyectado, 2) }}</td>
+                    <td class="text-end">{{ number_format($reg->msd_proyectado, 2) }}</td>
+                    <td>{{ $reg->situacion_stock_proyectado }}</td>
+                    <td class="text-end">{{ number_format($reg->envio_sugerido, 0) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    
+    
+</div>
 @endsection
 
 @section('scripts')
+    <!-- Agrega esto en la sección de scripts, antes de tu código -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="{{asset('js/select2.min.js')}}"></script>
     <script src="{{ asset('js/select2-focus.js') }}"></script>
     <script>
@@ -677,7 +1221,6 @@
 
                 let url = new URL(window.location.href);
                 
-                // Limpiar parámetros de filtros existentes
                 url.searchParams.delete('tip_sum[]');
                 url.searchParams.delete('tipo_prod[]');
                 url.searchParams.delete('tipo_abastecimiento[]');
@@ -685,7 +1228,6 @@
                 url.searchParams.delete('peti2023[]');
                 url.searchParams.delete('lista_1[]');
                 
-                // Agregar parámetros básicos
                 url.searchParams.set('cod_ipress', cod_ipress);
                 url.searchParams.set('fin_mes', fechaFinMes);
                 
@@ -695,7 +1237,6 @@
                     url.searchParams.delete('cod_sismed');
                 }
                 
-                // Agregar filtros múltiples
                 $('#tip_sum').val().forEach(value => {
                     url.searchParams.append('tip_sum[]', value);
                 });
@@ -723,12 +1264,9 @@
                 window.location.href = url.toString();
             });
 
-
-            // Botón para limpiar solo los filtros adicionales
             $('#btn-limpiar-filtros').on('click', function() {
                 $('.select2-multiple').val(null).trigger('change');
                 
-                // Mantener los filtros principales
                 let cod_ipress = $('#cod_ipress').val();
                 let cod_sismed = $('#cod_sismed').val();
                 let fechaFinMes = $('#fechaFinMes').val();
@@ -742,12 +1280,8 @@
                     window.location.href = url.toString();
                 }
             });
-
         });
-    </script>
-    <script>
-    // Función para obtener el último día del mes actual
-        // Función para obtener el último día del mes actual
+        
         function obtenerFinMesActual() {
             const hoy = new Date();
             const año = hoy.getFullYear();
@@ -759,40 +1293,20 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // ✅ Solo asignar valor si el input está vacío (no viene de la URL)
-        document.addEventListener('DOMContentLoaded', function() {
-            generarMinigraficos();
-
-            const inputFecha = document.getElementById('fechaFinMes');
-            if (!inputFecha.value) {
-                inputFecha.value = obtenerFinMesActual();
-            }
-        });
-    </script>
-    <script>
         function generarMinigraficos() {
             document.querySelectorAll('.minigrafico').forEach(function(container) {
                 const mesesData = container.getAttribute('data-meses').split(',').map(Number);
+                const maxValor = Math.max(...mesesData, 1);
                 
-                // Encontrar el valor máximo para escalar las barras
-                const maxValor = Math.max(...mesesData, 1); // Evitar división por cero
-                
-                // Limpiar el contenedor
                 container.innerHTML = '';
                 
-                // Crear las barras para cada mes
                 mesesData.forEach(function(valor) {
                     const barra = document.createElement('div');
                     barra.className = 'barra-mini';
-                    
-                    // Calcular altura proporcional (mínimo 3px, máximo 25px)
                     const altura = Math.max(3, Math.min(25, (valor / maxValor) * 25));
                     barra.style.height = altura + 'px';
-                    
-                    // Guardar el valor como atributo para tooltip
                     barra.setAttribute('data-valor', valor);
                     
-                    // Clasificar por rango de valores (opcional)
                     if (valor === 0) {
                         barra.classList.add('valor-cero');
                     } else if (valor < maxValor * 0.3) {
@@ -807,18 +1321,25 @@
                 });
             });
         }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            generarMinigraficos();
+            
+            const inputFecha = document.getElementById('fechaFinMes');
+            if (!inputFecha.value) {
+                inputFecha.value = obtenerFinMesActual();
+            }
+        });
     </script>
     
     <script>
-        // Variable para almacenar la fila seleccionada actualmente
+        // Navegación por teclado y selección de celdas
         let filaSeleccionada = null;
         let celdaSeleccionada = null;
         let indiceFila = -1;
         let indiceColumna = -1;
 
-        // Función para seleccionar una fila
         function seleccionarFila(fila, evento) {
-            // Quitar selección anterior
             if (filaSeleccionada) {
                 filaSeleccionada.classList.remove('seleccionada');
                 filaSeleccionada.querySelectorAll('td').forEach(td => {
@@ -826,22 +1347,18 @@
                 });
             }
             
-            // Seleccionar nueva fila
             fila.classList.add('seleccionada');
             filaSeleccionada = fila;
             
-            // Guardar índices
             const filas = Array.from(document.querySelectorAll('#registros tbody tr'));
             indiceFila = filas.indexOf(fila);
             
-            // Si se hizo clic en una celda específica
             if (evento && evento.target.tagName === 'TD') {
                 const celdas = Array.from(fila.children);
                 indiceColumna = celdas.indexOf(evento.target);
                 evento.target.classList.add('seleccionada');
                 celdaSeleccionada = evento.target;
                 
-                // Hacer scroll a la celda seleccionada
                 const contenedorTabla = document.querySelector('.table-responsive');
                 if (contenedorTabla) {
                     const celdaOffset = evento.target.offsetLeft;
@@ -849,7 +1366,6 @@
                     const contenedorScrollLeft = contenedorTabla.scrollLeft;
                     const contenedorWidth = contenedorTabla.clientWidth;
                     
-                    // Si la celda está fuera de vista
                     if (celdaOffset < contenedorScrollLeft || 
                         celdaOffset + celdaWidth > contenedorScrollLeft + contenedorWidth) {
                         evento.target.scrollIntoView({ 
@@ -864,20 +1380,15 @@
                 celdaSeleccionada = null;
             }
             
-            // Scroll vertical a la fila seleccionada
             fila.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // Función para navegar con teclado
         function navegarConTeclado(e) {
             if (!filaSeleccionada) return;
             
             const filas = Array.from(document.querySelectorAll('#registros tbody tr'));
-            const encabezados = Array.from(document.querySelectorAll('#registros thead th'));
             const totalFilas = filas.length;
             const totalColumnas = document.querySelectorAll('#registros thead th').length;
-            
-            // Obtener el contenedor con scroll
             const contenedorTabla = document.querySelector('.table-responsive');
             
             switch(e.key) {
@@ -901,28 +1412,22 @@
                     e.preventDefault();
                     if (indiceColumna > 0) {
                         indiceColumna--;
-                        // Quitar selección de celda anterior
                         if (celdaSeleccionada) {
                             celdaSeleccionada.classList.remove('seleccionada');
                         }
-                        // Seleccionar nueva celda
                         const nuevaCelda = filaSeleccionada.children[indiceColumna];
                         nuevaCelda.classList.add('seleccionada');
                         celdaSeleccionada = nuevaCelda;
                         
-                        // Hacer scroll horizontal para mostrar la celda
                         if (contenedorTabla) {
                             const celdaOffset = nuevaCelda.offsetLeft;
                             const celdaWidth = nuevaCelda.offsetWidth;
                             const contenedorScrollLeft = contenedorTabla.scrollLeft;
                             const contenedorWidth = contenedorTabla.clientWidth;
                             
-                            // Si la celda está fuera de vista a la izquierda
                             if (celdaOffset < contenedorScrollLeft) {
                                 contenedorTabla.scrollLeft = celdaOffset - 10;
-                            }
-                            // Si la celda está fuera de vista a la derecha
-                            else if (celdaOffset + celdaWidth > contenedorScrollLeft + contenedorWidth) {
+                            } else if (celdaOffset + celdaWidth > contenedorScrollLeft + contenedorWidth) {
                                 contenedorTabla.scrollLeft = celdaOffset + celdaWidth - contenedorWidth + 10;
                             }
                         }
@@ -933,28 +1438,22 @@
                     e.preventDefault();
                     if (indiceColumna < totalColumnas - 1) {
                         indiceColumna++;
-                        // Quitar selección de celda anterior
                         if (celdaSeleccionada) {
                             celdaSeleccionada.classList.remove('seleccionada');
                         }
-                        // Seleccionar nueva celda
                         const nuevaCelda = filaSeleccionada.children[indiceColumna];
                         nuevaCelda.classList.add('seleccionada');
                         celdaSeleccionada = nuevaCelda;
                         
-                        // Hacer scroll horizontal para mostrar la celda
                         if (contenedorTabla) {
                             const celdaOffset = nuevaCelda.offsetLeft;
                             const celdaWidth = nuevaCelda.offsetWidth;
                             const contenedorScrollLeft = contenedorTabla.scrollLeft;
                             const contenedorWidth = contenedorTabla.clientWidth;
                             
-                            // Si la celda está fuera de vista a la izquierda
                             if (celdaOffset < contenedorScrollLeft) {
                                 contenedorTabla.scrollLeft = celdaOffset - 10;
-                            }
-                            // Si la celda está fuera de vista a la derecha
-                            else if (celdaOffset + celdaWidth > contenedorScrollLeft + contenedorWidth) {
+                            } else if (celdaOffset + celdaWidth > contenedorScrollLeft + contenedorWidth) {
                                 contenedorTabla.scrollLeft = celdaOffset + celdaWidth - contenedorWidth + 10;
                             }
                         }
@@ -964,50 +1463,34 @@
                 case 'Home':
                     e.preventDefault();
                     if (e.ctrlKey) {
-                        // Ctrl+Home: ir a primera fila
                         indiceFila = 0;
                         seleccionarFila(filas[0]);
-                    } else {
-                        // Home: ir a primera columna
-                        if (filaSeleccionada) {
-                            indiceColumna = 0;
-                            if (celdaSeleccionada) {
-                                celdaSeleccionada.classList.remove('seleccionada');
-                            }
-                            const primeraCelda = filaSeleccionada.children[0];
-                            primeraCelda.classList.add('seleccionada');
-                            celdaSeleccionada = primeraCelda;
-                            
-                            // Scroll al inicio
-                            if (contenedorTabla) {
-                                contenedorTabla.scrollLeft = 0;
-                            }
+                    } else if (filaSeleccionada) {
+                        indiceColumna = 0;
+                        if (celdaSeleccionada) {
+                            celdaSeleccionada.classList.remove('seleccionada');
                         }
+                        const primeraCelda = filaSeleccionada.children[0];
+                        primeraCelda.classList.add('seleccionada');
+                        celdaSeleccionada = primeraCelda;
+                        if (contenedorTabla) contenedorTabla.scrollLeft = 0;
                     }
                     break;
                     
                 case 'End':
                     e.preventDefault();
                     if (e.ctrlKey) {
-                        // Ctrl+End: ir a última fila
                         indiceFila = totalFilas - 1;
                         seleccionarFila(filas[totalFilas - 1]);
-                    } else {
-                        // End: ir a última columna
-                        if (filaSeleccionada) {
-                            indiceColumna = totalColumnas - 1;
-                            if (celdaSeleccionada) {
-                                celdaSeleccionada.classList.remove('seleccionada');
-                            }
-                            const ultimaCelda = filaSeleccionada.children[totalColumnas - 1];
-                            ultimaCelda.classList.add('seleccionada');
-                            celdaSeleccionada = ultimaCelda;
-                            
-                            // Scroll al final
-                            if (contenedorTabla) {
-                                contenedorTabla.scrollLeft = contenedorTabla.scrollWidth;
-                            }
+                    } else if (filaSeleccionada) {
+                        indiceColumna = totalColumnas - 1;
+                        if (celdaSeleccionada) {
+                            celdaSeleccionada.classList.remove('seleccionada');
                         }
+                        const ultimaCelda = filaSeleccionada.children[totalColumnas - 1];
+                        ultimaCelda.classList.add('seleccionada');
+                        celdaSeleccionada = ultimaCelda;
+                        if (contenedorTabla) contenedorTabla.scrollLeft = contenedorTabla.scrollWidth;
                     }
                     break;
                     
@@ -1022,78 +1505,95 @@
                     indiceFila = Math.max(0, indiceFila - 10);
                     seleccionarFila(filas[indiceFila]);
                     break;
-                    
-                case 'Enter':
-                    e.preventDefault();
-                    if (filaSeleccionada) {
-                        const codSismed = filaSeleccionada.querySelector('td:nth-child(4)')?.textContent;
-                        console.log('Fila seleccionada:', codSismed);
-                    }
-                    break;
             }
         }
 
-        // Función para manejar doble clic (opcional)
         function manejarDobleClic(e) {
             if (e.target.tagName === 'TD') {
                 const fila = e.target.closest('tr');
                 const codSismed = fila.querySelector('td:nth-child(4)')?.textContent;
-                const descripcion = fila.querySelector('td:nth-child(5)')?.textContent;
-                
-                // Aquí puedes abrir un modal con detalles
-                alert(`Producto: ${codSismed}\nDescripción: ${descripcion}`);
+                alert(`Producto seleccionado: ${codSismed}`);
             }
         }
 
-        // Inicializar eventos cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
             const tabla = document.getElementById('registros');
             if (!tabla) return;
             
             const tbody = tabla.querySelector('tbody');
             
-            // Agregar evento clic a cada fila
             tbody.querySelectorAll('tr').forEach(fila => {
                 fila.addEventListener('click', function(e) {
                     seleccionarFila(this, e);
                 });
             });
             
-            // Agregar evento doble clic (opcional)
             tbody.addEventListener('dblclick', manejarDobleClic);
-            
-            // Agregar evento de teclado a nivel de documento
             document.addEventListener('keydown', navegarConTeclado);
-            
-            // Si hay paginación, necesitamos re-inicializar los eventos después de cada carga
-            // (Esto es útil si usas DataTables o AJAX)
         });
-
-        // Función para reinicializar eventos después de paginación o recarga AJAX
-        function reinicializarEventosTabla() {
-            const tabla = document.getElementById('registros');
-            if (!tabla) return;
-            
-            const tbody = tabla.querySelector('tbody');
-            
-            // Quitar eventos anteriores
-            tbody.querySelectorAll('tr').forEach(fila => {
-                fila.removeEventListener('click', seleccionarFila);
-            });
-            
-            // Agregar eventos nuevamente
-            tbody.querySelectorAll('tr').forEach(fila => {
-                fila.addEventListener('click', function(e) {
-                    seleccionarFila(this, e);
-                });
-            });
-        }
-
-        // Si usas paginación de Laravel (con recarga de página), no necesitas esto
-        // Pero si usas AJAX para recargar la tabla, llama a reinicializarEventosTabla()
-        // después de cada recarga
     </script>
-
-
+    
+    <script>
+        // Exportar tabla a Excel
+        document.getElementById('btn-exportar-excel').addEventListener('click', function() {
+            // Obtener la tabla
+            const tabla = document.getElementById('registros');
+            
+            // Crear una copia de la tabla para exportar (sin los selectores visuales)
+            const tablaExportar = tabla.cloneNode(true);
+            
+            // Remover clases de selección y estilos visuales
+            tablaExportar.querySelectorAll('.seleccionada').forEach(el => {
+                el.classList.remove('seleccionada');
+            });
+            
+            // Remover tooltips y elementos extra
+            tablaExportar.querySelectorAll('.minigrafico-cell .minigrafico').forEach(el => {
+                // Reemplazar el minigráfico con texto "Gráfico"
+                const textNode = document.createTextNode('Ver gráfico');
+                el.parentNode.replaceChild(textNode, el);
+            });
+            
+            // Crear el contenido HTML para exportar
+            const html = `
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Matriz de Disponibilidad</title>
+                    <style>
+                        th, td {
+                            border: 1px solid #ddd;
+                            padding: 5px;
+                            text-align: left;
+                        }
+                        th {
+                            background-color: #f2f2f2;
+                        }
+                        table {
+                            border-collapse: collapse;
+                            width: 100%;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>Matriz de Disponibilidad</h2>
+                    <p>Fecha de exportación: ${new Date().toLocaleString()}</p>
+                    ${tablaExportar.outerHTML}
+                </body>
+                </html>
+            `;
+            
+            // Crear blob y descargar
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `matriz_disponibilidad_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xls`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+    </script>
 
 @endsection

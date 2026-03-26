@@ -237,6 +237,8 @@ class MatrizController extends Controller
         $coleccion = $filtrarPorCampo($coleccion, $filtros['peti2023'], 'peti2023');
         $coleccion = $filtrarPorCampo($coleccion, $filtros['lista_1'], 'lista_1');
         
+        $coleccion = $this->procesarRegistrosProyectados($coleccion);
+
         // Mostrar todos los registros
         $registros = $coleccion;
         
@@ -254,17 +256,7 @@ class MatrizController extends Controller
             CALL sp_obtener_registros_matriz(?, ?, ?)
         ", [$codigo_pre, $codigo_sismed ?: null, $fechaReferencia]);
         
-        // Convertir a colección para mantener compatibilidad con paginate
-        // $collection = collect($results);
-        
-        // Crear un LengthAwarePaginator manual para mantener la interfaz
-        // $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-        //     $collection,
-        //     $collection->count(),
-        //     50,
-        //     1,
-        //     ['path' => request()->url(), 'query' => request()->query()]
-        // );
+
         
         // Retornar como Builder falso para mantener compatibilidad con paginate()
         // O mejor, retornar directamente la colección y ajustar el controller
@@ -667,340 +659,116 @@ class MatrizController extends Controller
     }
 
 
-    //CODIGO EN LARAVEL
-    // private function obtenerRegistrosMatriz($codigo_pre, $codigo_sismed, $fechaManual)
-    // {
-    //     $camposConsumo = 'form_det_filtrado.CREDHOSP + form_det_filtrado.DEFNAC + form_det_filtrado.EXO + form_det_filtrado.INTERSAN + form_det_filtrado.OTR_CONV + form_det_filtrado.SIS + form_det_filtrado.SOAT + form_det_filtrado.VENTA + form_det_filtrado.OTRAS_SAL';
+    /**
+     * Procesa los registros para agregar campos proyectados (cpma_proyectado, msd_proyectado, etc.)
+     */
+    private function procesarRegistrosProyectados($coleccion)
+    {
+        return $coleccion->map(function($item) {
+            // 1. Calcular suma de los últimos 11 meses (Mes2 a Mes12)
+            $sumaUltimos11Meses = $item->Mes2 + $item->Mes3 + $item->Mes4 + $item->Mes5 + 
+                                $item->Mes6 + $item->Mes7 + $item->Mes8 + $item->Mes9 + 
+                                $item->Mes10 + $item->Mes11 + $item->Mes12;
+            $sumaUltimos3meses = $item->Mes10 + $item->Mes11 + $item->Mes12;
+            // 2. Contar meses con consumo > 0 (de los últimos 11 meses)
+            $mesesConConsumo = 0;
+            $meses = [$item->Mes2, $item->Mes3, $item->Mes4, $item->Mes5, $item->Mes6, 
+                    $item->Mes7, $item->Mes8, $item->Mes9, $item->Mes10, $item->Mes11, $item->Mes12];
+            foreach ($meses as $mes) {
+                if ($mes > 0) $mesesConConsumo++;
+            }
+            
+            // 3. Calcular cpma_proyectado
+            $sumaTotal = $sumaUltimos11Meses + $item->cpma;
+            $divisor = $mesesConConsumo + ($item->cpma > 0 ? 1 : 0);
+            
+            if ($item->situacion_stock == 'SIN ROTACION') {
+                $item->cpma_proyectado = 0;
+            } elseif ($sumaTotal == 0 || $divisor == 0) {
+                $item->cpma_proyectado = 0;
+            } else {
+                $item->cpma_proyectado = round($sumaTotal / $divisor, 2);
+            }
+            
+            // 4. Calcular msd_proyectado
+            if ($item->cpma_proyectado > 0) {
+                $item->msd_proyectado = round($item->stockfinal_proyectado / $item->cpma_proyectado, 2);
+            } else {
+                $item->msd_proyectado = 0;
+            }
+            
+            // 5. Calcular consumo_cuatro_ult_meses_proyectado
+            if (in_array($item->situacion_stock, ['SIN CONSUMO', 'SIN DATOS'])) {
+                $item->consumo_cuatro_ult_meses_proyectado = 0;
+            } else {
+                $item->consumo_cuatro_ult_meses_proyectado = $sumaUltimos3meses + $item->cpma_proyectado;
+            }
+            
+            // 6. Calcular situacion_stock_proyectado
+            if ($item->lista_2 == 'Gran Volumen' && $item->msd_proyectado >= 1 && $item->msd_proyectado <= 6) {
+                $item->situacion_stock_proyectado = 'NORMOSTOCK';
+            } elseif ($item->stockfinal_proyectado > 0 && $item->cpma_proyectado > 0 && $item->msd_proyectado > 6) {
+                $item->situacion_stock_proyectado = 'SOBRESTOCK';
+            } elseif ($item->stockfinal_proyectado > 0 && $item->cpma_proyectado == 0 && $item->msd_proyectado == 0) {
+                $item->situacion_stock_proyectado = 'SIN ROTACION';
+            } elseif ($item->stockfinal_proyectado > 0 && $item->cpma_proyectado > 0 && $item->msd_proyectado >= 2 && $item->msd_proyectado <= 6) {
+                $item->situacion_stock_proyectado = 'NORMOSTOCK';
+            } elseif ($item->stockfinal_proyectado > 0 && $item->cpma_proyectado > 0 && $item->msd_proyectado > 0 && $item->msd_proyectado < 2) {
+                $item->situacion_stock_proyectado = 'SUBSTOCK';
+            } elseif ($item->stockfinal_proyectado == 0 && $item->cpma_proyectado > 0 && $item->msd_proyectado == 0 && $item->consumo_cuatro_ult_meses_proyectado > 0) {
+                $item->situacion_stock_proyectado = 'DESABASTECIDO';
+            } elseif ($item->stockfinal_proyectado == 0 && $item->cpma_proyectado > 0 && $item->msd_proyectado == 0 && $item->consumo_cuatro_ult_meses_proyectado == 0) {
+                $item->situacion_stock_proyectado = 'SIN CONSUMO';
+            } elseif ($item->stockfinal_proyectado == 0 && $item->cpma_proyectado == 0 && $item->msd_proyectado == 0 && $item->consumo_cuatro_ult_meses_proyectado == 0) {
+                $item->situacion_stock_proyectado = 'SIN DATOS';
+            } else {
+                $item->situacion_stock_proyectado = 'SIN CLASIFICAR';
+            }
+            
+            // 7. Calcular envio_sugerido
+            $item->envio_sugerido = $this->calcularEnvioSugerido($item);
+
+            return $item;
+        });
+    }
+
+
+    /**
+     * Calcula el envío sugerido basado en la situación del stock y el tipo de establecimiento
+    */
+    private function calcularEnvioSugerido($item)
+    {
+        // Situaciones que no requieren envío
+        $situacionesExcluidas = ['SIN ROTACION', 'SIN CONSUMO', 'SIN DATOS'];
+        if (in_array($item->situacion_stock_proyectado, $situacionesExcluidas)) {
+            return 0;
+        }
         
-    //     $fechaObj = \Carbon\Carbon::parse($fechaManual);
-    //     $fechaReferencia = $fechaObj->format('Y-m-d');
+        // Verificar si es establecimiento especial (PIAS, BAP, 024F01)
+        $nombreIpress = strtoupper($item->nombre_ipress ?? '');
+        $esEstablecimientoEspecial = (
+            strpos($nombreIpress, 'PIAS') !== false || 
+            strpos($nombreIpress, 'BAP') !== false ||
+            $item->cod_ipress == '024F01'
+        );
         
-    //     // 🧱 Construimos la subconsulta dinámicamente
-    //     $subQuery = "
-    //         SELECT
-    //             CODIGO_PRE,
-    //             CODIGO_MED,
-    //             FECHA,
-    //             ANNOMES,
-    //             CREDHOSP,
-    //             DEFNAC,
-    //             EXO,
-    //             INTERSAN,
-    //             OTR_CONV,
-    //             SIS,
-    //             SOAT,
-    //             VENTA,
-    //             OTRAS_SAL,
-    //             STOCK_FIN,
-    //             PRECIO,
-    //             ROW_NUMBER() OVER (
-    //                 PARTITION BY CODIGO_PRE, CODIGO_MED
-    //                 ORDER BY FECHA DESC, STOCK_FIN ASC
-    //             ) as rn_stock,
-    //             INGRE,
-    //             FEC_EXP
-    //         FROM form_det
-    //         WHERE FECHA >= DATE_SUB('{$fechaReferencia}', INTERVAL 12 MONTH)
-    //         AND CODIGO_PRE = ?";
+        // Si es establecimiento especial: enviar para 2 meses
+        if ($esEstablecimientoEspecial) {
+            $necesidad = ($item->cpma_proyectado * 2) - $item->stockfinal_proyectado;
+            return max(0, round($necesidad, 0));
+        }
+        
+        // Si no es especial y MSD < 3: enviar para 4 meses
+        if ($item->msd_proyectado < 3) {
+            $necesidad = ($item->cpma_proyectado * 4) - $item->stockfinal_proyectado;
+            return max(0, round($necesidad, 0));
+        }
+        
+        // Si MSD >= 3: no enviar
+        return 0;
+    }
 
-    //     $bindings = [$codigo_pre];
 
-    //     // Si viene cod_sismed, lo agregamos al filtro
-    //     if (!empty($codigo_sismed)) {
-    //         $subQuery .= " AND CODIGO_MED = ?";
-    //         $bindings[] = $codigo_sismed;
-    //     }
-
-    //     $formDetFiltrado = DB::raw("({$subQuery}) AS form_det_filtrado");
-    
-    //     // 🧱 Paso 1: Construimos la consulta base
-    //     $baseQuery = Almacen::query()
-    //         ->join($formDetFiltrado, 'almacenes.cod_ipress', '=', 'form_det_filtrado.CODIGO_PRE')
-    //         ->join('productos', 'productos.cod_sismed', '=', 'form_det_filtrado.CODIGO_MED')
-    //         ->where('productos.estado', 'C')
-    //         ->select(
-    //             'almacenes.id',
-    //             'productos.id as producto_id',
-    //             DB::raw('ANY_VALUE(almacenes.disa_diresa) as disa_diresa'),
-    //             DB::raw('ANY_VALUE(almacenes.ue_mef) as ue_mef'),
-    //             DB::raw('ANY_VALUE(almacenes.almacen_pertenece) as almacen_pertenece'),
-    //             DB::raw('ANY_VALUE(almacenes.red) as red'),
-    //             DB::raw('ANY_VALUE(almacenes.microred) as microred'),
-    //             DB::raw('ANY_VALUE(almacenes.distrito) as distrito'),
-    //             'almacenes.cod_ipress',
-    //             DB::raw('ANY_VALUE(almacenes.nombre_ipress) as nombre_ipress'),
-    //             DB::raw('ANY_VALUE(almacenes.tipo_establecimiento) as tipo_establecimiento'),
-    //             DB::raw('ANY_VALUE(almacenes.ipress_dengue) as ipress_dengue'),
-    //             DB::raw('ANY_VALUE(almacenes.nivel) as nivel'),
-    //             DB::raw('ANY_VALUE(almacenes.universo_ipress) as universo_ipress'),
-
-    //             'productos.cod_sismed',
-    //             DB::raw('ANY_VALUE(productos.cod_unificado) as cod_unificado'),
-    //             DB::raw('ANY_VALUE(productos.tipo_prod) as tipo_prod'),
-    //             DB::raw('ANY_VALUE(productos.tipo_abastecimiento) as tipo_abastecimiento'),
-    //             DB::raw('ANY_VALUE(productos.peti2023) as peti2023'),
-    //             DB::raw('ANY_VALUE(productos.estado) as estado'),
-    //             DB::raw('ANY_VALUE(productos.producto_fed_actual) as producto_fed_actual'),
-    //             DB::raw('ANY_VALUE(productos.producto_cap_eca) as producto_cap_eca'),
-    //             DB::raw('ANY_VALUE(productos.iras) as iras'),
-    //             DB::raw('ANY_VALUE(productos.dengue) as dengue'),
-    //             DB::raw('ANY_VALUE(productos.dengue_grupo_a) as dengue_grupo_a'),
-    //             DB::raw('ANY_VALUE(productos.dengue_grupo_b) as dengue_grupo_b'),
-    //             DB::raw('ANY_VALUE(productos.dengue_grupo_c) as dengue_grupo_c'),
-    //             DB::raw('ANY_VALUE(productos.lista_1) as lista_1'),
-    //             DB::raw('ANY_VALUE(productos.lista_2) as lista_2'),
-
-    //             DB::raw('ANY_VALUE(productos.descripcion_cubo) as descripcion_cubo'),
-    //             DB::raw('ANY_VALUE(productos.descripcion_producto) as descripcion_producto'),
-    //             DB::raw('ANY_VALUE(productos.descripcion_producto_alt) as descripcion_producto_alt'),
-
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes1"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes2"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes3"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes4"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes5"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes6"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes7"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes8"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes9"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes10"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes11"),
-    //             DB::raw("SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) as Mes12"),
-
-    //             DB::raw("
-    //                 SUM(CASE 
-    //                     WHEN form_det_filtrado.ANNOMES = DATE_FORMAT('{$fechaReferencia}', '%Y%m') 
-    //                     THEN form_det_filtrado.STOCK_FIN 
-    //                     ELSE 0 
-    //                 END) as StockFinal
-    //             "),
-
-    //             DB::raw("
-    //                 SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') 
-    //                     THEN form_det_filtrado.INGRE 
-    //                     ELSE 0 
-    //                 END) as ingre
-    //             "),
-    //             DB::raw('ANY_VALUE(form_det_filtrado.FEC_EXP) as fec_exp'),
-
-    //             DB::raw("SUM({$camposConsumo}) as consumo_total"),
-    //             //SOLAMENTE DIVIDIR ENTRE LAS CANTIDADES DE LOS MESES QUE HUBO CONSUNO
-    //             //SI HUBO 10 MESES CONSUMO /10
-    //             DB::raw("
-    //                 CASE
-    //                     WHEN (
-    //                         -- Contamos los meses con consumo > 0
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END)
-    //                     ) > 0
-    //                     THEN ROUND(
-    //                         (
-    //                             -- Suma total de consumo de los 12 meses
-    //                             SUM({$camposConsumo})
-    //                         ) / 
-    //                         (
-    //                             -- Divisor: suma de 1 por cada mes con consumo > 0
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                             (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END)
-    //                         )
-    //                     )
-    //                     ELSE 0
-    //                 END as cpma
-    //             "),
-    //             DB::raw("SUM(
-    //                 CASE
-    //                     WHEN DATE_FORMAT(form_det_filtrado.FECHA, '%Y%m') BETWEEN DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') AND DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m')
-    //                     THEN ({$camposConsumo}) ELSE 0
-    //                 END
-    //             ) as consumo_ultimos_4meses"),
-
-    //             DB::raw("
-    //                 CASE
-    //                     WHEN (
-    //                         -- Verificamos que cpma > 0 (usando la misma lógica de tu cpma)
-    //                         CASE
-    //                             WHEN (
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                 (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END)
-    //                             ) > 0
-    //                             THEN ROUND(
-    //                                 SUM({$camposConsumo}) / 
-    //                                 (
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END)
-    //                                 )
-    //                             )
-    //                             ELSE 0
-    //                         END
-    //                     ) > 0
-    //                     THEN ROUND(
-    //                         SUM(CASE 
-    //                             WHEN form_det_filtrado.ANNOMES = DATE_FORMAT('{$fechaReferencia}', '%Y%m') 
-    //                             THEN form_det_filtrado.STOCK_FIN 
-    //                             ELSE 0 
-    //                         END) / 
-    //                         (
-    //                             -- cpma
-    //                             CASE
-    //                                 WHEN (
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                     (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END)
-    //                                 ) > 0
-    //                                 THEN 
-    //                                     SUM({$camposConsumo}) / 
-    //                                     (
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 10 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 9 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 8 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 7 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 6 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 5 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 4 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 3 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 2 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL 0 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END) +
-    //                                         (CASE WHEN SUM(CASE WHEN DATE_FORMAT(form_det_filtrado.FECHA,'%Y%m') = DATE_FORMAT('{$fechaReferencia}' - INTERVAL -1 MONTH,'%Y%m') THEN ({$camposConsumo}) ELSE 0 END) > 0 THEN 1 ELSE 0 END)
-    //                                     )
-                                    
-    //                                 ELSE 0
-    //                             END
-    //                         ),
-    //                         2
-    //                     )
-    //                     ELSE 0
-    //                 END as meses_prov
-    //             ")
-    //             ,
-
-    //             DB::raw("
-    //                 ROUND(
-    //                     SUM(CASE 
-    //                         WHEN form_det_filtrado.ANNOMES = DATE_FORMAT('{$fechaReferencia}', '%Y%m') 
-    //                         THEN form_det_filtrado.PRECIO
-    //                         ELSE 0 
-    //                     END),
-    //                     2
-    //                 ) as precio
-    //             "),
-
-    //            DB::raw("
-    //                 ROUND(
-    //                     SUM(CASE 
-    //                         WHEN form_det_filtrado.ANNOMES = DATE_FORMAT('{$fechaReferencia}', '%Y%m') 
-    //                         THEN form_det_filtrado.STOCK_FIN 
-    //                         ELSE 0 
-    //                     END)  *
-    //                     SUM(CASE 
-    //                         WHEN form_det_filtrado.ANNOMES = DATE_FORMAT('{$fechaReferencia}', '%Y%m') 
-    //                         THEN form_det_filtrado.PRECIO
-    //                         ELSE 0 
-    //                     END),
-    //                 2) as monto
-    //             "),
-    //             DB::raw('TIMESTAMPDIFF(MONTH, CURDATE(), ANY_VALUE(form_det_filtrado.FEC_EXP)) as meses_para_vencimiento'),
-    //             DB::raw("
-    //                 CASE
-    //                     WHEN MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.STOCK_FIN END) > 0 THEN
-    //                         CASE
-    //                             WHEN TIMESTAMPDIFF(
-    //                                 MONTH,
-    //                                 DATE('{$fechaManual}'),
-    //                                 MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.FEC_EXP END)
-    //                             ) <= 0 THEN 'VENCIDO'
-    //                             WHEN TIMESTAMPDIFF(
-    //                                 MONTH,
-    //                                 DATE('{$fechaManual}'),
-    //                                 MAX(CASE WHEN form_det_filtrado.rn_stock = 1 THEN form_det_filtrado.FEC_EXP END)
-    //                             ) > 6 THEN ''
-    //                             ELSE 'POR VENCER'
-    //                         END
-    //                     ELSE ''
-    //                 END as sit_fecha_vcmto
-    //             ")
-    //         )
-    //         ->groupBy(
-    //             'almacenes.id',
-    //             'almacenes.cod_ipress',
-    //             'productos.cod_sismed',
-    //             'productos.id');
-
-    //     // Asignamos los bindings a la subconsulta
-    //     foreach ($bindings as $binding) {
-    //         $baseQuery->addBinding($binding, 'join');
-    //     }
-
-    //     // Paso 2: Envuelve la base y agrega situacion_stock
-    //     $wrappedQuery = DB::table(DB::raw("({$baseQuery->toSql()}) as base"))
-    //         ->mergeBindings($baseQuery->getQuery())
-    //         ->select('*', DB::raw("
-    //             CASE
-    //                 WHEN StockFinal < 0 THEN 'SALDO NEGATIVO'
-    //                 WHEN lista_1 = 'Gran Volumen' AND meses_prov BETWEEN 1 AND 6 THEN 'NORMOSTOCK'
-    //                 WHEN StockFinal > 0 AND cpma > 0 AND meses_prov > 6 THEN 'SOBRESTOCK'
-    //                 WHEN StockFinal > 0 AND cpma = 0 AND meses_prov = 0 THEN 'SIN ROTACION'
-    //                 WHEN StockFinal > 0 AND cpma > 0 AND meses_prov BETWEEN 2 AND 6 THEN 'NORMOSTOCK'
-    //                 WHEN StockFinal > 0 AND cpma > 0 AND meses_prov > 0 AND meses_prov < 2 THEN 'SUBSTOCK'
-    //                 WHEN StockFinal = 0 AND cpma > 0 AND meses_prov = 0 AND consumo_ultimos_4meses > 0 THEN 'DESABASTECIDO'
-    //                 WHEN StockFinal = 0 AND cpma > 0 AND meses_prov = 0 AND consumo_ultimos_4meses = 0 THEN 'SIN CONSUMO'
-    //                 WHEN StockFinal = 0 AND cpma = 0 AND meses_prov = 0 AND consumo_ultimos_4meses = 0 THEN 'SIN DATOS'
-    //                 ELSE 'SIN CLASIFICAR'
-    //             END as situacion_stock
-    //         "))
-    //         ->orderBy('id', 'desc');
-
-    //     return $wrappedQuery;
-    // }
 
 }
 
