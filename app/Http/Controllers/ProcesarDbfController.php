@@ -147,7 +147,7 @@ class ProcesarDbfController extends Controller
             \Log::channel('daily')->info('Contenido ZIP leído: ' . strlen($fileContent) . ' bytes');
             
             $response = Http::withHeaders([
-                'Authorization' => 'Token ' . $config->token,
+                // 'Authorization' => 'Token ' . $config->token,
                 'Accept' => 'application/json',
             ])->timeout(300) // 5 minutos de timeout
             ->attach(
