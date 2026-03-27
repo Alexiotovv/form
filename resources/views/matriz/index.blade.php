@@ -334,6 +334,112 @@
             color: #cc7000 !important;
         }
     </style>
+
+    <style>
+        /* Estilos para el icono de filtro en encabezado */
+        .th-filter {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px;
+        }
+        
+        .filter-icon {
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: #6c757d;
+            transition: color 0.2s;
+            padding: 2px;
+            border-radius: 3px;
+        }
+        
+        .filter-icon:hover {
+            color: #0d6efd;
+            background-color: #e9ecef;
+        }
+        
+        .filter-icon.active {
+            color: #0d6efd;
+        }
+        
+        /* Modal de filtro */
+        .filter-modal {
+            display: none;
+            position: absolute;
+            z-index: 10000;
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 200px;
+            max-width: 300px;
+            max-height: 300px;
+            overflow: hidden;
+        }
+        
+        .filter-modal-header {
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-modal-body {
+            padding: 8px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .filter-modal-footer {
+            padding: 8px 12px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            font-size: 0.7rem;
+        }
+        
+        .filter-option input {
+            margin: 0;
+        }
+        
+        .filter-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        
+        .filter-option:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .btn-filter-sm {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+        }
+        
+        .filter-badge {
+            display: inline-block;
+            background-color: #0d6efd;
+            color: white;
+            font-size: 0.55rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+    </style>
 @endsection
 
 @section('titulo_pagina')
@@ -656,7 +762,7 @@
             <div class="card-resumen">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>📦 Disponibilidad</span>
-                    <span class="text-muted">Total: S/ {{ number_format($totalMontoMostrar, 2) }}</span>
+                    <!-- <span class="text-muted">Total: S/ {{ number_format($totalMontoMostrar, 2) }}</span> -->
                 </div>
                 <div class="card-body">
                     <!-- Tabla de stock -->
@@ -837,7 +943,7 @@
             <div class="card-resumen">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>📊 Disponibilidad Proyectada</span>
-                    <span class="text-muted">Total: S/ {{ number_format($totalMontoProyectado, 2) }}</span>
+                    <!-- <span class="text-muted">Total: S/ {{ number_format($totalMontoProyectado, 2) }}</span> -->
                 </div>
                 <div class="card-body">
                     @php
@@ -1053,7 +1159,7 @@
     <div class="mt-2 text-end">
         <small class="text-muted">Total de registros: {{ $registros->count() }}</small>
         <button id="btn-exportar-excel" class="btn btn-success btn-sm">📥 Exportar a Excel</button>
-
+        <button type="button" id="btn-limpiar-filtros-columna" class="btn btn-outline-secondary btn-sm">🧹 Limpiar Filtros de Columna</button>
     </div>
     <div class="table-responsive">
         <table id="registros" class="table table-bordered table-hover table-striped">
@@ -1096,8 +1202,22 @@
                     <th class="proyectado">CPMA PROYEC.</th>
                     <th class="proyectado">CONSUMO_4M_PROYEC.</th>
                     <th class="proyectado">MSD PROYEC.</th>
-                    <th class="proyectado">SIT.STOCK_PROYEC</th>
-                    <th class="envio-sugerido">ENVÍO SUGERIDO</th>
+                    <th class="proyectado">
+                        <div class="th-filter">
+                            <span>SIT.STOCK_PROYEC</span>
+                            <span class="filter-icon" data-columna="sit_stock_proyec" data-titulo="Situación Stock Proyectado">
+                                🔽
+                            </span>
+                        </div>
+                    </th>
+                    <th class="envio-sugerido">
+                        <div class="th-filter">
+                            <span>ENVÍO SUGERIDO</span>
+                            <span class="filter-icon" data-columna="envio_sugerido" data-titulo="Envío Sugerido">
+                                🔽
+                            </span>
+                        </div>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -1595,5 +1715,164 @@
             URL.revokeObjectURL(url);
         });
     </script>
+
+    <script>
+        // Filtro por columna
+        $(document).ready(function() {
+            let filtroActivo = {};
+            
+            // Obtener valores únicos de la columna
+            function obtenerValoresUnicos(columna) {
+                const valores = new Set();
+                $('#registros tbody tr').each(function() {
+                    let valor;
+                    if (columna === 'envio_sugerido') {
+                        valor = $(this).find('td:last').text().trim();
+                    } else if (columna === 'sit_stock_proyec') {
+                        // La columna SIT.STOCK_PROYEC está en la penúltima posición
+                        // Ajusta el índice según tu tabla
+                        valor = $(this).find('td:nth-last-child(2)').text().trim();
+                    }
+                    if (valor && valor !== '') {
+                        valores.add(valor);
+                    }
+                });
+                return Array.from(valores).sort();
+            }
+            
+            // Aplicar filtro a la tabla
+            function aplicarFiltroColumna(columna, valoresSeleccionados) {
+                $('#registros tbody tr').each(function() {
+                    let mostrar = true;
+                    let valor;
+                    
+                    if (columna === 'envio_sugerido') {
+                        valor = $(this).find('td:last').text().trim();
+                    } else if (columna === 'sit_stock_proyec') {
+                        valor = $(this).find('td:nth-last-child(2)').text().trim();
+                    }
+                    
+                    if (valoresSeleccionados && valoresSeleccionados.length > 0) {
+                        if (!valoresSeleccionados.includes(valor)) {
+                            mostrar = false;
+                        }
+                    }
+                    
+                    $(this).toggle(mostrar);
+                });
+                
+                // Actualizar contador de registros visibles
+                const visibles = $('#registros tbody tr:visible').length;
+                const total = $('#registros tbody tr').length;
+                $('.total-registros-filtrados').remove();
+                $('.table-responsive').before(`<div class="total-registros-filtrados small text-muted mb-1">Mostrando ${visibles} de ${total} registros</div>`);
+                
+                // Guardar estado del filtro
+                if (valoresSeleccionados && valoresSeleccionados.length > 0) {
+                    filtroActivo[columna] = valoresSeleccionados;
+                    $(`.filter-icon[data-columna="${columna}"]`).addClass('active');
+                } else {
+                    delete filtroActivo[columna];
+                    $(`.filter-icon[data-columna="${columna}"]`).removeClass('active');
+                }
+            }
+            
+            // Crear y mostrar modal de filtro
+            function mostrarModalFiltro(columna, titulo, event) {
+                // Eliminar modal existente
+                $('.filter-modal').remove();
+                
+                const valores = obtenerValoresUnicos(columna);
+                const valoresActivos = filtroActivo[columna] || [];
+                
+                const modal = $(`
+                    <div class="filter-modal">
+                        <div class="filter-modal-header">
+                            <span>Filtrar por ${titulo}</span>
+                            <span class="filter-icon-close" style="cursor:pointer;">✕</span>
+                        </div>
+                        <div class="filter-modal-body">
+                            <div class="filter-option" style="border-bottom: 1px solid #e9ecef; margin-bottom: 5px;">
+                                <input type="checkbox" id="select-all-${columna}" class="select-all">
+                                <label for="select-all-${columna}">Seleccionar todos</label>
+                            </div>
+                            <div class="filter-options-list">
+                                ${valores.map(valor => `
+                                    <div class="filter-option">
+                                        <input type="checkbox" class="filter-checkbox" value="${valor}" ${valoresActivos.includes(valor) ? 'checked' : ''}>
+                                        <label>${valor}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="filter-modal-footer">
+                            <button class="btn btn-sm btn-secondary btn-filter-sm limpiar-filtro">Limpiar</button>
+                            <button class="btn btn-sm btn-primary btn-filter-sm aplicar-filtro">Aplicar</button>
+                        </div>
+                    </div>
+                `);
+                
+                // Posicionar modal
+                const $icon = $(event.target).closest('.filter-icon');
+                const offset = $icon.offset();
+                modal.css({
+                    top: offset.top + $icon.outerHeight() + 5,
+                    left: offset.left - 150,
+                    display: 'block'
+                });
+                
+                $('body').append(modal);
+                
+                // Eventos del modal
+                modal.find('.filter-icon-close, .btn-secondary').on('click', function() {
+                    modal.remove();
+                });
+                
+                modal.find('.select-all').on('change', function() {
+                    const checked = $(this).is(':checked');
+                    modal.find('.filter-checkbox').prop('checked', checked);
+                });
+                
+                modal.find('.limpiar-filtro').on('click', function() {
+                    modal.find('.filter-checkbox').prop('checked', false);
+                    modal.find('.select-all').prop('checked', false);
+                });
+                
+                modal.find('.aplicar-filtro').on('click', function() {
+                    const seleccionados = modal.find('.filter-checkbox:checked').map(function() {
+                        return $(this).val();
+                    }).get();
+                    
+                    aplicarFiltroColumna(columna, seleccionados);
+                    modal.remove();
+                });
+                
+                // Cerrar al hacer clic fuera
+                $(document).one('click', function(e) {
+                    if (!$(e.target).closest('.filter-modal').length && !$(e.target).closest('.filter-icon').length) {
+                        modal.remove();
+                    }
+                });
+            }
+            
+            // Evento clic en icono de filtro
+            $(document).on('click', '.filter-icon', function(e) {
+                e.stopPropagation();
+                const columna = $(this).data('columna');
+                const titulo = $(this).data('titulo');
+                mostrarModalFiltro(columna, titulo, e);
+            });
+        });
+
+        // Limpiar todos los filtros de columna
+        $('#btn-limpiar-filtros-columna').on('click', function() {
+            filtroActivo = {};
+            $('#registros tbody tr').show();
+            $('.filter-icon').removeClass('active');
+            $('.total-registros-filtrados').remove();
+            $('.filter-badge').remove();
+        });
+
+    </script>                    
 
 @endsection
