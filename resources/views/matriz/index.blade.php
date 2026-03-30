@@ -152,9 +152,9 @@
         
         .filtros-basicos {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 12px;
+            grid-template-columns: repeat(3, 2fr);
+            gap: 3px;
+            margin-bottom: 5px;
         }
         
         /* Achicar el input de fecha */
