@@ -439,6 +439,53 @@
             border-radius: 10px;
             margin-left: 5px;
         }
+
+        /* === COLUMNAS FIJAS (primera y segunda) === */
+.table-responsive {
+    position: relative;
+    overflow-x: auto;
+    /* max-height ya lo tienes */
+}
+
+/* Primera columna (DESC PROD) - índice 1 */
+#registros th:nth-child(1),
+#registros td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 11;
+    background-color: #f8f9fa;           /* fondo sólido para evitar transparencias */
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15); /* sombra sutil para separar */
+    border-right: 2px solid #dee2e6;
+}
+
+/* Segunda columna (COD_SISMED) - índice 2 */
+#registros th:nth-child(2),
+#registros td:nth-child(2) {
+    position: sticky;
+    left: 220px;                         /* ancho aproximado de la columna 1 (ajusta si es necesario) */
+    z-index: 10;
+    background-color: #f8f9fa;
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+    border-right: 1px solid #dee2e6;
+}
+
+/* Cabeceras de las columnas fijadas (más prioridad) */
+#registros thead th:nth-child(1),
+#registros thead th:nth-child(2) {
+    z-index: 20;                         /* más alto que el body y que el sticky header */
+    background-color: #f8f9fa !important;
+    top: 0;                              /* mantiene compatibilidad con sticky header */
+}
+
+/* Asegura que el sticky del header funcione bien con las columnas fijas */
+#registros thead th {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    background-color: #f8f9fa !important;
+}
+
+
     </style>
 @endsection
 
