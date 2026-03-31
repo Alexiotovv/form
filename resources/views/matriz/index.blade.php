@@ -462,7 +462,7 @@
 #registros th:nth-child(2),
 #registros td:nth-child(2) {
     position: sticky;
-    left: 220px;                         /* ancho aproximado de la columna 1 (ajusta si es necesario) */
+    left: 420px;                         /* ancho aproximado de la columna 1 (ajusta si es necesario) */
     z-index: 10;
     background-color: #f8f9fa;
     box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
@@ -485,6 +485,12 @@
     background-color: #f8f9fa !important;
 }
 
+#registros th:nth-child(1),
+#registros td:nth-child(1) {
+    min-width: 420px;   /* ancho fijo para que left: 220px funcione correctamente */
+    max-width: 280px;
+    white-space: normal; /* permite salto de línea si el nombre es muy largo */
+}
 
     </style>
 @endsection
