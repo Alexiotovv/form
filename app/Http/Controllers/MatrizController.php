@@ -14,164 +14,7 @@ use Illuminate\Support\Facades\DB;
 class MatrizController extends Controller
 {
 
-    //INDEX DESDE EL CODIGO LARAVEL
-    // public function index(Request $request)
-    // {
-    //     $codigo_pre = $request->input('cod_ipress');
-    //     $codigo_sismed = $request->input('cod_sismed');
-    //     $fechaManual = $request->input('fin_mes') ?? date('Y-m-t');
-
-    //     // Validar fecha
-    //     if (!strtotime($fechaManual)) {
-    //         $fechaManual = date('Y-m-t');
-    //     }
-
-    //     if (empty($codigo_pre)) {
-    //         $registros = new \Illuminate\Pagination\LengthAwarePaginator(
-    //             collect(),
-    //             0,
-    //             50,
-    //             1
-    //         );
-    //         return view('matriz.index', compact('registros'));
-    //     }
-
-    //     // ✅ Llamamos a la función reutilizable
-    //     $query = $this->obtenerRegistrosMatriz($codigo_pre, $codigo_sismed, $fechaManual);
-
-    //     // ✅ Paginamos
-    //     $registros = $query->paginate(50);
-
-    //     return view('matriz.index', compact('registros'));
-    // }
-
-    //INDEX LLAMAR AL STORE PROCEDURE
-    // public function index(Request $request)
-    // {
-    //     $codigo_pre = $request->input('cod_ipress');
-    //     $codigo_sismed = $request->input('cod_sismed');
-    //     $fechaManual = $request->input('fin_mes') ?? date('Y-m-t');
-        
-    //     // Validar fecha
-    //     if (!strtotime($fechaManual)) {
-    //         $fechaManual = date('Y-m-t');
-    //     }
-        
-    //     if (empty($codigo_pre)) {
-    //         $registros = new \Illuminate\Pagination\LengthAwarePaginator(
-    //             collect(),
-    //             0,
-    //             50,
-    //             1
-    //         );
-    //         return view('matriz.index', compact('registros'));
-    //     }
-        
-    //     // ✅ Llamamos a la función con stored procedure
-    //     $registros = $this->obtenerRegistrosMatriz($codigo_pre, $codigo_sismed, $fechaManual);
-        
-    //     // Paginación manual ya que SP no soporta paginate() nativo
-    //     $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?? 1;
-    //     $perPage = 50;
-    //     $registros = new \Illuminate\Pagination\LengthAwarePaginator(
-    //         $registros->forPage($currentPage, $perPage),
-    //         $registros->count(),
-    //         $perPage,
-    //         $currentPage,
-    //         ['path' => request()->url(), 'query' => request()->query()]
-    //     );
-        
-    //     return view('matriz.index', compact('registros'));
-    // }
-
-    // public function index(Request $request)
-    // {
-    //     $codigo_pre = $request->input('cod_ipress');
-    //     $codigo_sismed = $request->input('cod_sismed');
-    //     $fechaManual = $request->input('fin_mes') ?? date('Y-m-t');
-        
-    //     // Validar fecha
-    //     if (!strtotime($fechaManual)) {
-    //         $fechaManual = date('Y-m-t');
-    //     }
-        
-    //     // Capturar filtros adicionales
-    //     $filtros = [
-    //         'tip_sum' => $request->input('tip_sum', []),
-    //         'tipo_prod' => $request->input('tipo_prod', []),
-    //         'tipo_abastecimiento' => $request->input('tipo_abastecimiento', []),
-    //         'tipo_establecimiento' => $request->input('tipo_establecimiento', []),
-    //         'peti2023' => $request->input('peti2023', []),
-    //         'lista_1' => $request->input('lista_1', []),
-    //     ];
-        
-    //     if (empty($codigo_pre)) {
-    //         $registros = collect();
-    //         // $registros = new \Illuminate\Pagination\LengthAwarePaginator(
-    //         //     collect(),
-    //         //     0,
-    //         //     50,
-    //         //     1
-    //         // );
-    //         return view('matriz.index', compact('registros', 'filtros'));
-    //     }
-        
-    //     // Obtener registros del SP
-    //     $coleccion = $this->obtenerRegistrosMatriz($codigo_pre, $codigo_sismed, $fechaManual);
-        
-    //     // Aplicar filtros adicionales en PHP
-    //     if (!empty($filtros['tip_sum'])) {
-    //         $coleccion = $coleccion->filter(function($item) use ($filtros) {
-    //             return in_array($item->TIPSUM, $filtros['tip_sum']);
-    //         });
-    //     }
-        
-    //     if (!empty($filtros['tipo_prod'])) {
-    //         $coleccion = $coleccion->filter(function($item) use ($filtros) {
-    //             return in_array($item->tipo_prod, $filtros['tipo_prod']);
-    //         });
-    //     }
-        
-    //     if (!empty($filtros['tipo_abastecimiento'])) {
-    //         $coleccion = $coleccion->filter(function($item) use ($filtros) {
-    //             return in_array($item->tipo_abastecimiento, $filtros['tipo_abastecimiento']);
-    //         });
-    //     }
-        
-    //     if (!empty($filtros['tipo_establecimiento'])) {
-    //         $coleccion = $coleccion->filter(function($item) use ($filtros) {
-    //             return in_array($item->tipo_establecimiento, $filtros['tipo_establecimiento']);
-    //         });
-    //     }
-        
-    //     if (!empty($filtros['peti2023'])) {
-    //         $coleccion = $coleccion->filter(function($item) use ($filtros) {
-    //             return in_array($item->peti2023, $filtros['peti2023']);
-    //         });
-    //     }
-        
-    //     if (!empty($filtros['lista_1'])) {
-    //         $coleccion = $coleccion->filter(function($item) use ($filtros) {
-    //             return in_array($item->lista_1, $filtros['lista_1']);
-    //         });
-    //     }
-        
-    //     // Paginación manual
-    //     // $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?? 1;
-    //     // $perPage = 10000;
-    //     // $registros = new \Illuminate\Pagination\LengthAwarePaginator(
-    //     //     $coleccion->forPage($currentPage, $perPage),
-    //     //     $coleccion->count(),
-    //     //     $perPage,
-    //     //     $currentPage,
-    //     //     ['path' => $request->url(), 'query' => $request->query()]
-    //     // );
-
-    //     $registros=$coleccion;
-        
-    //     return view('matriz.index', compact('registros', 'filtros'));
-    // }
-
+    
     public function index(Request $request)
     {
         $codigo_pre = $request->input('cod_ipress');
@@ -238,10 +81,10 @@ class MatrizController extends Controller
         $coleccion = $filtrarPorCampo($coleccion, $filtros['lista_1'], 'lista_1');
         
         $coleccion = $this->procesarRegistrosProyectados($coleccion);
+        $coleccion = $coleccion->sortBy('descripcion_producto_alt', SORT_NATURAL | SORT_FLAG_CASE);
 
         // Mostrar todos los registros
         $registros = $coleccion;
-        
         return view('matriz.index', compact('registros', 'filtros'));
     }
 

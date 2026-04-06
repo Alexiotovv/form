@@ -151,7 +151,7 @@
         }
         
         .filtros-basicos {
-            display: grid;
+            /* display: grid; */
             grid-template-columns: repeat(3, 2fr);
             gap: 3px;
             margin-bottom: 5px;
@@ -492,6 +492,35 @@
     white-space: normal; /* permite salto de línea si el nombre es muy largo */
 }
 
+    /* Ocultar/Mostrar filtros avanzados */
+.filtros-avanzados-wrapper {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.filtros-avanzados-wrapper.collapsed {
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0;
+}
+
+.btn-toggle-filtros {
+    width: 100%;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+}
+
+.btn-toggle-filtros i {
+    transition: transform 0.3s ease;
+}
+
+.btn-toggle-filtros.collapsed i {
+    transform: rotate(-90deg);
+}
+
+
     </style>
 @endsection
 
@@ -814,7 +843,7 @@
             <!-- Tarjeta única: Situación de Stock y Vencimiento -->
             <div class="card-resumen">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>📦 Disponibilidad</span>
+                    <span>📦 Disponibilidad <span id="mes-actual" class="text-muted fw-normal"></span></span>
                     <!-- <span class="text-muted">Total: S/ {{ number_format($totalMontoMostrar, 2) }}</span> -->
                 </div>
                 <div class="card-body">
@@ -995,7 +1024,7 @@
             <!-- Cuadro: Disponibilidad Proyectada -->
             <div class="card-resumen">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>📊 Disponibilidad Proyectada</span>
+                    <span>📊 Disponibilidad Proyectada <span id="mes-proyectado" class="text-muted fw-normal"></span></span>
                     <!-- <span class="text-muted">Total: S/ {{ number_format($totalMontoProyectado, 2) }}</span> -->
                 </div>
                 <div class="card-body">
@@ -1218,7 +1247,7 @@
         <table id="registros" class="table table-bordered table-hover table-striped">
             <thead>
                 <tr>
-                    <th>DESC PROD</th>
+                    <th>PRODUCTO</th>
                     <th>COD_SISMED</th>
                     <th>TIPO PROD</th>
                     <th>TIPO ABAST</th>
@@ -1276,7 +1305,7 @@
             <tbody>
                 @foreach($registros as $reg)
                 <tr>
-                    <td>{{ $reg->descripcion_producto }}</td>
+                    <td>{{ $reg->descripcion_producto_alt }}</td>
                     <td>{{ $reg->cod_sismed }}</td>
                     <td>{{ $reg->tipo_prod }}</td>
                     <td>{{ $reg->tipo_abastecimiento }}</td>
@@ -1927,5 +1956,49 @@
         });
 
     </script>                    
+
+    <script>
+        // Función para mostrar el nombre del mes
+        function actualizarNombresMeses() {
+            const fechaInput = document.getElementById('fechaFinMes');
+            if (!fechaInput) return;
+
+            const fechaStr = fechaInput.value;
+            if (!fechaStr) return;
+
+            const fecha = new Date(fechaStr);
+            const opciones = { month: 'long', year: 'numeric' };
+            
+            // Mes actual (del filtro)
+            const nombreMesActual = fecha.toLocaleDateString('es-ES', opciones)
+                .replace(/^\w/, c => c.toUpperCase()); // Capitalizar primera letra
+
+            // Mes siguiente (proyectado)
+            fecha.setMonth(fecha.getMonth() + 1);
+            const nombreMesSiguiente = fecha.toLocaleDateString('es-ES', opciones)
+                .replace(/^\w/, c => c.toUpperCase());
+
+            // Actualizar los textos
+            const mesActualEl = document.getElementById('mes-actual');
+            const mesProyectadoEl = document.getElementById('mes-proyectado');
+
+            if (mesActualEl) mesActualEl.textContent = `(${nombreMesActual})`;
+            if (mesProyectadoEl) mesProyectadoEl.textContent = `(${nombreMesSiguiente})`;
+        }
+
+        // Ejecutar cuando cambie la fecha
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaInput = document.getElementById('fechaFinMes');
+            
+            if (fechaInput) {
+                // Actualizar al cargar la página
+                actualizarNombresMeses();
+
+                // Actualizar cada vez que cambie la fecha
+                fechaInput.addEventListener('change', actualizarNombresMeses);
+            }
+        });
+    </script>
+
 
 @endsection
