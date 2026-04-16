@@ -20,7 +20,7 @@ use App\Http\Controllers\AlmacenController;
 use App\Http\Controllers\MatrizController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\PedidoController;
-
+use App\Http\Controllers\MonitorController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/tokens', [TokenController::class, 'index'])->name('tokens.index');
@@ -138,6 +138,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos.index');
     Route::get('/pedidos/productos', [PedidoController::class, 'getProductos'])->name('pedidos.productos');
     Route::get('/pedidos/fer/{pedidoId}', [PedidoController::class, 'generarFER'])->name('pedidos.fer');
+
+        // Exportación de matriz
+    Route::prefix('matriz/exportacion')->name('matriz.exportacion.')->group(function () {
+        Route::get('/', [App\Http\Controllers\MatrizExportacionController::class, 'index'])->name('index');
+        Route::post('/exportar', [App\Http\Controllers\MatrizExportacionController::class, 'exportar'])->name('exportar');
+        Route::get('/estado/{id}', [App\Http\Controllers\MatrizExportacionController::class, 'estado'])->name('estado');
+        Route::get('/descargar/{id}', [App\Http\Controllers\MatrizExportacionController::class, 'descargar'])->name('descargar');
+        Route::delete('/eliminar/{id}', [App\Http\Controllers\MatrizExportacionController::class, 'eliminar'])->name('eliminar');
+    });
+
+    Route::middleware(['auth'])->prefix('monitor')->name('monitor.')->group(function() {
+        
+        // Vista principal de monitoreo de TMovim
+        Route::get('/tmovim', [MonitorController::class, 'index'])->name('tmovim');
+        // API: Obtener detalles de un movimiento específico (para modal)
+        Route::get('/tmovim/{movnumero}/detalles', [MonitorController::class, 'apiDetallesMovimiento'])->name('tmovim.detalles.api');
+        // Endpoint API para polling del estado general (opcional)
+        Route::get('/tmovim/api', [MonitorController::class, 'apiUltimoRegistro'])->name('tmovim.api');
+        // Refresh manual de datos
+        Route::post('/tmovim/refresh', [MonitorController::class, 'refresh'])->name('tmovim.refresh');
+            
+    });
+
 });
 
 

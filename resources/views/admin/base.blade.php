@@ -161,14 +161,16 @@
                 📑 Archivos <span>▾</span>
                 </a>
                 <div class="collapse ps-3" id="menu3">
-                  <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
-                  <a href="{{ route('archivos.index') }}" class="nav-link">▪️Descargar Archivos</a>
-                  <a href="{{ route('registro.create') }}" class="nav-link">▪️Registrar ICI</a>
-                  <a href="{{ route('historicos.index') }}" class="nav-link">▪️Procesamiento Históricos</a>
-                  <a href="{{ route('matriz.index') }}" class="nav-link">▪️Matriz Disponibilidad</a>
-                  <a href="{{ route('requerimientos.index') }}" class="nav-link">▪️Requerimientos</a>
-                  <a href="{{ route('pedidos.index') }}" class="nav-link">▪️Lista Requerimientos</a>
-                  
+                    <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
+                    <a href="{{ route('archivos.index') }}" class="nav-link">▪️Descargar Archivos</a>
+                    <a href="{{ route('registro.create') }}" class="nav-link">▪️Registrar ICI</a>
+                    <a href="{{ route('historicos.index') }}" class="nav-link">▪️Procesamiento Históricos</a>
+                    <a href="{{ route('matriz.index') }}" class="nav-link">▪️Matriz Disponibilidad</a>
+                    <a href="{{ route('matriz.exportacion.index') }}" class="nav-link">▪️Matriz Disp. Todos</a>
+                    <a href="{{ route('monitor.tmovim') }}" class="nav-link">Monitor API (TMovimDet)
+                    </a>
+                    <a href="{{ route('requerimientos.index') }}" class="nav-link">▪️Requerimientos</a>
+                    <a href="{{ route('pedidos.index') }}" class="nav-link">▪️Lista Requerimientos</a>
                 </div>
             @else
                 <a class="nav-link d-flex justify-content-between align-items-center" 
@@ -218,12 +220,12 @@
       @yield('content')
     </div>
   </div>
-
+    
   <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>    
-  @yield('scripts')
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+    @yield('scripts')
   <script>
     const toggleSidebar = document.getElementById('toggleSidebar');
     const sidebar = document.getElementById('sidebarMenu');

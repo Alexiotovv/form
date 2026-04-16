@@ -592,7 +592,23 @@
             </div>
    
             
-            <h6 class="mb-1">🎯 Filtros Avanzados</h6>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="mb-0">🎯 Filtros Avanzados</h6>
+                <button type="button" id="btn-guardar-filtro" class="btn btn-xs btn-outline-success" style="font-size: 0.6rem; padding: 2px 6px;" disabled>
+                    💾 
+                </button>
+                <button type="button" id="btn-limpiar-filtros" class="btn btn-outline-secondary">
+                    🧹 
+                </button>
+                <div class="mt-2" id="div-filtros-guardados" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        {{-- <small class="text-muted">📁 Filtros guardados:</small> --}}
+                        <button type="button" id="btn-cargar-filtro" class="btn btn-xs btn-outline-primary" style="font-size: 0.6rem;">
+                            📂 
+                        </button>
+                    </div>
+                </div>
+            </div>
             
             <!-- Filtros avanzados en grid de 3 columnas (2 filas) -->
             <div class="filtros-avanzados-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px;">
@@ -1465,6 +1481,140 @@
 
                 window.location.href = url.toString();
             });
+
+            // ========== GUARDAR Y CARGAR FILTROS AVANZADOS ==========
+                const STORAGE_KEY = 'filtros_avanzados_matriz';
+
+                // Función para obtener los valores actuales de los filtros avanzados
+                function obtenerFiltrosAvanzados() {
+                    return {
+                        tip_sum: $('#tip_sum').val() || [],
+                        tipo_prod: $('#tipo_prod').val() || [],
+                        tipo_abastecimiento: $('#tipo_abastecimiento').val() || [],
+                        tipo_establecimiento: $('#tipo_establecimiento').val() || [],
+                        peti2023: $('#peti2023').val() || [],
+                        lista_1: $('#lista_1').val() || []
+                    };
+                }
+
+                // Función para aplicar filtros avanzados desde un objeto
+                function aplicarFiltrosAvanzados(filtros) {
+                    if (filtros.tip_sum) $('#tip_sum').val(filtros.tip_sum).trigger('change');
+                    if (filtros.tipo_prod) $('#tipo_prod').val(filtros.tipo_prod).trigger('change');
+                    if (filtros.tipo_abastecimiento) $('#tipo_abastecimiento').val(filtros.tipo_abastecimiento).trigger('change');
+                    if (filtros.tipo_establecimiento) $('#tipo_establecimiento').val(filtros.tipo_establecimiento).trigger('change');
+                    if (filtros.peti2023) $('#peti2023').val(filtros.peti2023).trigger('change');
+                    if (filtros.lista_1) $('#lista_1').val(filtros.lista_1).trigger('change');
+                }
+
+                // Función para verificar si hay filtros avanzados activos
+                function hayFiltrosAvanzadosActivos() {
+                    const filtros = obtenerFiltrosAvanzados();
+                    return Object.values(filtros).some(arr => arr && arr.length > 0);
+                }
+
+                // Función para guardar filtros en localStorage
+                function guardarFiltrosEnStorage() {
+                    const filtros = obtenerFiltrosAvanzados();
+                    // También guardamos la fecha y hora para referencia
+                    filtros.guardado_en = new Date().toISOString();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtros));
+                    
+                    // Mostrar mensaje de confirmación
+                    mostrarToast('✅ Filtros guardados correctamente', 'success');
+                    
+                    // Cambiar texto del botón y mostrar opción de cargar
+                    $('#btn-guardar-filtro').html('💾 Guardado').removeClass('btn-outline-success').addClass('btn-success');
+                    setTimeout(() => {
+                        $('#btn-guardar-filtro').html('💾 Guardar Filtro').removeClass('btn-success').addClass('btn-outline-success');
+                    }, 1500);
+                    
+                    $('#div-filtros-guardados').show();
+                }
+
+                // Función para cargar filtros desde localStorage
+                function cargarFiltrosDesdeStorage() {
+                    const guardado = localStorage.getItem(STORAGE_KEY);
+                    if (!guardado) {
+                        mostrarToast('⚠️ No hay filtros guardados', 'warning');
+                        return false;
+                    }
+                    
+                    try {
+                        const filtros = JSON.parse(guardado);
+                        // Removemos la propiedad extra si existe
+                        delete filtros.guardado_en;
+                        
+                        aplicarFiltrosAvanzados(filtros);
+                        
+                        const fecha = new Date(JSON.parse(guardado).guardado_en);
+                        const fechaStr = fecha.toLocaleString();
+                        mostrarToast(`📂 Filtros cargados (guardados: ${fechaStr})`, 'info');
+                        
+                        // Opcional: ejecutar automáticamente el filtro?
+                        // $('#btn-filtrar').click();
+                        
+                        return true;
+                    } catch(e) {
+                        mostrarToast('❌ Error al cargar filtros', 'danger');
+                        return false;
+                    }
+                }
+
+                // Función para mostrar un pequeño toast (notificación)
+                function mostrarToast(mensaje, tipo = 'info') {
+                    // Eliminar toast anterior si existe
+                    $('.toast-notificacion').remove();
+                    
+                    const bgColor = tipo === 'success' ? '#28a745' : (tipo === 'warning' ? '#ffc107' : (tipo === 'danger' ? '#dc3545' : '#17a2b8'));
+                    const toast = $(`
+                        <div class="toast-notificacion" style="position: fixed; bottom: 20px; right: 20px; background: ${bgColor}; color: white; padding: 8px 16px; border-radius: 4px; font-size: 0.75rem; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+                            ${mensaje}
+                        </div>
+                    `);
+                    $('body').append(toast);
+                    setTimeout(() => toast.fadeOut(300, function() { $(this).remove(); }), 2000);
+                }
+
+                // Verificar si hay filtros guardados al cargar la página
+                function verificarFiltrosGuardados() {
+                    const guardado = localStorage.getItem(STORAGE_KEY);
+                    if (guardado) {
+                        $('#div-filtros-guardados').show();
+                    } else {
+                        $('#div-filtros-guardados').hide();
+                    }
+                }
+
+                // Habilitar/deshabilitar el botón de guardar según si hay filtros avanzados
+                function actualizarBotonGuardar() {
+                    const hayFiltros = hayFiltrosAvanzadosActivos();
+                    if (hayFiltros) {
+                        $('#btn-guardar-filtro').prop('disabled', false);
+                    } else {
+                        $('#btn-guardar-filtro').prop('disabled', true);
+                    }
+                }
+
+                // Eventos
+                $('#btn-guardar-filtro').on('click', guardarFiltrosEnStorage);
+                $('#btn-cargar-filtro').on('click', cargarFiltrosDesdeStorage);
+
+                // Detectar cambios en los filtros avanzados para habilitar/deshabilitar el botón
+                $('#tip_sum, #tipo_prod, #tipo_abastecimiento, #tipo_establecimiento, #peti2023, #lista_1').on('change', function() {
+                    actualizarBotonGuardar();
+                });
+
+                // Al hacer clic en "Filtrar", también habilitamos el botón de guardar si hay filtros
+                $('#btn-filtrar').on('click', function() {
+                    // Tu código existente de filtrar...
+                    // Al final, agregar:
+                    actualizarBotonGuardar();
+                });
+
+                // Inicializar al cargar la página
+                verificarFiltrosGuardados();
+                actualizarBotonGuardar();
 
             $('#btn-limpiar-filtros').on('click', function() {
                 $('.select2-multiple').val(null).trigger('change');

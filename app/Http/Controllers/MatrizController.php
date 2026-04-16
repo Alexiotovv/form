@@ -17,6 +17,8 @@ class MatrizController extends Controller
     
     public function index(Request $request)
     {
+
+
         $codigo_pre = $request->input('cod_ipress');
         $codigo_sismed = $request->input('cod_sismed');
         $fechaManual = $request->input('fin_mes') ?? date('Y-m-t');
