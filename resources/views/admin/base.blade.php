@@ -138,7 +138,7 @@
                 </a>
                 <div class="collapse ps-3" id="menu1">
                     {{-- <a href="{{ route('clave.edit') }}" class="nav-link">🗸 Clave de Acceso</a> --}}
-                    <a href="{{ route('plazo.edit') }}" class="nav-link">▪️ Configurar plazo de envío</a>
+                    <a href="{{ route('plazo.edit') }}" class="nav-link">▪️ Conf. plazo de envío</a>
                     <a href="{{ route('admin.users.index') }}" class="nav-link">▪️ Usuarios</a>
                     <a href="{{ route('almacenes.index') }}" class="nav-link">▪️ Almacenes</a>
                     <a href="{{ route('productos.index') }}" class="nav-link">▪️ Productos</a>
@@ -164,10 +164,10 @@
                     <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
                     <a href="{{ route('archivos.index') }}" class="nav-link">▪️Descargar Archivos</a>
                     <a href="{{ route('registro.create') }}" class="nav-link">▪️Registrar ICI</a>
-                    <a href="{{ route('historicos.index') }}" class="nav-link">▪️Procesamiento Históricos</a>
+                    <a href="{{ route('historicos.index') }}" class="nav-link">▪️Proces. Históricos</a>
                     <a href="{{ route('matriz.index') }}" class="nav-link">▪️Matriz Disponibilidad</a>
                     <a href="{{ route('matriz.exportacion.index') }}" class="nav-link">▪️Matriz Disp. Todos</a>
-                    <a href="{{ route('monitor.tmovim') }}" class="nav-link">Monitor API (TMovimDet)
+                    <a href="{{ route('monitor.tmovim') }}" class="nav-link">▪️Monitor API 
                     </a>
                     <a href="{{ route('requerimientos.index') }}" class="nav-link">▪️Requerimientos</a>
                     <a href="{{ route('pedidos.index') }}" class="nav-link">▪️Lista Requerimientos</a>
