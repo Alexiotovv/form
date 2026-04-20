@@ -119,12 +119,12 @@
                                 <td>
                                     @if($exp->estado == 'completado')
                                         <a href="{{ route('matriz.exportacion.descargar', $exp->id) }}" 
-                                        class="btn btn-sm btn-success">
-                                            <i class="fas fa-download"></i>
+                                        class="btn btn-sm btn-outline-light">
+                                            📥
                                         </a>
                                         <button onclick="eliminarExportacion({{ $exp->id }})" 
-                                                class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i>
+                                                class="btn btn-sm btn-outline-light">
+                                            ❌
                                         </button>
                                     @endif
                                 </td>
