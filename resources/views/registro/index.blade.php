@@ -22,7 +22,9 @@
                     <th>Fecha</th>
                     <th>Hora</th>
                     <th>Archivo</th>
-                    <th>Acciones</th>
+                    @if(auth()->user()->is_admin)
+                        <th>Acciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -57,13 +59,14 @@
                         </td>
                         <td>
                             <div class="d-flex gap-1">
-
-                                <form action="{{ route('registros.procesar', $reg->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-light {{ $reg->procesado ? 'disabled' : '' }}" {{ $reg->procesado ? 'disabled' : '' }}>
-                                        ⚙️ {{ $reg->procesado ? '✓ Procesado' : 'Procesar' }}
-                                    </button>
-                                </form>
+                                @if(auth()->user()->is_admin)
+                                    <form action="{{ route('registros.procesar', $reg->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-light {{ $reg->procesado ? 'disabled' : '' }}" {{ $reg->procesado ? 'disabled' : '' }}>
+                                            ⚙️ {{ $reg->procesado ? '✓ Procesado' : 'Procesar' }}
+                                        </button>
+                                    </form>
+                                 @endif
                             </div>
                         </td>
 

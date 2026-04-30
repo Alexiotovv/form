@@ -23,11 +23,13 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'is_active',
         'almacen_id',
     ];
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_admin' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     /**

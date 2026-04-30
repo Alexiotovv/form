@@ -20,6 +20,16 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+            if (! Auth::user()->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Tu usuario está deshabilitado. Contacta al administrador.',
+                ]);
+            }
+
             $request->session()->regenerate();
             return redirect()->route('admin.dashboard');
         }

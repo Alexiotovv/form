@@ -180,7 +180,6 @@
                 <div class="collapse ps-3" id="menu3">
                     <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
                     <a href="{{ route('registro.create') }}" class="nav-link">▪️Registro ICI</a>
-                    <a href="{{ route('requerimientos.index') }}" class="nav-link">▪️Requerimientos</a>
                 </div>
             @endif
         @endauth

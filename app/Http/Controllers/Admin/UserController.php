@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Establecimiento; 
 use App\Models\Almacen;
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 class UserController extends Controller
 {
     public function index()
@@ -15,6 +17,56 @@ class UserController extends Controller
         $almacenes = Almacen::all();
         $users = User::latest()->get();
         return view('admin.users.index', compact('users','almacenes'));
+    }
+
+    public function export(): StreamedResponse
+    {
+        $fileName = 'usuarios_' . now()->format('Ymd_His') . '.xlsx';
+
+        return response()->streamDownload(function () {
+            $writer = WriterEntityFactory::createXLSXWriter();
+            $writer->openToFile('php://output');
+
+            $header = WriterEntityFactory::createRowFromArray([
+                'ID',
+                'Nombre',
+                'Email',
+                'Rol',
+                'Habilitado',
+                'Establecimiento',
+                'Creado',
+            ]);
+            $writer->addRow($header);
+
+            User::with('almacen')->orderBy('id')->chunk(500, function ($users) use ($writer) {
+                foreach ($users as $user) {
+                    $writer->addRow(WriterEntityFactory::createRowFromArray([
+                        $user->id,
+                        $user->name,
+                        $user->email,
+                        $user->is_admin ? 'Admin' : 'Usuario',
+                        $user->is_active ? 'Sí' : 'No',
+                        $user->almacen?->nombre_ipress ?? 'Sin asignar',
+                        optional($user->created_at)->format('Y-m-d H:i:s'),
+                    ]));
+                }
+            });
+
+            $writer->close();
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
+    public function toggleStatus(User $user)
+    {
+        $user->update([
+            'is_active' => ! $user->is_active,
+        ]);
+
+        $message = $user->is_active ? 'Usuario habilitado correctamente.' : 'Usuario deshabilitado correctamente.';
+
+        return redirect()->route('admin.users.index')->with('success', $message);
     }
 
     public function create()
@@ -39,6 +91,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'is_admin' => $admin,
+            'is_active' => true,
             'almacen_id' => $request->almacen_id,
         ]);
 

@@ -167,6 +167,12 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'is_admin'])->group(function () {
     // Admin routes
     Route::prefix('admin')->group(function () {
+        // Rutas para creación masiva de usuarios (deben ir antes del resource para no ser capturadas por {user})
+        Route::get('users/bulk', [App\Http\Controllers\Admin\UserBulkController::class, 'index'])->name('admin.users.bulk');
+        Route::post('users/bulk', [App\Http\Controllers\Admin\UserBulkController::class, 'store'])->name('admin.users.bulk.store');
+        Route::get('users/export', [UserController::class, 'export'])->name('admin.users.export');
+        Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+
         Route::resource('users', UserController::class)->names([
             'index'   => 'admin.users.index',
             'create'  => 'admin.users.create',

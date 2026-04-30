@@ -3,25 +3,26 @@
 @section('content')
     <div class="container mt-4">
         <h3>Bienvenido 👋</h3>
-
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div id="chart-avance"></div>
-            </div>
-            <div class="col-md-6">
-                <div class="card p-3 shadow-sm">
-                    <h5>Resumen del mes</h5>
-                    <p><strong>Almacenes que deben enviar:</strong> {{ $totalAlmacenes }}</p>
-                    <p><strong>Almacenes que enviaron:</strong> {{ $enviaronEsteMes }}</p>
-                    <p><strong>Avance:</strong> {{ $porcentaje }}%</p>
+         @if(auth()->user()->is_admin)
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div id="chart-avance"></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card p-3 shadow-sm">
+                        <h5>Resumen del mes</h5>
+                        <p><strong>Almacenes que deben enviar:</strong> {{ $totalAlmacenes }}</p>
+                        <p><strong>Almacenes que enviaron:</strong> {{ $enviaronEsteMes }}</p>
+                        <p><strong>Avance:</strong> {{ $porcentaje }}%</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card mt-5 p-3 shadow-sm">
-            <h5>Requerimientos por Almacén ({{ now()->translatedFormat('F Y') }})</h5>
-            <div id="chart-requerimientos" style="height: 400px;"></div>
-        </div>
+            <div class="card mt-5 p-3 shadow-sm">
+                <h5>Requerimientos por Almacén ({{ now()->translatedFormat('F Y') }})</h5>
+                <div id="chart-requerimientos" style="height: 400px;"></div>
+            </div>
+        @endif
     </div>
 @endsection
 
