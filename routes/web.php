@@ -68,6 +68,11 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/cambiar-contrasena', [AuthController::class, 'showChangePassword'])->name('password.edit');
+    Route::post('/cambiar-contrasena', [AuthController::class, 'updatePassword'])->name('password.update');
+});
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');

@@ -113,13 +113,23 @@
         <h6 class="mb-0">@yield('titulo_pagina')</h6>
         <!-- <small class="text-muted">@yield('fecha_pagina')</small> -->
     </div>
-    <div class="d-flex ms-auto align-items-center">
-      <span class="me-3">👤 Bienvenido, {{ Auth::user()->name }}</span>
-      <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button class="btn btn-light btn-sm">🚪Cerrar sesión</button>
-      </form>
-    </div>
+        <div class="d-flex ms-auto align-items-center gap-3">
+            <div class="dropdown">
+                <button class="btn btn-link text-decoration-none dropdown-toggle text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="text-start lh-sm">
+                        <div class="fw-semibold">👤 {{ Auth::user()->name }}</div>
+                        <small class="text-muted d-block">Opciones de cuenta</small>
+                    </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li><a class="dropdown-item" href="{{ route('password.edit') }}">🔑 Cambiar contraseña</a></li>
+                </ul>
+            </div>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button class="btn btn-light btn-sm">🚪Cerrar sesión</button>
+            </form>
+        </div>
   </div>
 </nav>
 
