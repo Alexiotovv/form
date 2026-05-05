@@ -1,5 +1,6 @@
 @extends('admin.base')
 
+
 @section('css')
     <link href="{{asset('css/select2.min.css')}}" rel="stylesheet" />
     <link href="{{asset('css/select2-bootstrap.css')}}" rel="stylesheet"/>
