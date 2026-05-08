@@ -13,7 +13,7 @@ class AdminController extends Controller
         
             $user = auth()->user();
 
-            $registros = Registro::with('almacen', 'profesion')
+            $registros = Registro::with('almacen', 'profesion', 'procesamientoHistorico.formDet')
                 ->when(!$user->is_admin, function ($query) use ($user) {
                     return $query->where('user_id', $user->id);
                 })

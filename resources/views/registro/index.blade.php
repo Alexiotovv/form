@@ -21,6 +21,7 @@
                     <th>Establecimiento</th>
                     <th>Fecha</th>
                     <th>Hora</th>
+                    <th>Códigos_PRE</th>
                     <th>Archivo</th>
                     @if(auth()->user()->is_admin)
                         <th>Acciones</th>
@@ -38,6 +39,29 @@
                         <td>{{ $reg->almacen->cod_ipress}} - {{$reg->almacen->nombre_ipress }}</td>
                         <td>{{ $reg->fecha_envio }}</td>
                         <td>{{ $reg->hora_envio }}</td>
+                        <td>
+                            @php
+                                $codigosPre = $reg->procesamientoHistorico
+                                    ? $reg->procesamientoHistorico->formDet
+                                        ->pluck('CODIGO_PRE')
+                                        ->filter()
+                                        ->unique()
+                                        ->values()
+                                    : collect();
+                            @endphp
+
+                            @if($reg->procesado && $codigosPre->isNotEmpty())
+                                <div style="max-height: 90px; overflow-y: auto; font-size: 0.85rem;">
+                                    @foreach($codigosPre as $codigo)
+                                        <span class="badge bg-secondary me-1 mb-1">{{ $codigo }}</span>
+                                    @endforeach
+                                </div>
+                            @elseif($reg->procesado)
+                                <span class="text-muted">Sin códigos</span>
+                            @else
+                                <span class="text-muted">No procesado</span>
+                            @endif
+                        </td>
                         <td>
                             <div class="d-flex gap-1">
                                 <a href="{{ asset('storage/' . $reg->archivo) }}" class="btn btn-sm btn-outline-success" download>

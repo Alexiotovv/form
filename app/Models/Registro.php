@@ -35,6 +35,12 @@ class Registro extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function procesamientoHistorico()
+    {
+        return $this->hasOne(ProcesamientoHistorico::class, 'registro_id');
+    }
+
     protected $casts = [
         'procesado' => 'boolean'
     ];
