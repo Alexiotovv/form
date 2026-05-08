@@ -170,6 +170,10 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware(['auth', 'is_admin'])->group(function () {
+    // Ruta temporal admin para ejecutar backfill de registro_id en históricos
+    Route::get('/admin/tools/backfill-registro-id', [AdminController::class, 'ejecutarBackfillRegistroId'])
+        ->name('admin.tools.backfill-registro-id');
+
     // Admin routes
     Route::prefix('admin')->group(function () {
         // Rutas para creación masiva de usuarios (deben ir antes del resource para no ser capturadas por {user})

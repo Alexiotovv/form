@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Registro;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminController extends Controller
 {
@@ -72,6 +74,38 @@ class AdminController extends Controller
             'labels',
             'data'
         ));
+    }
+
+    /**
+     * Ruta temporal para ejecutar backfill de registro_id en históricos.
+     * - Simulación por defecto.
+     * - Aplica cambios solo cuando se envía force=1.
+     */
+    public function ejecutarBackfillRegistroId(Request $request)
+    {
+        $windowHours = max(1, (int) $request->query('window_hours', 24));
+        $limit = max(0, (int) $request->query('limit', 0));
+        $force = (int) $request->query('force', 0) === 1;
+
+        $params = [
+            '--window-hours' => $windowHours,
+            '--limit' => $limit,
+        ];
+
+        if ($force) {
+            $params['--force'] = true;
+        }
+
+        Artisan::call('app:backfill-registro-id', $params);
+        $salida = trim(Artisan::output());
+
+        return redirect()
+            ->route('historicos.index')
+            ->with(
+                $force ? 'success' : 'warning',
+                ($force ? 'Backfill ejecutado en modo APLICAR.' : 'Backfill ejecutado en modo SIMULACION.')
+                . '<br><pre style="white-space: pre-wrap; margin:0;">' . e($salida) . '</pre>'
+            );
     }
 
 
