@@ -40,8 +40,8 @@
                         @endif
                     </td>
                     <td>
-                        @if($h->registro)
-                            <a href="{{ route('archivos.descargar', $h->registro->id) }}" class="btn btn-sm btn-success">
+                        @if(!empty($h->registro_id))
+                            <a href="{{ route('archivos.descargar', $h->registro_id) }}" class="btn btn-sm btn-success">
                                 <i class="fas fa-download"></i> Descargar ZIP
                             </a>
                         @else
