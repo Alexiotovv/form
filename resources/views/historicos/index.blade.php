@@ -19,7 +19,6 @@
                     <th>Fecha Ejecución</th>
                     <th>Tiempo Ejecución</th>
                     <th>Almacén</th>
-                    <th>Archivo</th>
                     <th>Códigos PRE</th>
                     <th>Tablas Registros</th>
                     <th>Usuario</th>
@@ -37,15 +36,6 @@
                             <span class="badge bg-info">{{ $h->registro->almacen->nombre_ipress ?? 'N/A' }}</span>
                         @else
                             <span class="text-muted">N/A</span>
-                        @endif
-                    </td>
-                    <td>
-                        @if($h->registro)
-                            <a href="{{ route('archivos.descargar', $h->registro->id) }}" class="btn btn-sm btn-success">
-                                <i class="fas fa-download"></i> Descargar ZIP
-                            </a>
-                        @else
-                            <span class="text-muted">Sin archivo</span>
                         @endif
                     </td>
                     <td>
