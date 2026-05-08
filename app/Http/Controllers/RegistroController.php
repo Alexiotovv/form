@@ -6,9 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Almacen;
 use App\Models\Registro;
+use App\Models\ProcesamientoHistorico;
 use App\Models\Profesion;
 use App\Models\Plazo;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -140,10 +144,17 @@ class RegistroController extends Controller
             }
 
 
-        $codigo = $almacen->cod_ipress ?? ''; // puede ser null
+        $nombreAlmacen = $almacenId->nombre_ipress ?? 'SIN_ALMACEN';
+        // Normaliza el nombre para evitar caracteres inválidos en el nombre del archivo.
+        $nombreAlmacen = Str::upper(Str::ascii($nombreAlmacen));
+        $nombreAlmacen = preg_replace('/[^A-Z0-9]+/', '_', $nombreAlmacen);
+        $nombreAlmacen = trim($nombreAlmacen, '_');
+        if ($nombreAlmacen === '') {
+            $nombreAlmacen = 'SIN_ALMACEN';
+        }
+
         $fechaHora = now()->format('Ymd_His');
-        $prefijo = $codigo ? $codigo . '' : ''; // si hay código, añade "_"
-        $nombreArchivo = 'F'.'-'.$prefijo .'-'.'F01'. $fechaHora . '.' . $request->file('archivo')->getClientOriginalExtension();
+        $nombreArchivo = 'F-' . $nombreAlmacen . '-F01' . $fechaHora . '.' . $request->file('archivo')->getClientOriginalExtension();
 
         $rutaArchivo = $request->file('archivo')->storeAs('archivos', $nombreArchivo, 'public');
         
@@ -175,17 +186,25 @@ class RegistroController extends Controller
     public function destroy(Registro $registro)
     {
         try {
-            // 1. Guardar datos para el mensaje antes de eliminar
+            DB::transaction(function () use ($registro) {
+                // Si el registro fue procesado, eliminamos primero sus históricos.
+                // form_det se elimina en cascada por FK (procesamiento_id -> procesamientos_historicos.id).
+                if ($registro->procesado) {
+                    if (Schema::hasColumn('procesamientos_historicos', 'registro_id')) {
+                        ProcesamientoHistorico::where('registro_id', $registro->id)->delete();
+                    }
+                }
+
+                $registro->delete();
+            });
+
+            // Guardar datos para respuesta y eliminar archivo físico fuera de la transacción.
             $nombreCompleto = $registro->nombres . ' ' . $registro->apellidos;
             $rutaArchivo = $registro->archivo;
-            
-            // 2. Eliminar el archivo físico si existe
+
             if ($rutaArchivo && Storage::disk('public')->exists($rutaArchivo)) {
                 Storage::disk('public')->delete($rutaArchivo);
             }
-            
-            // 3. Eliminar el registro de la base de datos
-            $registro->delete();
             
             return redirect()->back()
                 ->with('success', "Registro de $nombreCompleto eliminado correctamente");

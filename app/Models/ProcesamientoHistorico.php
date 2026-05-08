@@ -15,6 +15,7 @@ class ProcesamientoHistorico extends Model
         'tiempo_ejecucion',
         'tablas_registros',
         'user_id',
+        'registro_id',
     ];
     protected $casts = [
         'fecha_ejecucion' => 'datetime',
@@ -25,8 +26,34 @@ class ProcesamientoHistorico extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Relación con registros
+    public function registro()
+    {
+        return $this->belongsTo(Registro::class);
+    }
+
+    // Relación con detalles de formulario
     public function formDet()
     {
         return $this->hasMany(FormDet::class, 'procesamiento_id');
+    }
+
+    // Obtener almacenes relacionados
+    public function almacenes()
+    {
+        if ($this->registro) {
+            return collect([$this->registro->almacen]);
+        }
+        return collect([]);
+    }
+
+    // Obtener códigos PRE únicos del procesamiento
+    public function obtenerCodigosPre()
+    {
+        return $this->formDet()
+            ->whereNotNull('CODIGO_PRE')
+            ->distinct('CODIGO_PRE')
+            ->pluck('CODIGO_PRE')
+            ->toArray();
     }
 }

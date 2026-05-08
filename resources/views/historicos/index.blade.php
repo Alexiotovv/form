@@ -18,6 +18,8 @@
                     <th>#</th>
                     <th>Fecha Ejecución</th>
                     <th>Tiempo Ejecución</th>
+                    <th>Almacén</th>
+                    <th>Códigos PRE</th>
                     <th>Tablas Registros</th>
                     <th>Usuario</th>
                     <th>Acciones</th>
@@ -30,8 +32,29 @@
                     <td>{{ $h->fecha_ejecucion }}</td>
                     <td>{{ $h->tiempo_ejecucion }}</td>
                     <td>
+                        @if($h->registro && $h->registro->almacen)
+                            <span class="badge bg-info">{{ $h->registro->almacen->nombre_ipress ?? 'N/A' }}</span>
+                        @else
+                            <span class="text-muted">N/A</span>
+                        @endif
+                    </td>
+                    <td>
+                        @php
+                            $codigos = $h->obtenerCodigosPre();
+                        @endphp
+                        @if(!empty($codigos))
+                            <div style="max-height: 100px; overflow-y: auto; font-size: 0.85rem;">
+                                @foreach($codigos as $codigo)
+                                    <span class="badge bg-secondary me-1 mb-1">{{ $codigo }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <span class="text-muted">Sin códigos</span>
+                        @endif
+                    </td>
+                    <td>
                         @if($h->tablas_registros)
-                            <pre>{{ Str::limit($h->tablas_registros, 100) }}</pre>
+                            <pre style="font-size: 0.85rem;">{{ Str::limit($h->tablas_registros, 100) }}</pre>
                         @else
                             <span class="text-muted">N/A</span>
                         @endif

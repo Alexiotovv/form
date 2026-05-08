@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use App\Models\FormDet;
 use App\Models\Ime1;
 use App\Models\Imed2;
@@ -52,12 +53,18 @@ class ProcesarDbfController extends Controller
 
             DB::beginTransaction();
             
-            $procesamientoHistorico = ProcesamientoHistorico::create([
+            $historicoData = [
                 'fecha_ejecucion'   => now(),
                 'tiempo_ejecucion'  => '0 seg. 0 ms',
                 'tablas_registros'  => '',
                 'user_id'           => Auth::id(),
-            ]);
+            ];
+
+            if (Schema::hasColumn('procesamientos_historicos', 'registro_id')) {
+                $historicoData['registro_id'] = $registroId;
+            }
+
+            $procesamientoHistorico = ProcesamientoHistorico::create($historicoData);
 
             \Log::channel('daily')->info('Enviando petición a Django...');
             

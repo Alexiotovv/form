@@ -14,7 +14,7 @@ class ProcesamientoHistoricoController extends Controller
         // Búsqueda simple
         $search = $request->input('search');
 
-        $historicos = ProcesamientoHistorico::with('user')
+        $historicos = ProcesamientoHistorico::with('user', 'registro.almacen', 'formDet')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('fecha_ejecucion', 'like', "%{$search}%")
@@ -22,6 +22,9 @@ class ProcesamientoHistoricoController extends Controller
                     ->orWhere('tablas_registros', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($u) use ($search) {
                         $u->where('name', 'like', "%{$search}%"); // 👈 aquí busca por nombre de usuario
+                    })
+                    ->orWhereHas('registro.almacen', function ($a) use ($search) {
+                        $a->where('nombre_ipress', 'like', "%{$search}%"); // Buscar por nombre del almacén
                     });
                 });
             })
