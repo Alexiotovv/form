@@ -71,8 +71,8 @@
             <img src="{{ asset('images/logo_diremid.png') }}" alt="Logo SISMED" class="logo-img">
         </div>
         
+        <p for="" style="font-size: 11px; text-align:center">SISPRO v2.0.2</p>
         <h3 class="login-title text-center">Iniciar Sesión</h3>
-
         <form method="POST" action="{{ route('login.post') }}">
             @csrf
 

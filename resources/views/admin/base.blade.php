@@ -107,8 +107,8 @@
     
     <a class="navbar-brand ms-2 d-flex align-items-center" href="#">
       <img src="{{ asset('images/logo_diremid.png') }}" alt="Logo" class="me-2" style="height: 30px; width: auto;">
-      
     </a>
+    <p for="" style="font-size: 11px; text-align:center">SISPRO v2.0.2</p>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="mb-0">@yield('titulo_pagina')</h6>
         <!-- <small class="text-muted">@yield('fecha_pagina')</small> -->
