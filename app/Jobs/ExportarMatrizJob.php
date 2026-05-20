@@ -91,6 +91,7 @@ class ExportarMatrizJob implements ShouldQueue
         
         // Encabezados
         $headers = [
+            'RED', 'MICRORED', 'DISTRITO',
             'PRODUCTO', 'COD_SISMED', 'TIPO PROD', 'TIPO ABAST',
             'MES1', 'MES2', 'MES3', 'MES4', 'MES5', 'MES6',
             'MES7', 'MES8', 'MES9', 'MES10', 'MES11', 'MES12',
@@ -106,6 +107,7 @@ class ExportarMatrizJob implements ShouldQueue
         
         // 🔹 Procesar en lotes para actualizar progreso
         $campos = [
+            'red', 'microred', 'distrito',
             'descripcion_producto_alt', 'cod_sismed', 'tipo_prod', 'tipo_abastecimiento',
             'Mes1', 'Mes2', 'Mes3', 'Mes4', 'Mes5', 'Mes6', 'Mes7', 'Mes8', 'Mes9', 'Mes10', 'Mes11', 'Mes12',
             'StockFinal', 'fec_exp', 'consumo_total', 'cpma', 'consumo_ultimos_4meses', 'meses_prov',
