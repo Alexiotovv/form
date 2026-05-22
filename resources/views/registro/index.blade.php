@@ -1,6 +1,11 @@
 @extends('admin.base')
 @section('content')
-    <h4>Lista de Archivos ICIs</h4>
+    <div class="mb-2">
+        <h4 class="mb-0">Lista de Archivos ICIs</h4>
+        <div class="text-center mt-2">
+            <a href="{{ route('registro.create') }}" class="btn btn-primary btn-sm">Crear Registro</a>
+        </div>
+    </div>
     <form method="GET" action="{{ route('registro.index') }}" class="mb-3 d-flex">
         <div class="input-group">
             <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Buscar por uno de estos campos: nombre, apellidos, correo, fecha de envío, profesión o establecimiento...">

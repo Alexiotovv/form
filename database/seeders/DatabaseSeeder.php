@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use Database\Seeders\AlmacenesSeeder;
 use Database\Seeders\ProfesionesSeeder;
 use Database\Seeders\AdminUserSeeder;
+use Database\Seeders\AccessControlSeeder;
 
 
 class DatabaseSeeder extends Seeder
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AlmacenesSeeder::class,
             ProfesionesSeeder::class,
             AdminUserSeeder::class,
+            AccessControlSeeder::class,
         ]);
     
     }

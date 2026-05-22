@@ -15,7 +15,9 @@ class AdminUserSeeder extends Seeder
             ['email' => 'admin@sismed.com'],
             [
                 'name' => 'Administrador',
-                'password' => Hash::make('$34Mfasd$AffSdAA') // puedes cambiarlo luego
+                'password' => Hash::make('$34Mfasd$AffSdAA'), // puedes cambiarlo luego
+                'is_admin' => true,
+                'is_active' => true,
             ]
         );
     }

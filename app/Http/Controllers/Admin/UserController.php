@@ -15,7 +15,7 @@ class UserController extends Controller
     public function index()
     {
         $almacenes = Almacen::all();
-        $users = User::latest()->get();
+        $users = User::with('roles')->latest()->get();
         return view('admin.users.index', compact('users','almacenes'));
     }
 
@@ -38,13 +38,14 @@ class UserController extends Controller
             ]);
             $writer->addRow($header);
 
-            User::with('almacen')->orderBy('id')->chunk(500, function ($users) use ($writer) {
+            User::with(['almacen', 'roles'])->orderBy('id')->chunk(500, function ($users) use ($writer) {
                 foreach ($users as $user) {
+                    $roles = $user->roles->pluck('name')->join(', ');
                     $writer->addRow(WriterEntityFactory::createRowFromArray([
                         $user->id,
                         $user->name,
                         $user->email,
-                        $user->is_admin ? 'Admin' : 'Usuario',
+                        $roles ?: ($user->is_admin ? 'superadmin (legacy)' : 'Sin rol'),
                         $user->is_active ? 'Sí' : 'No',
                         $user->almacen?->nombre_ipress ?? 'Sin asignar',
                         optional($user->created_at)->format('Y-m-d H:i:s'),

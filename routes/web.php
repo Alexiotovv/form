@@ -18,11 +18,15 @@ use App\Http\Controllers\DisaController;
 use App\Http\Controllers\UnidadEjecutoraController;
 use App\Http\Controllers\AlmacenController;
 use App\Http\Controllers\MatrizController;
+use App\Http\Controllers\ResumenController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\UserPermissionController;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'module.access'])->group(function () {
     Route::get('/tokens', [TokenController::class, 'index'])->name('tokens.index');
     Route::post('/tokens/create', [TokenController::class, 'store'])->name('tokens.store');
     Route::delete('/tokens/{tokenId}', [TokenController::class, 'destroy'])->name('tokens.destroy');
@@ -68,13 +72,13 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'module.access'])->group(function () {
     Route::get('/cambiar-contrasena', [AuthController::class, 'showChangePassword'])->name('password.edit');
     Route::post('/cambiar-contrasena', [AuthController::class, 'updatePassword'])->name('password.update');
 });
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'module.access'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     
     Route::get('/formulario', [RegistroController::class, 'create'])->name('registro.create');
@@ -98,6 +102,15 @@ Route::middleware('auth')->group(function () {
 
     //Matriz de disponibilidad
     Route::get ('/matriz/index',  [MatrizController::class, 'index'])->name('matriz.index');
+    Route::get('/resumen', [ResumenController::class, 'index'])
+        ->middleware('permission:module.resumen.view')
+        ->name('resumen.index');
+    Route::get('/resumen/red-data', [ResumenController::class, 'redData'])
+        ->middleware('permission:module.resumen.view')
+        ->name('resumen.red-data');
+    Route::get('/resumen/microred-data', [ResumenController::class, 'microredData'])
+        ->middleware('permission:module.resumen.view')
+        ->name('resumen.microred-data');
 
 
     //configurar plazos
@@ -191,6 +204,24 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
             'update'  => 'admin.users.update',
             'destroy' => 'admin.users.destroy',
         ]);
+
+        // Gestion de modulos
+        Route::get('access/modules', [ModuleController::class, 'index'])->name('admin.access.modules.index');
+        Route::post('access/modules', [ModuleController::class, 'store'])->name('admin.access.modules.store');
+        Route::put('access/modules/{module}', [ModuleController::class, 'update'])->name('admin.access.modules.update');
+        Route::post('access/modules/sync', [ModuleController::class, 'syncFromRoutes'])->name('admin.access.modules.sync');
+
+        // Gestion de permisos por rol
+        Route::get('access/roles', [RolePermissionController::class, 'index'])->name('admin.access.roles.index');
+        Route::post('access/roles', [RolePermissionController::class, 'storeRole'])->name('admin.access.roles.store');
+        Route::put('access/roles/{role}/permissions', [RolePermissionController::class, 'updatePermissions'])->name('admin.access.roles.permissions.update');
+        Route::delete('access/roles/{role}', [RolePermissionController::class, 'destroyRole'])->name('admin.access.roles.destroy');
+
+        // Gestion de permisos por usuario
+        Route::get('access/users', [UserPermissionController::class, 'index'])->name('admin.access.users.index');
+        Route::post('access/users/bulk-assign-roles', [UserPermissionController::class, 'bulkAssignRoles'])->name('admin.access.users.bulk-assign-roles');
+        Route::get('access/users/{user}/edit', [UserPermissionController::class, 'edit'])->name('admin.access.users.edit');
+        Route::put('access/users/{user}/permissions', [UserPermissionController::class, 'update'])->name('admin.access.users.update');
     });
 });
 

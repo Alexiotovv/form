@@ -98,6 +98,79 @@
   </style>
 </head>
 <body>
+@php
+    $currentUser = auth()->user();
+    $isSuperAdmin = $currentUser && ((method_exists($currentUser, 'hasRole') && $currentUser->hasRole('superadmin')) || (bool) $currentUser->is_admin);
+
+    $menuModules = collect();
+    if ($currentUser) {
+        $menuModules = \App\Models\Module::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->filter(function ($module) use ($currentUser, $isSuperAdmin) {
+                if (! \Illuminate\Support\Facades\Route::has($module->route_name_index)) {
+                    return false;
+                }
+
+                if ($isSuperAdmin) {
+                    return true;
+                }
+
+                return $currentUser->can("module.{$module->slug}.view");
+            });
+
+        $moduleRouteMap = [
+            'admin.access.modules.index' => ['label' => 'Modulos', 'icon' => '⚙️'],
+            'admin.access.roles.index' => ['label' => 'Permisos por rol', 'icon' => '⚙️'],
+            'admin.access.users.index' => ['label' => 'Permisos por usuario', 'icon' => '⚙️'],
+            'plazo.edit' => ['label' => 'Conf. plazo de envio', 'icon' => '⚙️'],
+            'admin.users.index' => ['label' => 'Usuarios', 'icon' => '⚙️'],
+            'tokens.index' => ['label' => 'Tokens de acceso', 'icon' => '⚙️'],
+            'django-config.index' => ['label' => 'Django Config', 'icon' => '⚙️'],
+            'registro.index' => ['label' => 'Listar ICIs', 'icon' => '📑'],
+            'archivos.index' => ['label' => 'Descargar Archivos', 'icon' => '📑'],
+            'registro.create' => ['label' => 'Registrar ICI', 'icon' => '📑'],
+            'historicos.index' => ['label' => 'Proces. Historicos', 'icon' => '📑'],
+            'matriz.index' => ['label' => 'Disp. Digitacion', 'icon' => '📑'],
+            'resumen.index' => ['label' => 'Disp. Resumen', 'icon' => '📑'],
+            'matriz.exportacion.index' => ['label' => 'Disp. Exportar', 'icon' => '📑'],
+            'monitor.tmovim' => ['label' => 'Monitor API', 'icon' => '📑'],
+            'requerimientos.index' => ['label' => 'Requerimientos', 'icon' => '📑'],
+            'pedidos.index' => ['label' => 'Lista Requerimientos', 'icon' => '📑'],
+            'almacenes.index' => ['label' => 'Almacenes', 'icon' => '⚙️'],
+            'productos.index' => ['label' => 'Productos', 'icon' => '⚙️'],
+        ];
+
+        $menuGroups = [
+            'config' => ['title' => 'Configurar', 'icon' => '⚙️', 'routes' => []],
+            'system' => ['title' => 'Sistema', 'icon' => '⚙️', 'routes' => []],
+            'files' => ['title' => 'Archivos', 'icon' => '📑', 'routes' => []],
+            'other' => ['title' => 'Modulos', 'icon' => '📌', 'routes' => []],
+        ];
+
+        foreach ($menuModules as $module) {
+            $routeName = $module->route_name_index;
+
+            if (in_array($routeName, ['admin.access.modules.index', 'admin.access.roles.index', 'admin.access.users.index', 'plazo.edit', 'admin.users.index', 'almacenes.index', 'productos.index'], true)) {
+                $menuGroups['config']['routes'][] = $module;
+                continue;
+            }
+
+            if (in_array($routeName, ['tokens.index', 'django-config.index'], true)) {
+                $menuGroups['system']['routes'][] = $module;
+                continue;
+            }
+
+            if (in_array($routeName, ['registro.index', 'archivos.index', 'registro.create', 'historicos.index', 'matriz.index', 'resumen.index', 'matriz.exportacion.index', 'monitor.tmovim', 'requerimientos.index', 'pedidos.index'], true)) {
+                $menuGroups['files']['routes'][] = $module;
+                continue;
+            }
+
+            $menuGroups['other']['routes'][] = $module;
+        }
+    }
+@endphp
 
 <!-- Navbar superior -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
@@ -139,58 +212,37 @@
     <div class="sidebar bg-light" id="sidebarMenu">
            
       <nav class="nav flex-column p-3">
-        @auth  
-            @if(auth()->user()->is_admin)
-                <!-- Menú 1 -->
-                <a class="nav-link d-flex justify-content-between align-items-center" 
-                data-bs-toggle="collapse" href="#menu1" role="button" aria-expanded="false" aria-controls="menu1">
-                ⚙️ Configurar <span>▾</span>
-                </a>
-                <div class="collapse ps-3" id="menu1">
-                    {{-- <a href="{{ route('clave.edit') }}" class="nav-link">🗸 Clave de Acceso</a> --}}
-                    <a href="{{ route('plazo.edit') }}" class="nav-link">▪️ Conf. plazo de envío</a>
-                    <a href="{{ route('admin.users.index') }}" class="nav-link">▪️ Usuarios</a>
-                    <a href="{{ route('almacenes.index') }}" class="nav-link">▪️ Almacenes</a>
-                    <a href="{{ route('productos.index') }}" class="nav-link">▪️ Productos</a>
-                    {{-- <a href="{{ route('unidadesejecutoras.index') }}" class="nav-link">🗸 UnidadesEjecutoras</a> --}}
-                </div>
-
-                <!-- Menú 2 -->
-                <a class="nav-link d-flex justify-content-between align-items-center" 
-                data-bs-toggle="collapse" href="#menu2" role="button" aria-expanded="false" aria-controls="menu2">
-                ⚙️ Sistema <span>▾</span>
-                </a>
-                <div class="collapse ps-3" id="menu2">
-                <a href="{{ route('tokens.index') }}" class="nav-link">▪️ Tokens de acceso</a>
-                <a href="{{ route('django-config.index') }}" class="nav-link">▪️ Django Config</a>
-                </div>
-
-                <!-- Menú 3 -->
-                <a class="nav-link d-flex justify-content-between align-items-center" 
-                data-bs-toggle="collapse" href="#menu3" role="button" aria-expanded="false" aria-controls="menu2">
-                📑 Archivos <span>▾</span>
-                </a>
-                <div class="collapse ps-3" id="menu3">
-                    <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
-                    <a href="{{ route('archivos.index') }}" class="nav-link">▪️Descargar Archivos</a>
-                    <a href="{{ route('registro.create') }}" class="nav-link">▪️Registrar ICI</a>
-                    <a href="{{ route('historicos.index') }}" class="nav-link">▪️Proces. Históricos</a>
-                    <a href="{{ route('matriz.index') }}" class="nav-link">▪️Matriz Disponibilidad</a>
-                    <a href="{{ route('matriz.exportacion.index') }}" class="nav-link">▪️Matriz Disp. Todos</a>
-                    <a href="{{ route('monitor.tmovim') }}" class="nav-link">▪️Monitor API 
+        @auth
+            @foreach($menuGroups as $groupKey => $group)
+                @if(!empty($group['routes']))
+                    <a class="nav-link d-flex justify-content-between align-items-center"
+                       data-bs-toggle="collapse"
+                       href="#menu-{{ $groupKey }}"
+                       role="button"
+                       aria-expanded="{{ $groupKey === 'files' ? 'true' : 'false' }}"
+                       aria-controls="menu-{{ $groupKey }}">
+                        {{ $group['icon'] }} {{ $group['title'] }} <span>▾</span>
                     </a>
-                    <a href="{{ route('requerimientos.index') }}" class="nav-link">▪️Requerimientos</a>
-                    <a href="{{ route('pedidos.index') }}" class="nav-link">▪️Lista Requerimientos</a>
+
+                    <div class="collapse {{ $groupKey === 'files' ? 'show' : '' }} ps-3" id="menu-{{ $groupKey }}">
+                        @foreach($group['routes'] as $module)
+                            @php
+                                $meta = $moduleRouteMap[$module->route_name_index] ?? null;
+                                $label = $meta['label'] ?? $module->name;
+                            @endphp
+                            <a href="{{ route($module->route_name_index) }}" class="nav-link">▪️ {{ $label }}</a>
+                        @endforeach
+                    </div>
+                @endif
+            @endforeach
+
+            @if($isSuperAdmin && $menuModules->isEmpty())
+                <div class="alert alert-warning py-2 px-2 mt-2 mb-2" style="font-size: 12px;">
+                    No hay modulos sincronizados. Usa estos accesos para configurar.
                 </div>
-            @else
-                <a class="nav-link d-flex justify-content-between align-items-center" 
-                  data-bs-toggle="collapse" href="#menu3" role="button" aria-expanded="false" aria-controls="menu2">
-                  📑 Archivos <span>▾</span>
-                </a>
-                <div class="collapse ps-3" id="menu3">
-                    <a href="{{ route('registro.index') }}" class="nav-link">▪️Listar ICIs</a>  
-                    <a href="{{ route('registro.create') }}" class="nav-link">▪️Registro ICI</a>
-                </div>
+                <a href="{{ route('admin.access.modules.index') }}" class="nav-link">▪️ Modulos</a>
+                <a href="{{ route('admin.access.roles.index') }}" class="nav-link">▪️ Permisos por rol</a>
+                <a href="{{ route('admin.access.users.index') }}" class="nav-link">▪️ Permisos por usuario</a>
             @endif
         @endauth
       </nav>

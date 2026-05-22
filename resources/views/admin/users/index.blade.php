@@ -51,10 +51,12 @@
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
-                                    @if ($user->is_admin==true)
-                                        <span class="badge bg-warning text-dark">Admin User</span>
+                                    @if($user->roles->isNotEmpty())
+                                        <span class="badge bg-warning text-dark">{{ $user->roles->pluck('name')->join(', ') }}</span>
+                                    @elseif ($user->is_admin==true)
+                                        <span class="badge bg-warning text-dark">superadmin (legacy)</span>
                                     @else
-                                        <span class="badge bg-success">Regular User</span>
+                                        <span class="badge bg-success">Sin rol</span>
                                     @endif
                         
                                 </td>
