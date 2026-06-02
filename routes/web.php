@@ -84,6 +84,7 @@ Route::middleware(['auth', 'module.access'])->group(function () {
     Route::get('/formulario', [RegistroController::class, 'create'])->name('registro.create');
     Route::post('/registro', [RegistroController::class, 'store'])->name('registro.store');
     Route::delete('/registros/{registro}', [RegistroController::class, 'destroy'])
+    ->middleware('permission:'.\App\Models\Module::REGISTRO_DELETE_PERMISSION)
     ->name('registros.destroy');
     
     //Unidades Ejecutoras create,store,index,update,delete
@@ -116,7 +117,9 @@ Route::middleware(['auth', 'module.access'])->group(function () {
     //configurar plazos
     Route::get ('/admin/plazo',  [PlazoController::class, 'edit'])->name('plazo.edit');
     Route::post('/admin/plazo',  [PlazoController::class, 'update'])->name('plazo.update');
-    Route::post('/registros/procesar/{id}', [ProcesarDbfController::class, 'procesar'])->name('registros.procesar');
+    Route::post('/registros/procesar/{id}', [ProcesarDbfController::class, 'procesar'])
+    ->middleware('permission:'.\App\Models\Module::REGISTRO_PROCESS_PERMISSION)
+    ->name('registros.procesar');
 
     Route::get('/admin', [AdminController::class, 'index'])->name('registro.index');
     //configurar claves de acceso al form

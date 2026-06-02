@@ -1,5 +1,12 @@
 @extends('admin.base')
 @section('content')
+    @php
+        $currentUser = auth()->user();
+        $canDeleteRegistro = $currentUser->is_admin || $currentUser->can(\App\Models\Module::REGISTRO_DELETE_PERMISSION);
+        $canProcessRegistro = $currentUser->is_admin || $currentUser->can(\App\Models\Module::REGISTRO_PROCESS_PERMISSION);
+        $showActionColumn = $canDeleteRegistro || $canProcessRegistro;
+    @endphp
+
     <div class="mb-2">
         <h4 class="mb-0">Lista de Archivos ICIs</h4>
         <div class="text-center mt-2">
@@ -31,7 +38,7 @@
                     <th>Hora</th>
                     <th>Códigos_PRE</th>
                     <th>Archivo</th>
-                    @if(auth()->user()->is_admin)
+                    @if($showActionColumn)
                         <th>Acciones</th>
                     @endif
                 </tr>
@@ -79,7 +86,7 @@
                                     Descargar ZIP
                                 </a>
 
-                                @if(auth()->user()->is_admin)
+                                @if($canDeleteRegistro)
                                     <form action="{{ route('registros.destroy', $reg->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
@@ -92,9 +99,10 @@
                                 @endif
                             </div>
                         </td>
+                        @if($showActionColumn)
                         <td>
                             <div class="d-flex gap-1">
-                                @if(auth()->user()->is_admin)
+                                @if($canProcessRegistro)
                                     <form action="{{ route('registros.procesar', $reg->id) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-light {{ $reg->procesado ? 'disabled' : '' }}" {{ $reg->procesado ? 'disabled' : '' }}>
@@ -104,6 +112,7 @@
                                  @endif
                             </div>
                         </td>
+                        @endif
 
                     </tr>
                 @endforeach

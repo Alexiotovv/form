@@ -11,6 +11,8 @@ class Module extends Model
     use HasFactory;
 
     public const REGISTRO_VIEW_ALL_PERMISSION = 'module.registro.view-all';
+    public const REGISTRO_DELETE_PERMISSION = 'module.registro.delete';
+    public const REGISTRO_PROCESS_PERMISSION = 'module.registro.process';
 
     protected $fillable = [
         'name',
@@ -35,6 +37,7 @@ class Module extends Model
 
         if ($slug === 'registro') {
             $permissions[] = self::REGISTRO_VIEW_ALL_PERMISSION;
+            $permissions[] = self::REGISTRO_PROCESS_PERMISSION;
         }
 
         return $permissions;
