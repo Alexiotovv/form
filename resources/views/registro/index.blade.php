@@ -24,6 +24,9 @@
                     <th>Teléfono</th>
                     <th>Profesión</th>
                     <th>Establecimiento</th>
+                    @if(auth()->user()->is_admin)
+                        <th>Usuario asignado</th>
+                    @endif
                     <th>Fecha</th>
                     <th>Hora</th>
                     <th>Códigos_PRE</th>
@@ -42,6 +45,9 @@
                         <td>{{ $reg->telefono }}</td>
                         <td>{{ $reg->profesion->nombre_profesion }}</td>
                         <td>{{ $reg->almacen->cod_ipress}} - {{$reg->almacen->nombre_ipress }}</td>
+                        @if(auth()->user()->is_admin)
+                            <td>{{ $reg->user->name ?? 'Sin usuario' }}</td>
+                        @endif
                         <td>{{ $reg->fecha_envio }}</td>
                         <td>{{ $reg->hora_envio }}</td>
                         <td>

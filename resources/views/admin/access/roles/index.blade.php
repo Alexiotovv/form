@@ -91,7 +91,13 @@
                                                     value="{{ $permission->id }}"
                                                     data-group="{{ $permissionGroup }}"
                                                     {{ $role->permissions->contains('id', $permission->id) ? 'checked' : '' }}>
-                                                <label class="form-check-label">{{ $permission->name }}</label>
+                                                <label class="form-check-label">
+                                                    @if($permission->name === \App\Models\Module::REGISTRO_VIEW_ALL_PERMISSION)
+                                                        Puede ver todos los registros
+                                                    @else
+                                                        {{ $permission->name }}
+                                                    @endif
+                                                </label>
                                             </div>
                                         </div>
                                     @endforeach

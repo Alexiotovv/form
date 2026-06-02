@@ -14,9 +14,11 @@ class RolePermissionController extends Controller
 {
     public function index()
     {
+        $modules = Module::query()->orderBy('name')->get();
+        $modules->each->ensurePermissions();
+
         $roles = Role::query()->with('permissions')->orderBy('name')->get();
         $permissions = Permission::query()->orderBy('name')->get();
-        $modules = Module::query()->orderBy('name')->get();
 
         return view('admin.access.roles.index', compact('roles', 'permissions', 'modules'));
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Module;
 use App\Models\Registro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -10,31 +11,30 @@ class AdminController extends Controller
 {
     public function index()
     {
-        
-            $user = auth()->user();
+        $user = auth()->user();
+        $isAdmin = (bool) $user->is_admin;
+        $canViewAllRegistros = $isAdmin || $user->can(Module::REGISTRO_VIEW_ALL_PERMISSION);
 
-            $registros = Registro::with('almacen', 'profesion', 'procesamientoHistorico.formDet')
-                ->when(!$user->is_admin, function ($query) use ($user) {
-                    return $query->where('user_id', $user->id);
-                })
-                ->when(request('search'), function ($query, $search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->where('nombres', 'like', "%{$search}%")
+        $registros = Registro::with(['user', 'almacen', 'profesion', 'procesamientoHistorico.formDet'])
+            ->when(!$canViewAllRegistros, function ($query) use ($user) {
+                return $query->where('user_id', $user->id);
+            })
+            ->when(request('search'), function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nombres', 'like', "%{$search}%")
                         ->orWhere('apellidos', 'like', "%{$search}%")
                         ->orWhere('correo', 'like', "%{$search}%")
-                        ->orWhere('fecha_envio', 'like', "%{$search}%") // 👈 búsqueda por fecha
-                        ->orWhereHas('profesion', fn($p) => $p->where('nombre_profesion', 'like', "%{$search}%"))
-                        ->orWhereHas('almacen', fn($e) => $e->where('nombre_ipress', 'like', "%{$search}%"));
-                    });
-                })
-                ->latest()
-                ->paginate(20)   // 👈 activa paginación
-                ->withQueryString(); // 👈 mantiene el ?search= en la URL al cambiar de página
+                        ->orWhere('fecha_envio', 'like', "%{$search}%")
+                        ->orWhereHas('profesion', fn ($p) => $p->where('nombre_profesion', 'like', "%{$search}%"))
+                        ->orWhereHas('almacen', fn ($e) => $e->where('nombre_ipress', 'like', "%{$search}%"))
+                        ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
 
-                return view('registro.index', compact('registros'));
-
-
-
+        return view('registro.index', compact('registros'));
     }
 
     public function dashboard()

@@ -12,7 +12,15 @@ class UserBulkController extends Controller
 {
     public function index()
     {
-        $almacenes = Almacen::all();
+        $almacenes = Almacen::query()
+            ->whereNotIn('id', function ($query) {
+                $query->select('almacen_id')
+                    ->from('users')
+                    ->whereNotNull('almacen_id');
+            })
+            ->orderBy('cod_ipress')
+            ->get();
+
         return view('admin.users.bulk', compact('almacenes'));
     }
 
@@ -33,6 +41,12 @@ class UserBulkController extends Controller
         foreach ($almacenIds as $id) {
             $almacen = Almacen::find($id);
             if (! $almacen) continue;
+
+            // Seguridad extra: no crear si el almacen ya tiene usuario asociado.
+            if (User::where('almacen_id', $almacen->id)->exists()) {
+                $skipped++;
+                continue;
+            }
 
             $nombre = $almacen->nombre_ipress ?? '';
             // Obtener desde el 10mo caracter (1-based). En mb_substr el offset 9.

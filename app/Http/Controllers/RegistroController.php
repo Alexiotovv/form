@@ -22,8 +22,6 @@ class RegistroController extends Controller
 
     public function registrosici(Request $request)
     {
-        
-        
         // Validar que las fechas sean correctas
         $request->validate([
             'fecha_inicio' => 'required|date',
@@ -83,43 +81,10 @@ class RegistroController extends Controller
             'terminos' => 'accepted',
         ]);
 
-        //validar tablas formDet y Imed3
-        // $config = \App\Models\DjangoConfig::first();
-        // if (!$config) {
-        //     return back()->with('error', 'No existe configuración de Django API en la BD');
-        // }
-
-        // $archivo = $request->file('archivo');
-
-        // // --- Validar ZIP en el endpoint de Django ---
-        // $response = Http::withHeaders([
-        //     'Authorization' => 'Token ' . $config->token,
-        // ])
-        // ->attach(
-        //     'archivo', file_get_contents($archivo->getRealPath()), $archivo->getClientOriginalName()
-        // )   
-        // ->post($config->url . '/api/validar-zip/', [
-        //     'password' => $config->password_zip
-        // ]);
-
-        // if (!$response->successful()) {
-        //     $body = $response->json();
-
-        //     $errorMsg = 'Error al validar archivo ZIP.';
-        //     if (is_array($body)) {
-        //         $errorMsg = $body['error'] ?? ($body['detalle'] ?? $errorMsg);
-        //     } else {
-        //         $errorMsg = $response->body(); // texto plano si no es JSON
-        //     }
-
-        //     return redirect()->back()
-        //         ->withInput()
-        //         ->with('error', $errorMsg);
-        // }
 
         //Termina de validar formDet y Imed3
 
-        // 🔒 Obtener el establecimiento del USUARIO AUTENTICADO (no del request)
+        // Obtener el establecimiento del USUARIO AUTENTICADO (no del request)
         $usuario = auth()->user();
         $almacenId = $usuario->almacen_id;
         // dd($establecimientoId);

@@ -10,6 +10,8 @@ class Module extends Model
 {
     use HasFactory;
 
+    public const REGISTRO_VIEW_ALL_PERMISSION = 'module.registro.view-all';
+
     protected $fillable = [
         'name',
         'slug',
@@ -24,12 +26,18 @@ class Module extends Model
 
     public static function permissionNamesFor(string $slug): array
     {
-        return [
+        $permissions = [
             "module.{$slug}.view",
             "module.{$slug}.create",
             "module.{$slug}.update",
             "module.{$slug}.delete",
         ];
+
+        if ($slug === 'registro') {
+            $permissions[] = self::REGISTRO_VIEW_ALL_PERMISSION;
+        }
+
+        return $permissions;
     }
 
     public function ensurePermissions(): void

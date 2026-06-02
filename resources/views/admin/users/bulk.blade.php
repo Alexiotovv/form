@@ -21,21 +21,24 @@
             <div class="mb-3">
                 <label class="form-label">Seleccionar almacenes</label>
                 <div class="mb-2">
-                    <input type="checkbox" id="select_all_almacenes"> <label for="select_all_almacenes">Seleccionar todos</label>
+                    <input type="checkbox" id="select_all_almacenes" {{ $almacenes->isEmpty() ? 'disabled' : '' }}>
+                    <label for="select_all_almacenes">Seleccionar todos</label>
                 </div>
 
                 <div class="border rounded p-2" style="max-height:300px; overflow:auto;">
-                    @foreach($almacenes as $almacen)
+                    @forelse($almacenes as $almacen)
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="almacen_ids[]" value="{{ $almacen->id }}" id="alm_{{ $almacen->id }}">
                             <label class="form-check-label" for="alm_{{ $almacen->id }}">{{ $almacen->cod_ipress }} - {{ $almacen->nombre_ipress }}</label>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="text-muted small">No hay almacenes disponibles. Todos ya tienen usuario asociado.</div>
+                    @endforelse
                 </div>
             </div>
 
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Crear usuarios masivos</button>
+                <button type="submit" class="btn btn-primary" {{ $almacenes->isEmpty() ? 'disabled' : '' }}>Crear usuarios masivos</button>
                 <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Volver al listado</a>
             </div>
         </form>
