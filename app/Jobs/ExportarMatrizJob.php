@@ -100,7 +100,7 @@ class ExportarMatrizJob implements ShouldQueue
             'SIT.STOCK', 'MESES_PARA_VCMTO.', 'SIT.FECH_VCMTO.',
             'DIST.1', 'INGRESO_ICI', 'PEND.ING.ICI', 'DIST.2',
             'CONSUMO_PROYEC.', 'STOCK_PROYEC.', 'CPMA PROYEC.',
-            'CONSUMO_4M_PROYEC.', 'MSD PROYEC.', 'SIT.STOCK_PROYEC', 'ENVÍO SUGERIDO'
+            'CONSUMO_4M_PROYEC.', 'MSD PROYEC.', 'SIT.STOCK_PROYEC', 'ENVÍO SUGERIDO', 'UE_MEF'
         ];
         
         fputcsv($handle, $headers, ';'); // Usar ; como separador (Excel en español)
@@ -114,7 +114,7 @@ class ExportarMatrizJob implements ShouldQueue
             'precio', 'monto', 'situacion_stock', 'meses_para_vencimiento', 'sit_fecha_vcmto',
             'dist1', 'ingre', 'pendingre_ici', 'dist2', 'consumo_total_proyectado', 'stockfinal_proyectado',
             'cpma_proyectado', 'consumo_cuatro_ult_meses_proyectado', 'msd_proyectado',
-            'situacion_stock_proyectado', 'envio_sugerido'
+            'situacion_stock_proyectado', 'envio_sugerido', 'ue_mef'
         ];
         
         $batchSize = 1000; // Actualizar cada 1000 registros
