@@ -22,6 +22,7 @@ use App\Http\Controllers\ResumenController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\InconsistenciasController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserPermissionController;
@@ -157,6 +158,11 @@ Route::middleware(['auth', 'module.access'])->group(function () {
 
     //Pedidos de los Requerimientos
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos.index');
+
+        //Inconsistencias SIS
+        Route::get('/inconsistencias', [InconsistenciasController::class, 'index'])
+            ->middleware('permission:module.inconsistencias.view')
+            ->name('inconsistencias.index');
     Route::get('/pedidos/productos', [PedidoController::class, 'getProductos'])->name('pedidos.productos');
     Route::get('/pedidos/fer/{pedidoId}', [PedidoController::class, 'generarFER'])->name('pedidos.fer');
 

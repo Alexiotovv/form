@@ -140,7 +140,8 @@
             'pedidos.index' => ['label' => 'Lista Requerimientos', 'icon' => '📑'],
             'almacenes.index' => ['label' => 'Almacenes', 'icon' => '⚙️'],
             'productos.index' => ['label' => 'Productos', 'icon' => '⚙️'],
-        ];
+                'inconsistencias.index' => ['label' => 'Inconsistencias SIS', 'icon' => '⚠️'],
+          ];
 
         $menuGroups = [
             'config' => ['title' => 'Configurar', 'icon' => '⚙️', 'routes' => []],
@@ -162,7 +163,7 @@
                 continue;
             }
 
-            if (in_array($routeName, ['registro.index', 'archivos.index', 'registro.create', 'historicos.index', 'matriz.index', 'resumen.index', 'matriz.exportacion.index', 'monitor.tmovim', 'requerimientos.index', 'pedidos.index'], true)) {
+            if (in_array($routeName, ['registro.index', 'archivos.index', 'registro.create', 'historicos.index', 'matriz.index', 'resumen.index', 'matriz.exportacion.index', 'monitor.tmovim', 'requerimientos.index', 'pedidos.index', 'inconsistencias.index'], true)) {
                 $menuGroups['files']['routes'][] = $module;
                 continue;
             }
