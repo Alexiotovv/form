@@ -163,6 +163,9 @@ Route::middleware(['auth', 'module.access'])->group(function () {
         Route::get('/inconsistencias', [InconsistenciasController::class, 'index'])
             ->middleware('permission:module.inconsistencias.view')
             ->name('inconsistencias.index');
+        Route::get('/inconsistencias/export', [InconsistenciasController::class, 'export'])
+            ->middleware('permission:module.inconsistencias.view')
+            ->name('inconsistencias.export');
     Route::get('/pedidos/productos', [PedidoController::class, 'getProductos'])->name('pedidos.productos');
     Route::get('/pedidos/fer/{pedidoId}', [PedidoController::class, 'generarFER'])->name('pedidos.fer');
 

@@ -21,6 +21,11 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4>⚠️ Inconsistencias SIS (valores 0 o nulos)</h4>
+    @if($annomes)
+        <a href="{{ route('inconsistencias.export', ['annomes' => $annomes]) }}" class="btn btn-success btn-sm">
+            Exportar a Excel
+        </a>
+    @endif
 </div>
 
 {{-- Filtro de período --}}
