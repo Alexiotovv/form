@@ -28,7 +28,7 @@
                     <div class="mb-2">
                         <label class="form-label">Ruta index</label>
                         <input type="text" name="route_name_index" class="form-control" required>
-                        <small class="text-muted">Ejemplo: matriz.exportacion.index</small>
+                        <small class="text-muted">Ejemplo: matriz.exportacion.index o plazo.edit</small>
                     </div>
                     <div class="mb-2">
                         <label class="form-label">Descripcion</label>

@@ -23,7 +23,7 @@ class ModuleController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'slug' => ['required', 'string', 'max:120', 'alpha_dash', Rule::unique('modules', 'slug')],
-            'route_name_index' => ['required', 'string', 'max:180', 'ends_with:.index', Rule::unique('modules', 'route_name_index')],
+            'route_name_index' => ['required', 'string', 'max:180', Rule::unique('modules', 'route_name_index')],
             'description' => ['nullable', 'string', 'max:500'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -41,7 +41,7 @@ class ModuleController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'slug' => ['required', 'string', 'max:120', 'alpha_dash', Rule::unique('modules', 'slug')->ignore($module->id)],
-            'route_name_index' => ['required', 'string', 'max:180', 'ends_with:.index', Rule::unique('modules', 'route_name_index')->ignore($module->id)],
+            'route_name_index' => ['required', 'string', 'max:180', Rule::unique('modules', 'route_name_index')->ignore($module->id)],
             'description' => ['nullable', 'string', 'max:500'],
             'is_active' => ['nullable', 'boolean'],
         ]);
