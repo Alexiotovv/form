@@ -68,11 +68,13 @@ class AdminController extends Controller
             ->distinct();
 
         $almacenesEnviaron = (clone $almacenesBase)
+            ->select('id', 'cod_ipress', 'nombre_ipress')
             ->whereIn('cod_ipress', $codigosConEnvio)
             ->orderBy('nombre_ipress')
             ->get();
 
         $almacenesPendientes = (clone $almacenesBase)
+            ->select('id', 'cod_ipress', 'nombre_ipress')
             ->whereNotIn('cod_ipress', $codigosConEnvio)
             ->orderBy('nombre_ipress')
             ->get();
@@ -80,24 +82,6 @@ class AdminController extends Controller
         $enviaronEsteMes = $almacenesEnviaron->count();
 
         $porcentaje = $totalAlmacenes > 0 ? round(($enviaronEsteMes / $totalAlmacenes) * 100, 2) : 0;
-
-        $detalleEnviosPorAlmacen = DB::table('form_det as fd')
-            ->leftJoin('almacenes as a', 'fd.CODIGO_PRE', '=', 'a.cod_ipress')
-            ->select(
-                'fd.CODIGO_PRE',
-                'a.nombre_ipress',
-                'fd.CODIGO_MED',
-                'fd.SIS',
-                'fd.SALDO',
-                'fd.STOCK_FIN'
-            )
-            ->where('fd.ANNOMES', $annomes)
-            ->whereNotNull('fd.CODIGO_PRE')
-            ->where('fd.CODIGO_PRE', '<>', '')
-            ->orderBy('fd.CODIGO_PRE')
-            ->orderBy('fd.CODIGO_MED')
-            ->get()
-            ->groupBy('CODIGO_PRE');
 
         // === Gráfico de requerimientos por almacén ===
         $requerimientos = \App\Models\Requerimiento::with('almacen')
@@ -126,9 +110,46 @@ class AdminController extends Controller
             'labels',
             'data',
             'almacenesEnviaron',
-            'almacenesPendientes',
-            'detalleEnviosPorAlmacen'
+            'almacenesPendientes'
         ));
+    }
+
+    public function dashboardDetalleAlmacen(Request $request)
+    {
+        $validated = $request->validate([
+            'annomes' => ['required', 'string', 'max:20'],
+            'cod_ipress' => ['required', 'string', 'max:50'],
+            'limit' => ['nullable', 'integer', 'min:1', 'max:500'],
+        ]);
+
+        $annomes = $validated['annomes'];
+        $codIpress = trim($validated['cod_ipress']);
+        $limit = (int) ($validated['limit'] ?? 150);
+
+        $detalle = DB::table('form_det as fd')
+            ->select(
+                'fd.CODIGO_PRE',
+                'fd.CODIGO_MED',
+                'fd.SIS',
+                'fd.SALDO',
+                'fd.STOCK_FIN'
+            )
+            ->where('fd.ANNOMES', $annomes)
+            ->where('fd.CODIGO_PRE', $codIpress)
+            ->orderBy('fd.CODIGO_MED')
+            ->limit($limit + 1)
+            ->get();
+
+        $hasMore = $detalle->count() > $limit;
+        $rows = $hasMore ? $detalle->take($limit)->values() : $detalle;
+
+        return response()->json([
+            'cod_ipress' => $codIpress,
+            'annomes' => $annomes,
+            'has_more' => $hasMore,
+            'limit' => $limit,
+            'rows' => $rows,
+        ]);
     }
 
     /**

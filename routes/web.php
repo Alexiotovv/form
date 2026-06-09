@@ -81,6 +81,7 @@ Route::middleware(['auth', 'module.access'])->group(function () {
 
 Route::middleware(['auth', 'module.access'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/dashboard/detalle-almacen', [AdminController::class, 'dashboardDetalleAlmacen'])->name('admin.dashboard.detalle');
     
     Route::get('/formulario', [RegistroController::class, 'create'])->name('registro.create');
     Route::post('/registro', [RegistroController::class, 'store'])->name('registro.store');

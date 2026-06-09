@@ -92,48 +92,25 @@
                             @else
                                 <div class="list-group list-group-flush">
                                     @foreach($almacenesEnviaron as $almacen)
-                                        @php
-                                            $detalleId = 'enviado-' . $almacen->cod_ipress;
-                                            $detallesAlmacen = $detalleEnviosPorAlmacen[$almacen->cod_ipress] ?? collect();
-                                        @endphp
+                                        @php $detalleId = 'enviado-' . $almacen->cod_ipress; @endphp
                                         <div class="list-group-item px-0">
                                             <div class="d-flex justify-content-between align-items-start gap-3">
                                                 <div>
                                                     <div class="fw-semibold">{{ $almacen->cod_ipress }} - {{ $almacen->nombre_ipress }}</div>
-                                                    <div class="small text-muted">{{ $detallesAlmacen->count() }} registros en form_det</div>
+                                                    <div class="small text-muted">Detalle bajo demanda para mejorar rendimiento</div>
                                                 </div>
                                                 <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $detalleId }}" aria-expanded="false" aria-controls="{{ $detalleId }}">
                                                     Ver detalles
                                                 </button>
                                             </div>
 
-                                            <div class="collapse mt-3" id="{{ $detalleId }}">
-                                                @if($detallesAlmacen->isEmpty())
-                                                    <div class="alert alert-light border mb-0">No se encontraron filas de detalle para este almacén.</div>
-                                                @else
-                                                    <div class="table-responsive">
-                                                        <table class="table table-sm table-striped align-middle mb-0">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Código medicamento</th>
-                                                                    <th class="text-end">SIS</th>
-                                                                    <th class="text-end">Saldo</th>
-                                                                    <th class="text-end">Stock final</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach($detallesAlmacen as $detalle)
-                                                                    <tr>
-                                                                        <td>{{ $detalle->CODIGO_MED }}</td>
-                                                                        <td class="text-end">{{ $detalle->SIS ?? '-' }}</td>
-                                                                        <td class="text-end">{{ $detalle->SALDO ?? '-' }}</td>
-                                                                        <td class="text-end">{{ $detalle->STOCK_FIN ?? '-' }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                @endif
+                                            <div class="collapse mt-3 js-detalle-enviado"
+                                                id="{{ $detalleId }}"
+                                                data-cod-ipress="{{ $almacen->cod_ipress }}"
+                                                data-annomes="{{ $annomes }}"
+                                                data-detail-url="{{ route('admin.dashboard.detalle') }}"
+                                                data-loaded="0">
+                                                <div class="border rounded p-3 bg-light text-muted small">Cargando detalle...</div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -227,5 +204,90 @@
         };
 
         new ApexCharts(document.querySelector("#chart-requerimientos"), optionsRequerimientos).render();
+    </script>
+
+    <script>
+        (function () {
+            function renderDetalle(container, payload) {
+                if (!payload.rows || payload.rows.length === 0) {
+                    container.innerHTML = '<div class="alert alert-light border mb-0">No se encontraron filas de detalle para este almacén.</div>';
+                    return;
+                }
+
+                var rowsHtml = payload.rows.map(function (row) {
+                    return '<tr>' +
+                        '<td>' + (row.CODIGO_MED ?? '-') + '</td>' +
+                        '<td class="text-end">' + (row.SIS ?? '-') + '</td>' +
+                        '<td class="text-end">' + (row.SALDO ?? '-') + '</td>' +
+                        '<td class="text-end">' + (row.STOCK_FIN ?? '-') + '</td>' +
+                        '</tr>';
+                }).join('');
+
+                var moreNotice = payload.has_more
+                    ? '<div class="small text-muted mt-2">Se muestran los primeros ' + payload.limit + ' registros.</div>'
+                    : '';
+
+                container.innerHTML =
+                    '<div class="table-responsive">' +
+                        '<table class="table table-sm table-striped align-middle mb-0">' +
+                            '<thead>' +
+                                '<tr>' +
+                                    '<th>Código medicamento</th>' +
+                                    '<th class="text-end">SIS</th>' +
+                                    '<th class="text-end">Saldo</th>' +
+                                    '<th class="text-end">Stock final</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                            '<tbody>' + rowsHtml + '</tbody>' +
+                        '</table>' +
+                    '</div>' + moreNotice;
+            }
+
+            function renderError(container) {
+                container.innerHTML = '<div class="alert alert-danger mb-0">No se pudo cargar el detalle. Intenta nuevamente.</div>';
+                container.dataset.loaded = '0';
+            }
+
+            var collapses = document.querySelectorAll('.js-detalle-enviado');
+
+            collapses.forEach(function (collapseEl) {
+                collapseEl.addEventListener('show.bs.collapse', function () {
+                    if (collapseEl.dataset.loaded === '1') {
+                        return;
+                    }
+
+                    var endpoint = collapseEl.dataset.detailUrl;
+                    var codIpress = collapseEl.dataset.codIpress;
+                    var annomes = collapseEl.dataset.annomes;
+                    var query = new URLSearchParams({
+                        cod_ipress: codIpress,
+                        annomes: annomes
+                    });
+
+                    collapseEl.innerHTML = '<div class="border rounded p-3 bg-light text-muted small">Cargando detalle...</div>';
+
+                    fetch(endpoint + '?' + query.toString(), {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(function (response) {
+                            if (!response.ok) {
+                                throw new Error('HTTP ' + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(function (payload) {
+                            renderDetalle(collapseEl, payload);
+                            collapseEl.dataset.loaded = '1';
+                        })
+                        .catch(function () {
+                            renderError(collapseEl);
+                        });
+                });
+            });
+        })();
     </script>
 @endsection
