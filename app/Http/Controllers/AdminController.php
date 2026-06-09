@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Almacen;
+use App\Models\FormDet;
 use App\Models\Module;
 use App\Models\Registro;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 
 class AdminController extends Controller
@@ -37,17 +40,64 @@ class AdminController extends Controller
         return view('registro.index', compact('registros'));
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        // === Gráfico de avance SIGA ===
-        $totalAlmacenes = \App\Models\Almacen::where('para_descarga_siga', 'SI')->count();
+        $mesesDisponibles = FormDet::query()
+            ->whereNotNull('ANNOMES')
+            ->where('ANNOMES', '<>', '')
+            ->distinct()
+            ->orderByDesc('ANNOMES')
+            ->pluck('ANNOMES');
 
-        $enviaronEsteMes = \App\Models\Registro::whereMonth('fecha_envio', now()->month)
-            ->whereYear('fecha_envio', now()->year)
-            ->distinct('almacen_id')
-            ->count('almacen_id');
+        $annomes = $request->input('annomes', $mesesDisponibles->first());
+
+        if (! $annomes) {
+            $annomes = now()->format('Ym');
+        }
+
+        $almacenesBase = Almacen::query()
+            ->where('para_descarga_siga', 'SI');
+
+        $totalAlmacenes = (clone $almacenesBase)->count();
+
+        $codigosConEnvio = DB::table('form_det')
+            ->select('CODIGO_PRE')
+            ->where('ANNOMES', $annomes)
+            ->whereNotNull('CODIGO_PRE')
+            ->where('CODIGO_PRE', '<>', '')
+            ->distinct();
+
+        $almacenesEnviaron = (clone $almacenesBase)
+            ->whereIn('cod_ipress', $codigosConEnvio)
+            ->orderBy('nombre_ipress')
+            ->get();
+
+        $almacenesPendientes = (clone $almacenesBase)
+            ->whereNotIn('cod_ipress', $codigosConEnvio)
+            ->orderBy('nombre_ipress')
+            ->get();
+
+        $enviaronEsteMes = $almacenesEnviaron->count();
 
         $porcentaje = $totalAlmacenes > 0 ? round(($enviaronEsteMes / $totalAlmacenes) * 100, 2) : 0;
+
+        $detalleEnviosPorAlmacen = DB::table('form_det as fd')
+            ->leftJoin('almacenes as a', 'fd.CODIGO_PRE', '=', 'a.cod_ipress')
+            ->select(
+                'fd.CODIGO_PRE',
+                'a.nombre_ipress',
+                'fd.CODIGO_MED',
+                'fd.SIS',
+                'fd.SALDO',
+                'fd.STOCK_FIN'
+            )
+            ->where('fd.ANNOMES', $annomes)
+            ->whereNotNull('fd.CODIGO_PRE')
+            ->where('fd.CODIGO_PRE', '<>', '')
+            ->orderBy('fd.CODIGO_PRE')
+            ->orderBy('fd.CODIGO_MED')
+            ->get()
+            ->groupBy('CODIGO_PRE');
 
         // === Gráfico de requerimientos por almacén ===
         $requerimientos = \App\Models\Requerimiento::with('almacen')
@@ -68,11 +118,16 @@ class AdminController extends Controller
         }
 
         return view('admin.dashboard', compact(
+            'mesesDisponibles',
+            'annomes',
             'totalAlmacenes',
             'enviaronEsteMes',
             'porcentaje',
             'labels',
-            'data'
+            'data',
+            'almacenesEnviaron',
+            'almacenesPendientes',
+            'detalleEnviosPorAlmacen'
         ));
     }
 
