@@ -46,6 +46,7 @@ Route::middleware(['auth', 'module.access'])->group(function () {
     ->name('archivos.descargarZip');
 
     Route::delete('/historicos/{id}', [ProcesamientoHistoricoController::class, 'destroy'])
+    ->middleware('permission:module.historicos.delete')
     ->name('historicos.destroy');
 
 });
@@ -96,12 +97,23 @@ Route::middleware(['auth', 'module.access'])->group(function () {
     ->name('unidadesejecutoras.import');
 
     //Almacenes
-    Route::resource('almacenes', \App\Http\Controllers\AlmacenController::class);
+    Route::resource('almacenes', \App\Http\Controllers\AlmacenController::class)
+        ->only(['index', 'show']);
+    Route::resource('almacenes', \App\Http\Controllers\AlmacenController::class)
+        ->only(['create', 'store'])
+        ->middleware('permission:module.almacenes.create');
+    Route::resource('almacenes', \App\Http\Controllers\AlmacenController::class)
+        ->only(['edit', 'update'])
+        ->middleware('permission:module.almacenes.update');
+    Route::resource('almacenes', \App\Http\Controllers\AlmacenController::class)
+        ->only(['destroy'])
+        ->middleware('permission:module.almacenes.delete');
     Route::get('/matriz/search-almacen', [UserController::class, 'searchAlmacen'])->name('matriz.searchAlmacen');
 
-
     //Importar Almacenes archivo excel
-    Route::post('almacenes/import', [AlmacenController::class, 'import'])->name('almacenes.import');
+    Route::post('almacenes/import', [AlmacenController::class, 'import'])
+        ->middleware('permission:module.almacenes.create')
+        ->name('almacenes.import');
 
     //Matriz de disponibilidad
     Route::get ('/matriz/index',  [MatrizController::class, 'index'])->name('matriz.index');
@@ -137,8 +149,16 @@ Route::middleware(['auth', 'module.access'])->group(function () {
     Route::put('/disas/{disa}', [DisaController::class, 'update'])->name('disas.update');
 
     //Productos
-    Route::resource('productos', ProductoController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::post('productos/import', [ProductoController::class, 'import'])->name('productos.import');
+    Route::resource('productos', ProductoController::class)->only(['index']);
+    Route::resource('productos', ProductoController::class)->only(['store'])
+        ->middleware('permission:module.productos.create');
+    Route::resource('productos', ProductoController::class)->only(['update'])
+        ->middleware('permission:module.productos.update');
+    Route::resource('productos', ProductoController::class)->only(['destroy'])
+        ->middleware('permission:module.productos.delete');
+    Route::post('productos/import', [ProductoController::class, 'import'])
+        ->middleware('permission:module.productos.create')
+        ->name('productos.import');
 
     //Disponibilidad
     Route::get('/registros/data', [App\Http\Controllers\RegistroController::class, 'getData'])

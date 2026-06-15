@@ -5,14 +5,18 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h4>📦 Gestión de Productos</h4>
     {{-- Nuevo Producto --}}
+    @can('module.productos.create')
     <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createModal">
       ➕ Nuevo Producto
     </button>
+    @endcan
 
     {{-- Botón importar --}}
+    @can('module.productos.create')
     <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
         📂 imp...
     </button>
+    @endcan
 
 
 </div>
@@ -35,7 +39,7 @@
     </form> --}}
 
   <br>
-  <table class="table table-bordered table-striped" id="productosTable">
+  <table class="table table-bordered table-striped" id="productosTable" style="font-size: 0.7rem;">
       <thead>
           <tr>
               <th>ID</th>
@@ -53,12 +57,20 @@
               <td>{{ $producto->descripcion_producto }}</td>
               <td>{{ $producto->estado }}</td>
               <td>
+                <button class="btn btn-sm btn-info view-btn me-1"
+                  data-product="{{ $producto->toJson() }}"
+                  data-bs-toggle="modal"
+                  data-bs-target="#viewModal">
+                    👁️
+                </button>
+                @can('module.productos.update')
                 <button class="btn btn-sm btn-warning edit-btn"
                   data-product="{{ $producto->toJson() }}"
                   data-bs-toggle="modal" 
                   data-bs-target="#editModal">
                     ✏️
                 </button>
+                @endcan
               </td>
           </tr>
           @endforeach
@@ -67,6 +79,38 @@
 
   {{ $productos->links() }}
 </div>
+
+ <!-- Modal Ver Detalle -->
+  <div class="modal fade" id="viewModal" tabindex="-1">
+    <div class="modal-dialog" style="max-width: 1400px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Detalle de Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body row">
+          @php
+            $fillable = (new App\Models\Producto)->getFillable();
+          @endphp
+          @foreach($fillable as $campo)
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-semibold">{{ ucfirst(str_replace('_', ' ', $campo)) }}</label>
+              <input
+                type="text"
+                id="view-{{ $campo }}"
+                class="form-control"
+                readonly
+                disabled
+              >
+            </div>
+          @endforeach
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
  <!-- Modal Editar Único -->
   <div class="modal fade" id="editModal" tabindex="-1">
@@ -248,6 +292,21 @@
   document.addEventListener('DOMContentLoaded', function () {
       const editModal = document.getElementById('editModal');
       const editForm = document.getElementById('editForm');
+      const viewButtons = document.querySelectorAll('.view-btn');
+
+      viewButtons.forEach(button => {
+          button.addEventListener('click', function () {
+              const producto = JSON.parse(this.getAttribute('data-product'));
+
+              for (const [key, value] of Object.entries(producto)) {
+                  const input = document.getElementById(`view-${key}`);
+                  if (input) {
+                      input.value = value ?? '';
+                  }
+              }
+          });
+      });
+
       const editButtons = document.querySelectorAll('.edit-btn');
 
       editButtons.forEach(button => {

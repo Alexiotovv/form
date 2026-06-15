@@ -114,8 +114,6 @@ class MatrizController extends Controller
         $q = $request->input('q');
         $tipo = $request->input('tipo');
 
-        $user = auth()->user();
-        $isAdmin = (bool) $user->is_admin;
         $results = [];
 
         if ($tipo === 'cod_ipress') {
@@ -123,16 +121,11 @@ class MatrizController extends Controller
             // Base query
             $query = Almacen::query();
 
-            // 🔒 Si NO es admin, solo su almacén asignado
-            if (!$isAdmin && $user->almacen_id) {
-                $query->where('id', $user->almacen_id);
-            } else {
-                // Si es admin, puede buscar libremente
-                $query->where(function ($sub) use ($q) {
-                    $sub->where('cod_ipress', 'LIKE', "%{$q}%")
-                        ->orWhere('nombre_ipress', 'LIKE', "%{$q}%");
-                });
-            }
+            // Todos los usuarios pueden buscar cualquier almacén
+            $query->where(function ($sub) use ($q) {
+                $sub->where('cod_ipress', 'LIKE', "%{$q}%")
+                    ->orWhere('nombre_ipress', 'LIKE', "%{$q}%");
+            });
 
             $results = $query->limit(20)
                 ->get()

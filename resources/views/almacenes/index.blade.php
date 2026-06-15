@@ -6,13 +6,17 @@
         <h4>📦 Gestión de Almacenes</h4>
 
         {{-- Botón nuevo --}}
+        @can('module.almacenes.create')
         <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createModal">
             ➕ Nuevo Almacén
         </button>
+        @endcan
         {{-- Botón importar --}}
+        @can('module.almacenes.create')
         <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
             📂 Importar
         </button>
+        @endcan
     </div>
 
     {{-- Buscador --}}
@@ -27,7 +31,7 @@
     {{-- Tabla --}}
     <div class="card">
         <div class="card-body table-responsive">
-            <table class="table table-hover table-bordered">
+            <table class="table table-hover table-bordered" style="font-size: 0.7rem;">
                 <thead>
                     <tr>
                         <th>COD PLIEGO</th>
@@ -61,13 +65,21 @@
                             <td>{{ $almacen->nombre_ipress }}</td>
                             <td>{{ $almacen->nivel }}</td>
                             <td>
+                                <button class="btn btn-sm btn-info view-btn me-1"
+                                        data-almacen="{{ $almacen->toJson() }}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#viewModal">
+                                    👁️ Ver
+                                </button>
                                 {{-- ✅ Botón de edición CORRECTO --}}
+                                @can('module.almacenes.update')
                                 <button class="btn btn-sm btn-light edit-btn"
                                         data-almacen="{{ $almacen->toJson() }}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editModal">
                                     ✏️ Editar
                                 </button>
+                                @endcan
                             </td>
                         </tr>
                         
@@ -77,6 +89,40 @@
 
             <div class="mt-3">
                 {{ $almacenes->links() }}
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Ver Detalle --}}
+    <div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle de Almacén</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    @php
+                        $fillable = (new App\Models\Almacen)->getFillable();
+                    @endphp
+                    <div class="row g-3">
+                        @foreach($fillable as $campo)
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">{{ ucfirst(str_replace('_', ' ', $campo)) }}</label>
+                                <input
+                                    type="text"
+                                    id="view-{{ $campo }}"
+                                    class="form-control"
+                                    readonly
+                                    disabled
+                                >
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -221,6 +267,22 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // === CARGAR DATOS EN MODAL DE VISTA ===
+    const viewButtons = document.querySelectorAll('.view-btn');
+
+    viewButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const almacen = JSON.parse(this.getAttribute('data-almacen'));
+
+            for (const [key, value] of Object.entries(almacen)) {
+                const input = document.getElementById(`view-${key}`);
+                if (input) {
+                    input.value = value ?? '';
+                }
+            }
+        });
+    });
+
     // === CARGAR DATOS EN MODAL DE EDICIÓN ===
     const editButtons = document.querySelectorAll('.edit-btn');
     const editForm = document.getElementById('editForm');

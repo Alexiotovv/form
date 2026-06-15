@@ -72,6 +72,7 @@
                     <td>{{ $h->user->name ?? 'Desconocido' }}</td>
                     <td>
                         {{-- Botón de eliminar con confirmación --}}
+                        @can('module.historicos.delete')
                         <form action="{{ route('historicos.destroy', $h->id) }}" 
                               method="POST" 
                               class="d-inline"
@@ -82,6 +83,7 @@
                                 <i class="fas fa-trash"></i> Eliminar
                             </button>
                         </form>
+                        @endcan
                     </td>
                 </tr>
                 @endforeach
