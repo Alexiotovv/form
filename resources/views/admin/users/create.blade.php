@@ -83,7 +83,10 @@
 
                         <div class="form-group">
                             <label for="password">Contraseña</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                                <button type="button" id="togglePassword" class="btn btn-outline-secondary btn-sm" title="Mostrar/Ocultar contraseña">👁️</button>
+                            </div>
                             @error('password')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -96,6 +99,13 @@
                             <input type="password" class="form-control" id="password-confirm" name="password_confirmation" required>
                         </div>
 
+                        <div class="form-group">
+                            <div class="d-flex gap-2">
+                                <button type="button" id="generatePassword" class="btn btn-outline-primary btn-sm">🔐 Generar</button>
+                                <button type="button" id="copyPassword" class="btn btn-outline-secondary btn-sm" title="Copiar contraseña">📋</button>
+                            </div>
+                        </div>
+                        <br>
                         <div class="form-group">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin" {{ old('is_admin') ? 'checked' : '' }}>
@@ -146,6 +156,80 @@
                         };
                     },
                     cache: true
+                }
+            });
+
+            function shuffleString(str) {
+                var arr = str.split('');
+                for (var i = arr.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+                }
+                return arr.join('');
+            }
+
+            function generateMediumPassword(length = 10) {
+                var upper = 'ABCDEFGHJKLMNPQRSTUVWXYZÑ';
+                var lower = 'abcdefghijkmnpqrstuvwxyzñ';
+                var numbers = '0123456789';
+                var special = '!@#$%&*?¡¿-_+[]{}()=<>.,;:\\"';
+
+                // Ensure at least one of each category
+                var pwd = '';
+                pwd += upper.charAt(Math.floor(Math.random() * upper.length));
+                pwd += lower.charAt(Math.floor(Math.random() * lower.length));
+                pwd += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                pwd += special.charAt(Math.floor(Math.random() * special.length));
+
+                var all = upper + lower + numbers + special;
+                for (var i = pwd.length; i < length; i++) {
+                    pwd += all.charAt(Math.floor(Math.random() * all.length));
+                }
+
+                return shuffleString(pwd);
+            }
+
+            $('#generatePassword').on('click', function() {
+                var pwd = generateMediumPassword(10);
+                $('#password').val(pwd).trigger('input');
+                $('#password-confirm').val(pwd).trigger('input');
+            });
+
+            $('#togglePassword').on('click', function() {
+                var $btn = $(this);
+                var $pwd = $('#password');
+                var $pwdc = $('#password-confirm');
+                var type = $pwd.attr('type') === 'password' ? 'text' : 'password';
+                $pwd.attr('type', type);
+                $pwdc.attr('type', type);
+                $btn.html(type === 'text' ? '🙈' : '👁️');
+            });
+
+            $('#copyPassword').on('click', function() {
+                var $btn = $(this);
+                var pwd = $('#password').val();
+                if (!pwd) {
+                    // generate if empty
+                    pwd = generateMediumPassword(10);
+                    $('#password').val(pwd);
+                    $('#password-confirm').val(pwd);
+                }
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(pwd).then(function() {
+                        var original = $btn.html();
+                        $btn.html('✅');
+                        setTimeout(function() { $btn.html(original); }, 1000);
+                    });
+                } else {
+                    // fallback
+                    var $temp = $('<input>');
+                    $('body').append($temp);
+                    $temp.val(pwd).select();
+                    document.execCommand('copy');
+                    $temp.remove();
+                    var original = $btn.html();
+                    $btn.html('✅');
+                    setTimeout(function() { $btn.html(original); }, 1000);
                 }
             });
 

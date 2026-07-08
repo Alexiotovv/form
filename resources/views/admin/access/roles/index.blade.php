@@ -94,6 +94,8 @@
                                                 <label class="form-check-label">
                                                     @if($permission->name === \App\Models\Module::REGISTRO_VIEW_ALL_PERMISSION)
                                                         Puede ver todos los registros
+                                                    @elseif($permission->name === \App\Models\Module::REGISTRO_ALERTS_PERMISSION)
+                                                        Ver alerta de registros sin procesar
                                                     @elseif($permission->name === \App\Models\Module::REGISTRO_DELETE_PERMISSION)
                                                         Puede eliminar registros
                                                     @elseif($permission->name === \App\Models\Module::REGISTRO_PROCESS_PERMISSION)

@@ -29,12 +29,18 @@ use App\Http\Controllers\Admin\UserPermissionController;
 
 Route::middleware(['auth', 'module.access'])->group(function () {
     Route::get('/tokens', [TokenController::class, 'index'])->name('tokens.index');
-    Route::post('/tokens/create', [TokenController::class, 'store'])->name('tokens.store');
-    Route::delete('/tokens/{tokenId}', [TokenController::class, 'destroy'])->name('tokens.destroy');
+    Route::post('/tokens/create', [TokenController::class, 'store'])
+        ->middleware('permission:module.tokens.create')
+        ->name('tokens.store');
+    Route::delete('/tokens/{tokenId}', [TokenController::class, 'destroy'])
+        ->middleware('permission:module.tokens.delete')
+        ->name('tokens.destroy');
 
     #rutas para guardar parametros de api django
     Route::get('/django-config', [DjangoConfigController::class, 'index'])->name('django-config.index');
-    Route::post('/django-config', [DjangoConfigController::class, 'storeOrUpdate'])->name('django-config.store');
+    Route::post('/django-config', [DjangoConfigController::class, 'storeOrUpdate'])
+        ->middleware('permission:module.django-config.update')
+        ->name('django-config.store');
 
 
     //descargar archivo x archivo
@@ -169,13 +175,21 @@ Route::middleware(['auth', 'module.access'])->group(function () {
     //Requerimientos
     Route::get('/requerimientos', [MatrizController::class, 'requerimientosIndex'])->name('requerimientos.index');
     Route::get('/requerimientos/data', [MatrizController::class, 'requerimientosData'])->name('requerimientos.data');
-    Route::post('/requerimientos/guardar', [MatrizController::class, 'guardarRequerimiento'])->name('requerimientos.guardar');
+    Route::post('/requerimientos/guardar', [MatrizController::class, 'guardarRequerimiento'])
+        ->middleware('permission:module.requerimientos.create')
+        ->name('requerimientos.guardar');
 
     // Nuevas rutas para gestión de confirmación
     Route::get('/requerimientos/no-confirmados', [MatrizController::class, 'getRequerimientosNoConfirmados'])->name('requerimientos.no-confirmados');
-    Route::post('/requerimientos/confirmar', [MatrizController::class, 'confirmarRequerimientos'])->name('requerimientos.confirmar');
-    Route::delete('/requerimientos/eliminar/{id}', [MatrizController::class, 'eliminarRequerimiento'])->name('requerimientos.eliminar');
-    Route::put('/requerimientos/editar', [MatrizController::class, 'editarRequerimiento'])->name('requerimientos.editar');
+    Route::post('/requerimientos/confirmar', [MatrizController::class, 'confirmarRequerimientos'])
+        ->middleware('permission:module.requerimientos.update')
+        ->name('requerimientos.confirmar');
+    Route::delete('/requerimientos/eliminar/{id}', [MatrizController::class, 'eliminarRequerimiento'])
+        ->middleware('permission:module.requerimientos.delete')
+        ->name('requerimientos.eliminar');
+    Route::put('/requerimientos/editar', [MatrizController::class, 'editarRequerimiento'])
+        ->middleware('permission:module.requerimientos.update')
+        ->name('requerimientos.editar');
 
     //Pedidos de los Requerimientos
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos.index');

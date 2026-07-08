@@ -13,6 +13,7 @@ class Module extends Model
     public const REGISTRO_VIEW_ALL_PERMISSION = 'module.registro.view-all';
     public const REGISTRO_DELETE_PERMISSION = 'module.registro.delete';
     public const REGISTRO_PROCESS_PERMISSION = 'module.registro.process';
+    public const REGISTRO_ALERTS_PERMISSION = 'module.registro.alerts.view';
 
     protected $fillable = [
         'name',
@@ -38,6 +39,7 @@ class Module extends Model
         if ($slug === 'registro') {
             $permissions[] = self::REGISTRO_VIEW_ALL_PERMISSION;
             $permissions[] = self::REGISTRO_PROCESS_PERMISSION;
+            $permissions[] = self::REGISTRO_ALERTS_PERMISSION;
         }
 
         return $permissions;

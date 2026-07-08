@@ -3,6 +3,7 @@
 @section('content')
     <h4>Configuración Django API</h4>
 
+    @can('module.django-config.update')
     <form action="{{ route('django-config.store') }}" method="POST">
         @csrf
 
@@ -26,4 +27,5 @@
 
         <button type="submit" class="btn btn-outline-primary btn-sm">💾 Guardar</button>
     </form>
+    @endcan
 @endsection

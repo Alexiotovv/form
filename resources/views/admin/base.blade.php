@@ -170,6 +170,9 @@
 
             $menuGroups['other']['routes'][] = $module;
         }
+        // Alerta de registros no procesados y control por permiso dinámico
+        $unprocessedCount = \App\Models\Registro::query()->where('procesado', false)->count();
+        $canSeeAlerts = $isSuperAdmin || $currentUser->can('module.registro.alerts.view') || $currentUser->can('registro.view_alerts');
     }
 @endphp
 
@@ -188,6 +191,16 @@
         <!-- <small class="text-muted">@yield('fecha_pagina')</small> -->
     </div>
         <div class="d-flex ms-auto align-items-center gap-3">
+            @if(isset($canSeeAlerts) && $canSeeAlerts)
+                <a href="{{ route('registro.index') }}" class="btn btn-link position-relative text-dark p-0 me-2" title="Registros sin procesar">
+                    🔔
+                    @if(isset($unprocessedCount) && $unprocessedCount > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.7rem;">
+                            {{ $unprocessedCount }}
+                        </span>
+                    @endif
+                </a>
+            @endif
             <div class="dropdown">
                 <button class="btn btn-link text-decoration-none dropdown-toggle text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="text-start lh-sm">

@@ -24,6 +24,7 @@
         </div>
     @endif
 
+    @can('module.tokens.create')
     <form method="POST" action="{{ route('tokens.store') }}" class="mb-4">
         @csrf
         <div class="input-group">
@@ -31,6 +32,7 @@
             <button class="btn btn-primary" type="submit">Generar Token</button>
         </div>
     </form>
+    @endcan
 
     <h5>Tokens activos:</h5>
     <table class="table table-bordered table-striped">
@@ -49,11 +51,13 @@
                 <td>{{ $token->name }}</td>
                 <td>{{ $token->created_at }}</td>
                 <td>
+                    @can('module.tokens.delete')
                     <form method="POST" action="{{ route('tokens.destroy', $token->id) }}">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-light btn-sm">Revocar</button>
                     </form>
+                    @endcan
                 </td>
             </tr>
         @endforeach
