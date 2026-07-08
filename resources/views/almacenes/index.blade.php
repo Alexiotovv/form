@@ -66,7 +66,7 @@
                             <td>{{ $almacen->nivel }}</td>
                             <td>
                                 <button class="btn btn-sm btn-info view-btn me-1"
-                                        data-almacen="{{ $almacen->toJson() }}"
+                                        data-almacen='@json($almacen)'
                                         data-bs-toggle="modal"
                                         data-bs-target="#viewModal">
                                     👁️ Ver
@@ -74,7 +74,7 @@
                                 {{-- ✅ Botón de edición CORRECTO --}}
                                 @can('module.almacenes.update')
                                 <button class="btn btn-sm btn-light edit-btn"
-                                        data-almacen="{{ $almacen->toJson() }}"
+                                        data-almacen='@json($almacen)'
                                         data-bs-toggle="modal"
                                         data-bs-target="#editModal">
                                     ✏️ Editar
@@ -187,13 +187,21 @@
 
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">{{ ucfirst(str_replace('_',' ',$campo)) }}</label>
-                                <input 
-                                    type="text" 
-                                    name="{{ $campo }}" 
-                                    id="edit-{{ $campo }}" 
-                                    class="form-control"
-                                    @if($maxLength) maxlength="{{ $maxLength }}" @endif
-                                >
+                                @if($campo === 'para_descarga_siga')
+                                    <select name="{{ $campo }}" id="edit-{{ $campo }}" class="form-select">
+                                        <option value="">Seleccione...</option>
+                                        <option value="SI">SI</option>
+                                        <option value="NO">NO</option>
+                                    </select>
+                                @else
+                                    <input 
+                                        type="text" 
+                                        name="{{ $campo }}" 
+                                        id="edit-{{ $campo }}" 
+                                        class="form-control"
+                                        @if($maxLength) maxlength="{{ $maxLength }}" @endif
+                                    >
+                                @endif
                                 <div class="invalid-feedback" id="error-{{ $campo }}"></div>
                             </div>
                             @endforeach
@@ -223,7 +231,15 @@
                             @foreach((new App\Models\Almacen)->getFillable() as $campo)
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">{{ ucfirst(str_replace('_',' ',$campo)) }}</label>
-                                    <input type="text" name="{{ $campo }}" class="form-control">
+                                    @if($campo === 'para_descarga_siga')
+                                        <select name="{{ $campo }}" class="form-select">
+                                            <option value="">Seleccione...</option>
+                                            <option value="SI">SI</option>
+                                            <option value="NO">NO</option>
+                                        </select>
+                                    @else
+                                        <input type="text" name="{{ $campo }}" class="form-control">
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
@@ -267,9 +283,11 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // === CARGAR DATOS EN MODAL DE VISTA ===
     const viewButtons = document.querySelectorAll('.view-btn');
+    const editButtons = document.querySelectorAll('.edit-btn');
+    const editForm = document.getElementById('editForm');
 
+    // === CARGAR DATOS EN MODAL DE VISTA ===
     viewButtons.forEach(btn => {
         btn.addEventListener('click', function () {
             const almacen = JSON.parse(this.getAttribute('data-almacen'));
@@ -277,33 +295,28 @@ document.addEventListener('DOMContentLoaded', function () {
             for (const [key, value] of Object.entries(almacen)) {
                 const input = document.getElementById(`view-${key}`);
                 if (input) {
-                    input.value = value ?? '';
+                    input.value = value !== null ? value : '';
                 }
             }
         });
     });
 
     // === CARGAR DATOS EN MODAL DE EDICIÓN ===
-    const editButtons = document.querySelectorAll('.edit-btn');
-    const editForm = document.getElementById('editForm');
-
     editButtons.forEach(btn => {
         btn.addEventListener('click', function () {
             const almacen = JSON.parse(this.getAttribute('data-almacen'));
             const action = "{{ route('almacenes.update', ':id') }}".replace(':id', almacen.id);
             editForm.action = action;
 
-            // Rellenar campos
             for (const [key, value] of Object.entries(almacen)) {
                 const input = document.querySelector(`#editForm [name="${key}"]`);
                 if (input) {
-                    input.value = value || '';
+                    input.value = value !== null ? value : '';
                 }
             }
         });
     });
 
-    // === VALIDACIÓN EN TIEMPO REAL ===
     function setupRealTimeValidation(formSelector, errorPrefix = 'error-') {
         const form = document.querySelector(formSelector);
         if (!form) return;
@@ -339,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.addEventListener('blur', validate);
         });
 
-        // Validar al enviar
         form.addEventListener('submit', function (e) {
             let isValid = true;
             inputs.forEach(input => {
@@ -363,7 +375,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Aplicar validación a ambos formularios
     setupRealTimeValidation('#editForm', 'error-edit-');
     setupRealTimeValidation('form[action="{{ route("almacenes.store") }}"]', 'error-create-');
 });

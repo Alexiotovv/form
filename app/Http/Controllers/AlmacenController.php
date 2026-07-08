@@ -31,52 +31,18 @@ class AlmacenController extends Controller
         // Hacer 'cod_ipress' obligatorio en creación
         $rules['cod_ipress'] = 'required|string|max:10';
 
-        $request->validate($rules, $this->getValidationMessages());
+        $validated = $request->validate($rules, $this->getValidationMessages());
 
-        Almacen::create($request->all());
+        Almacen::create($validated);
         return redirect()->route('almacenes.index')->with('success', 'Almacén creado correctamente.');
     }
 
     public function update(Request $request, $id)
     {
+        $rules = $this->getValidationRules();
+        $rules['cod_ipress'] = 'required|string|max:10';
 
-        $rules = [
-            'cod_pliego' => 'nullable|integer',
-            'pliego' => 'nullable|string|max:255',
-            'cod_disa' => 'nullable|integer',
-            'disa_diresa' => 'nullable|string|max:255',
-            'cod_ue_mef' => 'nullable|integer',
-            'ue_mef' => 'nullable|string|max:255',
-            'departamento' => 'nullable|string|max:50',
-            'ubigeo' => 'nullable|string|max:25',
-            'provincia' => 'nullable|string|max:50',
-            'distrito' => 'nullable|string|max:50',
-            'cod_renipress' => 'nullable|string|max:255',
-            'cod_ipress' => 'required|string|max:10',
-            'red' => 'nullable|string|max:255',
-            'microred' => 'nullable|string|max:255',
-            'nombre_ipress' => 'nullable|string|max:100',
-            'codigo_nombre_ipress' => 'nullable|string|max:100',
-            'nivel' => 'nullable|string|max:10',
-            'tipo_establecimiento' => 'nullable|string|max:50',
-            'estado_ipress' => 'nullable|string|max:10',
-            'universo_ipress' => 'nullable|string|max:2',
-            'ipress_feed' => 'nullable|string|max:2',
-            'ipress_eca' => 'nullable|string|max:2',
-            'ipress_evaluar_disponibilidad' => 'nullable|string|max:2',
-            'ipress_dengue' => 'nullable|string|max:7',
-            'ipress_prio_temp_bajas' => 'nullable|string|max:2',
-            'ipress_prio_riesg_lluv' => 'nullable|string|max:15',
-            'est_pert_cuencas' => 'nullable|string|max:10',
-            'ipress_prio_plan_malaria' => 'nullable|string|max:2',
-            'almacen_pertenece' => 'nullable|string|max:50',
-            'filtro' => 'nullable|string|max:6',
-            'ruta_distribucion' => 'nullable|string|max:7',
-            'monitor' => 'nullable|string|max:100',
-            'digitador' => 'nullable|string|max:100',
-            'envios' => 'nullable|integer|min:0|max:99',
-        ];
-         $messages = [
+        $messages = [
             'estado_ipress.max' => 'El campo "Estado de Ipress" no debe exceder los 10 caracteres.',
             'universo_ipress.max' => 'El campo "Universo Ipress" no debe exceder los 2 caracteres.',
             
@@ -86,20 +52,21 @@ class AlmacenController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         try {
             $almacen = \App\Models\Almacen::findOrFail($id);
-            $almacen->update($request->all());
+            $validated = $validator->validated();
+            $almacen->update($validated);
 
-        return redirect()->route('almacenes.index')->with('success', 'Almacén actualizado correctamente.');
+            return redirect()->route('almacenes.index')->with('success', 'Almacén actualizado correctamente.');
         } catch (\Exception $e) {
-            // En caso de otro error inesperado (aunque ya no debería ser "data too long")
+            report($e);
             return redirect()->back()
-                            ->withErrors(['error' => 'Ocurrió un error al actualizar el producto.'])
-                            ->withInput();
+                ->withErrors(['error' => 'Ocurrió un error al actualizar el almacén.'])
+                ->withInput();
         }
         
     }
@@ -142,6 +109,7 @@ class AlmacenController extends Controller
             'monitor' => 'nullable|string|max:100',
             'digitador' => 'nullable|string|max:100',
             'envios' => 'nullable|integer|min:0|max:99',
+            'para_descarga_siga' => 'nullable|in:SI,NO',
         ];
     }
 
