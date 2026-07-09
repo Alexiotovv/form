@@ -232,20 +232,24 @@
                 </div>
                 <form action="{{ route('almacenes.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="form_type" value="create">
                     <div class="modal-body row">
                         <div class="row g-3">
                             @foreach((new App\Models\Almacen)->getFillable() as $campo)
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">{{ ucfirst(str_replace('_',' ',$campo)) }}</label>
                                     @if($campo === 'para_descarga_siga')
-                                        <select name="{{ $campo }}" class="form-select">
+                                        <select name="{{ $campo }}" class="form-select @error($campo) is-invalid @enderror">
                                             <option value="">Seleccione...</option>
-                                            <option value="SI">SI</option>
-                                            <option value="NO">NO</option>
+                                            <option value="SI" @selected(old($campo) === 'SI')>SI</option>
+                                            <option value="NO" @selected(old($campo) === 'NO')>NO</option>
                                         </select>
                                     @else
-                                        <input type="text" name="{{ $campo }}" class="form-control">
+                                        <input type="text" name="{{ $campo }}" value="{{ old($campo) }}" class="form-control @error($campo) is-invalid @enderror">
                                     @endif
+                                    @error($campo)
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             @endforeach
                         </div>
@@ -383,6 +387,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setupRealTimeValidation('#editForm', 'error-edit-');
     setupRealTimeValidation('form[action="{{ route("almacenes.store") }}"]', 'error-create-');
+
+    @if ($errors->any() && old('form_type') === 'create')
+        const createModal = new bootstrap.Modal(document.getElementById('createModal'));
+        createModal.show();
+    @endif
 });
 </script>
 @endsection

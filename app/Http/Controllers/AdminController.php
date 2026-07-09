@@ -60,26 +60,18 @@ class AdminController extends Controller
 
         $totalAlmacenes = (clone $almacenesBase)->count();
 
-        $codigosConEnvio = DB::table('form_det')
-            ->select('CODIGO_PRE')
-            ->where('ANNOMES', $annomes)
-            ->whereNotNull('CODIGO_PRE')
-            ->where('CODIGO_PRE', '<>', '')
-            ->distinct();
+        $enviaronEsteMes = (clone $almacenesBase)
+            ->whereExists(function ($query) use ($annomes) {
+                $query->select(DB::raw(1))
+                    ->from('form_det')
+                    ->whereColumn('form_det.CODIGO_PRE', 'almacenes.cod_ipress')
+                    ->where('ANNOMES', $annomes)
+                    ->whereNotNull('CODIGO_PRE')
+                    ->where('CODIGO_PRE', '<>', '');
+            })
+            ->count();
 
-        $almacenesEnviaron = (clone $almacenesBase)
-            ->select('id', 'cod_ipress', 'nombre_ipress')
-            ->whereIn('cod_ipress', $codigosConEnvio)
-            ->orderBy('nombre_ipress')
-            ->get();
-
-        $almacenesPendientes = (clone $almacenesBase)
-            ->select('id', 'cod_ipress', 'nombre_ipress')
-            ->whereNotIn('cod_ipress', $codigosConEnvio)
-            ->orderBy('nombre_ipress')
-            ->get();
-
-        $enviaronEsteMes = $almacenesEnviaron->count();
+        $almacenesPendientesCount = max(0, $totalAlmacenes - $enviaronEsteMes);
 
         $porcentaje = $totalAlmacenes > 0 ? round(($enviaronEsteMes / $totalAlmacenes) * 100, 2) : 0;
 
@@ -109,8 +101,7 @@ class AdminController extends Controller
             'porcentaje',
             'labels',
             'data',
-            'almacenesEnviaron',
-            'almacenesPendientes'
+            'almacenesPendientesCount'
         ));
     }
 
