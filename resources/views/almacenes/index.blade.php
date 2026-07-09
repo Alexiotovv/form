@@ -17,6 +17,12 @@
             📂 Importar
         </button>
         @endcan
+        {{-- Botón gestionar quienes envían --}}
+        @can('module.almacenes.update')
+        <a href="{{ route('almacenes.manage-senders') }}" class="btn btn-light btn-sm">
+            👥 Gestionar Quienes Envían
+        </a>
+        @endcan
     </div>
 
     {{-- Buscador --}}

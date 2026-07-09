@@ -215,6 +215,60 @@ class AlmacenController extends Controller
             ->with('success', "Importación completada. Filas leídas: $totalRows, insertadas: $inserted.");
     }
 
+    /**
+     * Mostrar la vista para gestionar quienes envían (SI/NO).
+     */
+    public function manageSenders()
+    {
+        return view('almacenes.manage_senders');
+    }
+
+    /**
+     * API: obtener almacenes filtrados por para_descarga_siga (SI/NO)
+     */
+    public function apiSenders(Request $request)
+    {
+        $status = $request->query('status'); // expected 'SI' or 'NO'
+        $search = $request->query('search');
+        $perPage = (int) $request->query('per_page', 50);
+
+        $query = Almacen::query();
+        if (in_array($status, ['SI', 'NO'])) {
+            $query->where('para_descarga_siga', $status);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('cod_ipress', 'like', "%{$search}%")
+                  ->orWhere('nombre_ipress', 'like', "%{$search}%");
+            });
+        }
+
+        $paginated = $query->select(['id', 'cod_ipress', 'nombre_ipress', 'para_descarga_siga'])
+            ->orderBy('nombre_ipress')
+            ->paginate($perPage)
+            ->appends($request->query());
+
+        return response()->json($paginated->toArray());
+    }
+
+    /**
+     * API: toggle para_descarga_siga between SI and NO
+     */
+    public function toggleSender(Request $request, $id)
+    {
+        try {
+            $almacen = Almacen::findOrFail($id);
+
+            $almacen->para_descarga_siga = ($almacen->para_descarga_siga === 'SI') ? 'NO' : 'SI';
+            $almacen->save();
+
+            return response()->json(['success' => true, 'data' => $almacen]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al actualizar estado.'], 500);
+        }
+    }
+
 
 
 

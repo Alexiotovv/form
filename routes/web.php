@@ -102,6 +102,19 @@ Route::middleware(['auth', 'module.access'])->group(function () {
     Route::post('/unidadesejecutoras/import', [UnidadEjecutoraController::class, 'import'])
     ->name('unidadesejecutoras.import');
 
+    // Gestionar quienes envían (vista y APIs) -- rutas colocadas antes de las rutas resource parametrizadas
+    Route::get('almacenes/gestionar-envios', [AlmacenController::class, 'manageSenders'])
+        ->middleware('permission:module.almacenes.update')
+        ->name('almacenes.manage-senders');
+
+    Route::get('almacenes/senders', [AlmacenController::class, 'apiSenders'])
+        ->middleware('permission:module.almacenes.update')
+        ->name('almacenes.senders');
+
+    Route::put('almacenes/toggle-sender/{id}', [AlmacenController::class, 'toggleSender'])
+        ->middleware('permission:module.almacenes.update')
+        ->name('almacenes.toggle-sender');
+
     //Almacenes
     Route::resource('almacenes', \App\Http\Controllers\AlmacenController::class)
         ->only(['index', 'show']);
