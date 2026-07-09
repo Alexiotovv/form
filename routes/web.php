@@ -71,7 +71,9 @@ Route::middleware('check.formkey')->group(function () {
 });
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return auth()->check()
+        ? redirect()->route('admin.dashboard')
+        : redirect()->route('login');
 });
 
 Route::post('/registro', [RegistroController::class, 'store'])->name('registro.store');
